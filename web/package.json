@@ -1,0 +1,29 @@
+{
+  "name": "settings",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config ./webpack.single.js & webpack --config ./webpack.index.js",
+    "postbuild": "node gzip_h.js",
+    "dev": "webpack serve --config ./webpack.dev.js & webpack --config ./webpack.dev.js"
+  },
+  "keywords": [],
+  "author": "AlexGyver",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.0",
+    "html-inline-css-webpack-plugin": "^1.11.2",
+    "html-inline-script-webpack-plugin": "^3.2.1",
+    "html-webpack-plugin": "^5.6.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.4"
+  },
+  "dependencies": {
+    "@alexgyver/component": "^1.0.25"
+  }
+}

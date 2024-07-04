@@ -1,0 +1,31 @@
+@import '../theme.css';
+
+.buttons {
+    background: var(--back);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 7px 5px;
+}
+
+.button {
+    width: 100%;
+    display: inline-block;
+    margin: 5px;
+    height: 40px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--back);
+    border-radius: 12px;
+    cursor: pointer;
+    touch-action: none;
+    user-select:none;
+    font-weight: 500;
+    font-size: 19px;
+}
+
+.button:active {
+    filter: saturate(0.8);
+}

@@ -1,0 +1,26 @@
+:root {
+    --accent: #37A93C;
+    --trsh: 500px;
+    --font_fam: Verdana, sans-serif;
+    --error: #b61c1c;
+}
+
+body.theme_light {
+    --dark: #ddd;
+    --back: #f4f4f4;
+    --tab: #fff;
+    --font: #000;
+    --font_tint: #777;
+    --shadow: #00000012;
+}
+
+body.theme_dark {
+    --dark: #000;
+    /* --back: #121213; */
+    /* --tab: #282828; */
+    --back: #1c1d22;
+    --tab: #27272f;
+    --font: #f2f2f2;
+    --font_tint: #a0a0a0;
+    --shadow: #00000049;
+}
