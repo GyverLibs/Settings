@@ -1,7 +1,7 @@
 @import 'theme.css';
 
 .page {
-    padding-top: 15px;
+    padding-top: 10px;
     padding-bottom: 40px;
     display: none;
 }
@@ -67,11 +67,15 @@
 }
 
 .group_col>.widget {
-    border-bottom: 2px solid var(--back);
+    border-bottom: 1px solid var(--back);
+    border-top: 1px solid var(--back);
 }
 
+.group_col>.widget:first-child {
+    border-top: none;
+}
 .group_col>.widget:last-child {
-    border: none;
+    border-bottom: none;
 }
 
 .label_tint {

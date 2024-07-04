@@ -21,10 +21,10 @@
 
 ### Зависимости
 - GTL v1.0.6+
-- GyverDB v1.0.0+
-- StringUtils v1.4.15+
+- GyverDB v1.0.1+
+- StringUtils v1.4.16+
 - GyverHTTP v1.0.8+
-- GSON v1.5.1+
+- GSON v1.5.2+
 
 <details>
 <summary>platformio.ini</summary>

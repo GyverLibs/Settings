@@ -97,16 +97,14 @@ export default function decodeBson(b) {
 
             case BS_DATA_CODE:
             case BS_KEY_CODE: {
-                s += '"';
-                s += codes[b[++i]];
-                s += '"';
+                s += '"' + codes[b[++i]] + '"';
                 s += (c == BS_KEY_CODE) ? ':' : ',';
             } break;
 
-            case BS_DATA_STR16:
-            case BS_KEY_STR16:
+            case BS_KEY_STR8:
             case BS_DATA_STR8:
-            case BS_KEY_STR8: {
+            case BS_KEY_STR16:
+            case BS_DATA_STR16: {
                 let key = (c == BS_KEY_STR8 || c == BS_KEY_STR16);
                 let len = b[++i];
                 if (c == BS_KEY_STR16 || c == BS_DATA_STR16) {
@@ -114,19 +112,31 @@ export default function decodeBson(b) {
                     len |= b[++i];
                 }
                 i++;
-                len = len >>> 0;
-                s += '\"';
+                len = (len >>> 0);
+                s += '"';
                 s += new TextDecoder().decode(b.slice(i, i + len));
                 i += len - 1;
-                s += '\"';
+                s += '"';
                 s += key ? ':' : ',';
             } break;
 
             case BS_DATA_INT8:
             case BS_DATA_INT16:
             case BS_DATA_INT32:
-            case BS_DATA_INT64: {
-                let size = b[i] - '0'.charCodeAt(0);
+            case BS_DATA_UINT8:
+            case BS_DATA_UINT16:
+            case BS_DATA_UINT32: {
+                let size = 0;
+                switch (c) {
+                    case BS_DATA_INT8:
+                    case BS_DATA_INT16:
+                    case BS_DATA_INT32:
+                        size = b[i] - '0'.charCodeAt(0);
+                        break;
+                    default:
+                        size = b[i] - 'a'.charCodeAt(0);
+                        break;
+                }
                 let v = 0;
                 while (size--) {
                     v <<= 8;
@@ -136,29 +146,24 @@ export default function decodeBson(b) {
                     case BS_DATA_INT8: s += (new Int8Array([v]))[0]; break;
                     case BS_DATA_INT16: s += (new Int16Array([v]))[0]; break;
                     case BS_DATA_INT32: s += (new Int32Array([v]))[0]; break;
-                    case BS_DATA_UINT64: s += (new BigInt64Array([v]))[0]; break;
+                    case BS_DATA_UINT8: s += (new Uint8Array([v]))[0]; break;
+                    case BS_DATA_UINT16: s += (new Uint16Array([v]))[0]; break;
+                    case BS_DATA_UINT32: s += (new Uint32Array([v]))[0]; break;
                 }
                 s += ',';
             } break;
 
-            case BS_DATA_UINT8:
-            case BS_DATA_UINT16:
-            case BS_DATA_UINT32:
-            case BS_DATA_UINT64: {
-                let size = b[i] - 'a'.charCodeAt(0);
-                let v = 0;
+            case BS_DATA_INT64:
+            case BS_DATA_UINT64:
+                let size = 8;
+                let v = BigInt(0);
                 while (size--) {
-                    v <<= 8;
-                    v |= b[++i];
+                    v <<= 8n;
+                    v |= BigInt(b[++i]);
                 }
-                switch (c) {
-                    case BS_DATA_UINT8: s += (new Uint8Array([v]))[0]; break;
-                    case BS_DATA_UINT16: s += (new Uint16Array([v]))[0]; break;
-                    case BS_DATA_UINT32:
-                    case BS_DATA_UINT64: s += (v >>> 0); break;
-                }
+                s += '"' + v + '"';
                 s += ',';
-            } break;
+                break;
 
             case BS_DATA_FLOAT: {
                 let v = 0;

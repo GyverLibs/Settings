@@ -9,15 +9,16 @@ namespace sets {
 
 class Packet : public BSON {
    public:
+    void addKey(Code key) {
+        addKey((uint8_t)key);
+    }
     void addCode(Code key, Code val) {
         addCode((uint8_t)key, (uint8_t)val);
     }
     void addCode(Code val) {
         addCode((uint8_t)val);
     }
-    void addBool(Code key, bool b) {
-        addBool((uint8_t)key, b);
-    }
+
     template <typename T>
     void addInt(Code key, T val) {
         addInt((uint8_t)key, val);
@@ -26,15 +27,18 @@ class Packet : public BSON {
     void addUint(Code key, T val) {
         addUint((uint8_t)key, val);
     }
+
+    void addBool(Code key, bool b) {
+        addBool((uint8_t)key, b);
+    }
     void addFloat(Code key, float f, uint8_t dec = 3) {
         addFloat((uint8_t)key, f, dec);
     }
+
     void addText(Code key, Text text) {
         addText((uint8_t)key, text);
     }
-    void addKey(Code key) {
-        addKey((uint8_t)key);
-    }
+
     void beginObj(Code key) {
         beginObj((uint8_t)key);
     }
@@ -45,25 +49,11 @@ class Packet : public BSON {
     void addFromDB(GyverDB* db, size_t hash) {
         gdb::Entry en = db->get(hash);
         switch (en.type()) {
-            case gdb::Type::Int8:
-                addInt(en.toInt8());
+            case gdb::Type::Int:
+                addInt(en.toInt());
                 break;
-            case gdb::Type::Uint8:
-                addUint((uint8_t)en.toInt8());
-                break;
-
-            case gdb::Type::Int16:
-                addInt(en.toInt16());
-                break;
-            case gdb::Type::Uint16:
-                addUint((uint16_t)en.toInt16());
-                break;
-
-            case gdb::Type::Int32:
-                addInt(en.toInt32());
-                break;
-            case gdb::Type::Uint32:
-                addUint((uint32_t)en.toInt32());
+            case gdb::Type::Uint:
+                addUint((uint32_t)en.toInt());
                 break;
 
             case gdb::Type::Int64:
@@ -82,7 +72,7 @@ class Packet : public BSON {
                 break;
 
             default:
-                addInt(false);
+                addInt(0);
         }
     }
 

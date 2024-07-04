@@ -20,31 +20,28 @@ GyverDBFile db(&LittleFS, "db.bin");
 Settings sett("My Settings", &db);
 
 // ключи для хранения в базе данных
-// разоврачивается в enum /имя = хэш(имя)/, так просто компактнее выглядит
-DB_KEYS(
-    kk,
-    DB_KEY(txt),
-    DB_KEY(pass),
-    DB_KEY(int8w),
-    DB_KEY(int16w),
-    DB_KEY(uint32w),
+enum kk : size_t {
+    txt,
+    pass,
+    uintw,
+    intw,
+    int64w,
 
-    DB_KEY(color),
-    DB_KEY(toggle),
-    DB_KEY(slider),
-    DB_KEY(selectw),
+    color,
+    toggle,
+    slider,
+    selectw,
 
-    DB_KEY(lbl1),
-    DB_KEY(lbl2),
+    lbl1,
+    lbl2,
 
-    DB_KEY(date),
-    DB_KEY(timew),
-    DB_KEY(datime),
+    date,
+    timew,
+    datime,
 
-    DB_KEY(btn1),
-    DB_KEY(btn2),
-
-);
+    btn1,
+    btn2,
+};
 
 // билдер! Тут строится наше окно настроек
 void build(sets::Builder& b) {
@@ -60,9 +57,9 @@ void build(sets::Builder& b) {
     if (b.beginGroup("Group 1")) {
         b.Input(kk::txt, "Text");
         b.Pass(kk::pass, "Password");
-        b.Input(kk::int8w, "8 bit int");
-        b.Input(kk::int16w, "16 bit int");
-        b.Input(kk::uint32w, "32 bit uint");
+        b.Input(kk::uintw, "uint");
+        b.Input(kk::intw, "int");
+        b.Input(kk::int64w, "int 64");
 
         b.endGroup();  // НЕ ЗАБЫВАЕМ ЗАВЕРШИТЬ ГРУППУ
     }
@@ -72,12 +69,15 @@ void build(sets::Builder& b) {
     b.Label(kk::lbl2, "millis()", "", sets::Colors::Red);
 
     // ещё группа
-    if (b.beginGroup("Group 2")) {
+    // можно использовать такой синтаксис: sets::Group(Builder&, title) заключается в блок кода в самом начале,
+    // вызывать endGroup в этом случае не нужно
+    // так же работают остальные контейнеры (Menu, Buttons)
+    {
+        sets::Group g(b, "Group 2");
         b.Color(kk::color, "Color");
         b.Switch(kk::toggle, "Switch");
         b.Select(kk::selectw, "Select", "var1;var2;hello");
         b.Slider(kk::slider, "Slider", -10, 10, 0.5, "deg");
-        b.endGroup();
     }
 
     // и ещё
@@ -120,7 +120,7 @@ void build(sets::Builder& b) {
             db.update();
         }
 
-        b.endButtons();     // завершить кнопки
+        b.endButtons();  // завершить кнопки
     }
 }
 
@@ -170,16 +170,18 @@ void setup() {
     db.begin();
     db.init(kk::txt, "text");
     db.init(kk::pass, "some pass");
-    db.init(kk::int8w, (int8_t)64);
-    db.init(kk::int16w, (int16_t)-10);
-    db.init(kk::uint32w, (uint32_t)1234567);
+    db.init(kk::uintw, 64u);
+    db.init(kk::intw, -10);
+    db.init(kk::int64w, 1234567ll);
     db.init(kk::color, 0xff0000);
     db.init(kk::toggle, (bool)1);
-    db.init(kk::slider, -3.0);
+    db.init(kk::slider, -3.5);
     db.init(kk::selectw, (uint8_t)1);
     db.init(kk::date, 1719941932);
     db.init(kk::timew, 60);
     db.init(kk::datime, 1719941932);
+
+    db.dump(Serial);
 
     // инициализация базы данных начальными значениями
 }

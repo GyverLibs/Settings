@@ -5,11 +5,14 @@
 
 #include "build.h"
 #include "colors.h"
+#include "containers_class.h"
 #include "packet.h"
 
 namespace sets {
 
 class Builder {
+    friend class BasicContainer;
+
    public:
     Builder(Build build, GyverDB* db = nullptr, sets::Packet* p = nullptr) : _build(build), _db(db), p(p) {}
 
@@ -33,7 +36,7 @@ class Builder {
     }
 
     // ================= MENU =================
-    bool beginMenu(Text title = Text()) {
+    bool beginMenu(Text title) {
         return _beginContainer(Code::menu, title);
     }
     void endMenu() {

@@ -5,6 +5,7 @@
 
 #include "core/builder.h"
 #include "core/colors.h"
+#include "core/containers.h"
 #include "core/packet.h"
 #include "core/timer.h"
 #include "core/updater.h"
