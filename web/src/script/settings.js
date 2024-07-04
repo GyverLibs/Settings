@@ -3,14 +3,16 @@ import Page from './page';
 import { Arrow } from './widgets/misc';
 import popup from './popup';
 import decodeBson from './bson';
+import unMap from './unmap';
 
 const timeout = 2000;
 
 export default class Settings {
     pageStack = [];
-    widgets = new Map();
+    widgets = new unMap();
     cfg = { dark: false };
     pingprd = null;
+    offline = false;
 
     constructor() {
         this.$arrow = Arrow('left', 16);
@@ -76,15 +78,13 @@ export default class Settings {
             this.$arrow.style.display = 'block';
         });
 
-        this.$main_col.addEventListener("set", async (e) => {
-            const res = await this.send('set', e.detail.id.toString(16), e.detail.value);
-            if (res == null) this.setError(e.detail.id);
-            else this.parse(res);
-        });
-
-        this.$main_col.addEventListener("bclick", async (e) => {
-            const res = await this.send('click', e.detail.id.toString(16));
-            if (res == null) this.setError(e.detail.id);
+        this.$main_col.addEventListener("widget_event", async (e) => {
+            let res;
+            switch (e.data.action) {
+                case 'click': res = await this.send('click', e.data.id); break;
+                case 'set': res = await this.send('set', e.data.id, e.data.value); break;
+            }
+            if (res == null) e.data.widget.setError();
             else this.parse(res);
         });
 
@@ -109,11 +109,6 @@ export default class Settings {
         this.reload();
     }
 
-    setError(id) {
-        this.widgets.get(id).$error.style.display = 'inline';
-        setTimeout(() => this.widgets.get(id).$error.style.display = 'none', 2500);
-    }
-
     async reload() {
         this.parse(await this.send('load'));
     }
@@ -124,33 +119,27 @@ export default class Settings {
         if (id) url += '&id=' + id;
         if (value != null) url += '&value=' + value;
 
-        let res;
+        let res = null;
         try {
             res = await fetch(url, { signal: AbortSignal.timeout(timeout) });
-        } catch (e) {
-            this.$offline.style.display = 'inline';
-            return null;
-        }
-        if (!res.ok) {
-            this.error("Response error");
-            return null;
-        }
+        } catch (e) { }
+
+        if (!res || !res.ok) return null;
+
         try {
             return decodeBson(new Uint8Array(await res.arrayBuffer()));
         } catch (e) {
-            this.error(e);
+            popup(e);
         }
         return null;
     }
 
-    error(e) {
-        popup(e);
-    }
-
     back() {
         if (this.pageStack.length > 1) {
+
             this.pageStack.pop().page.style.display = 'none';
             this.pageStack[this.pageStack.length - 1].page.style.display = 'block';
+
             this.$title.innerText = this.pageStack[this.pageStack.length - 1].title;
             this.$arrow.style.display = 'block';
         }
@@ -160,16 +149,28 @@ export default class Settings {
         }
     }
 
+    restartPing(prd) {
+        if (this.pingprd) clearInterval(this.pingprd);
+        this.pingprd = setInterval(async () => {
+            const res = await this.send(this.offline ? 'load' : 'ping');
+            if (res) {
+                this.offline = false;
+                this.parse(res);
+            } else {
+                this.offline = true;
+            }
+            this.$offline.style.display = this.offline ? 'inline' : 'none';
+        }, prd);
+    }
+
     parse(packet) {
         if (!packet) return;
-        this.$offline.style.display = 'none';
 
         switch (packet.type) {
             case 'build':
                 this.render(packet);
                 localStorage.setItem('cache', JSON.stringify(packet));
-                if (this.pingprd) clearInterval(this.pingprd);
-                this.pingprd = setInterval(async () => this.parse(await this.send('ping')), packet.ping);
+                this.restartPing(packet.ping);
                 break;
 
             case 'update':
@@ -184,7 +185,7 @@ export default class Settings {
         this.$title.innerText = json.title ?? 'Settings';
         document.title = this.$title.innerText;
         let pages = [];
-        this.widgets = new Map();
+        this.widgets = new unMap();
         Page(json.content, pages, this.widgets);
         pages[0].style.display = 'block';
         this.$main_col.replaceChildren(...pages);

@@ -1,13 +1,14 @@
 import { Component } from "@alexgyver/component";
-import Widget from "./widget";
 import Page from "../page";
 import { Arrow } from "./misc";
+import WidgetBase from "./widget";
 
 export default function MenuWidget(title, data, parent, pages, widgets) {
     let page = Page(data, pages, widgets);
-    let widget = Widget({ label: title }, Arrow('right', 20));
+    let widget = new WidgetBase({ label: title });
+    widget.addOutput(Arrow('right', 20));
 
-    Component.config(widget, {
+    Component.config(widget.$root, {
         style: 'cursor:pointer',
         events: {
             click: () => {
@@ -22,5 +23,5 @@ export default function MenuWidget(title, data, parent, pages, widgets) {
             }
         }
     });
-    return widget;
+    return widget.$root;
 };

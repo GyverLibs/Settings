@@ -5,7 +5,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 7px 5px;
+    margin: 7px 0;
 }
 
 .button {

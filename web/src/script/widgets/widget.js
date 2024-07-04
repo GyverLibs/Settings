@@ -1,4 +1,5 @@
 import { Component } from "@alexgyver/component";
+import WidgetEvent from "./event";
 
 export default class WidgetBase {
     $root;
@@ -44,13 +45,14 @@ export default class WidgetBase {
     }
 
     sendEvent(value) {
-        this.$root.dispatchEvent(new CustomEvent("set", {
-            bubbles: true,
-            detail: {
-                id: this.id,
-                value: value,
-            }
-        }));
+        this.$root.dispatchEvent(new WidgetEvent('set', this.id, value, this));
+    }
+
+    setError() {
+        this.$error.style.display = 'inline';
+        setTimeout(() => {
+            if (this.$error) this.$error.style.display = 'none';
+        }, 2500);
     }
 
     update(value) { }

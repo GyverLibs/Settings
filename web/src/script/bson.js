@@ -113,8 +113,11 @@ export default function decodeBson(b) {
                     len <<= 8;
                     len |= b[++i];
                 }
+                i++;
+                len = len >>> 0;
                 s += '\"';
-                while (len--) s += String.fromCharCode(b[++i]);
+                s += new TextDecoder().decode(b.slice(i, i + len));
+                i += len - 1;
                 s += '\"';
                 s += key ? ':' : ',';
             } break;
