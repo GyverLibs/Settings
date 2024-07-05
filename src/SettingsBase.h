@@ -19,6 +19,46 @@ class SettingsBase {
    public:
     SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {}
 
+    // установить заголовок страницы
+    void setTitle(const String& title) {
+        _title = title;
+    }
+
+    // установить период обновлений
+    void setUpdatePeriod(uint16_t prd) {
+        _updPeriod = prd;
+    }
+
+    // подкдлючить базу данных
+    void attachDB(GyverDB* db) {
+        _db = db;
+    }
+
+    // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер)
+    void useAutoUpdates(bool use) {
+        _dbupdates = use;
+    }
+
+    // обработчик билда
+    void onBuild(BuildCallback cb) {
+        _build_cb = cb;
+    }
+
+    // обработчик обновлений
+    void onUpdate(UpdateCallback cb) {
+        _upd_cb = cb;
+    }
+
+    // тикер, вызывать в родительском классе
+    void tick() {
+        if (_db) _db->tick();
+    }
+
+   protected:
+    // отправка для родительского класса
+    virtual void send(Text text) {}
+
+    // парсить запрос клиента
     void parse(Text action, Text idtxt, Text value) {
         size_t id = idtxt.toInt32HEX();
 
@@ -83,45 +123,6 @@ class SettingsBase {
                 break;
         }
     }
-
-    // заголовок страницы
-    void setTitle(const String& title) {
-        _title = title;
-    }
-
-    // установить период обновлений
-    void setUpdatePeriod(uint16_t prd) {
-        _updPeriod = prd;
-    }
-
-    // подкдлючить базу данных
-    void attachDB(GyverDB* db) {
-        _db = db;
-    }
-
-    // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер)
-    void useAutoUpdates(bool use) {
-        _dbupdates = use;
-    }
-
-    // обработчик билда
-    void onBuild(BuildCallback cb) {
-        _build_cb = cb;
-    }
-
-    // обработчик обновлений
-    void onUpdate(UpdateCallback cb) {
-        _upd_cb = cb;
-    }
-
-    // тикер, вызывать в родительском классе
-    void tick() {
-        if (_db) _db->tick();
-    }
-
-   protected:
-    // отправка для родительского класса
-    virtual void send(Text text) {}
 
    private:
     BuildCallback _build_cb = nullptr;

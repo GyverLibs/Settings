@@ -16,10 +16,12 @@ class Builder {
    public:
     Builder(Build build, GyverDB* db = nullptr, sets::Packet* p = nullptr) : _build(build), _db(db), p(p) {}
 
+    // инфо о билде
     Build build() {
         return _build;
     }
 
+    // перезагрузить страницу
     void reload() {
         if (_build.isAction()) _reload = 1;
     }
