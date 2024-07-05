@@ -20,11 +20,12 @@
 Совместима со всеми Arduino платформами (используются Arduino-функции)
 
 ### Зависимости
-- GTL v1.0.6+
+- GTL v1.0.7+
 - GyverDB v1.0.1+
 - StringUtils v1.4.16+
 - GyverHTTP v1.0.8+
-- GSON v1.5.2+
+- GSON v1.5.3+
+## `ЕСЛИ НЕ КОМПИЛИРУЕТСЯ - ОБНОВИ БИБЛИОТЕКИ!`
 
 <details>
 <summary>platformio.ini</summary>

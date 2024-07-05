@@ -35,24 +35,16 @@ const codes = [
 export default function decodeBson(b) {
     if (!b || !(b instanceof Uint8Array) || !b.length) return null;
 
-    const BS_KEY_CODE = '$';
-    const BS_KEY_STR8 = 'k';
-    const BS_KEY_STR16 = 'K';
-
-    const BS_DATA_CODE = '#';
-    const BS_DATA_FLOAT = 'f';
-    const BS_DATA_STR8 = 's';
-    const BS_DATA_STR16 = 'S';
-
-    const BS_DATA_INT8 = '1';
-    const BS_DATA_INT16 = '2';
-    const BS_DATA_INT32 = '4';
-    const BS_DATA_INT64 = '8';
-
-    const BS_DATA_UINT8 = 'b';
-    const BS_DATA_UINT16 = 'c';
-    const BS_DATA_UINT32 = 'e';
-    const BS_DATA_UINT64 = 'i';
+    const BS_KEY_CODE = (0 << 5);
+    const BS_KEY_STR = (1 << 5);
+    const BS_VAL_CODE = (2 << 5);
+    const BS_VAL_STR = (3 << 5);
+    const BS_VAL_INT = (4 << 5);
+    const BS_VAL_FLOAT = (5 << 5);
+    const BS_CONT_OPEN = (6 << 5);
+    const BS_CONT_CLOSE = (7 << 5);
+    const BS_CONT_OBJ = (1);
+    const BS_CONT_ARR = (0);
 
     function ieee32ToFloat(intval) {
         var fval = 0.0;
@@ -78,102 +70,58 @@ export default function decodeBson(b) {
         }
         return fval;
     }
+    function unpack5(msb5, lsb) {
+        return ((msb5 << 8) | lsb) >>> 0;
+    }
 
     let s = '';
     for (let i = 0; i < b.length; i++) {
-        let c = String.fromCharCode(b[i]);
-        switch (c) {
-            case ']':
-            case '}':
+        const type = b[i] & 0b11100000;
+        const data = b[i] & 0b00011111;
+
+        switch (type) {
+            case BS_CONT_CLOSE:
                 if (s[s.length - 1] == ',') s = s.slice(0, -1);
-                s += c;
+                s += (data == BS_CONT_OBJ) ? '}' : ']';
                 s += ',';
                 break;
 
-            case '[':
-            case '{':
-                s += c;
+            case BS_CONT_OPEN:
+                s += (data == BS_CONT_OBJ) ? '{' : '[';
                 break;
 
-            case BS_DATA_CODE:
-            case BS_KEY_CODE: {
-                s += '"' + codes[b[++i]] + '"';
-                s += (c == BS_KEY_CODE) ? ':' : ',';
-            } break;
+            case BS_KEY_CODE:
+            case BS_VAL_CODE:
+                s += '"' + codes[unpack5(data, b[++i])] + '"';
+                s += (type == BS_KEY_CODE) ? ':' : ',';
+                break;
 
-            case BS_KEY_STR8:
-            case BS_DATA_STR8:
-            case BS_KEY_STR16:
-            case BS_DATA_STR16: {
-                let key = (c == BS_KEY_STR8 || c == BS_KEY_STR16);
-                let len = b[++i];
-                if (c == BS_KEY_STR16 || c == BS_DATA_STR16) {
-                    len <<= 8;
-                    len |= b[++i];
-                }
+            case BS_KEY_STR:
+            case BS_VAL_STR: {
+                let len = unpack5(data, b[++i]);
                 i++;
-                len = (len >>> 0);
-                s += '"';
-                s += new TextDecoder().decode(b.slice(i, i + len));
+                s += '"' + new TextDecoder().decode(b.slice(i, i + len)) + '"';
+                s += (type == BS_KEY_STR) ? ':' : ',';
                 i += len - 1;
-                s += '"';
-                s += key ? ':' : ',';
             } break;
 
-            case BS_DATA_INT8:
-            case BS_DATA_INT16:
-            case BS_DATA_INT32:
-            case BS_DATA_UINT8:
-            case BS_DATA_UINT16:
-            case BS_DATA_UINT32: {
-                let size = 0;
-                switch (c) {
-                    case BS_DATA_INT8:
-                    case BS_DATA_INT16:
-                    case BS_DATA_INT32:
-                        size = b[i] - '0'.charCodeAt(0);
-                        break;
-                    default:
-                        size = b[i] - 'a'.charCodeAt(0);
-                        break;
-                }
-                let v = 0;
-                while (size--) {
-                    v <<= 8;
-                    v |= b[++i];
-                }
-                switch (c) {
-                    case BS_DATA_INT8: s += (new Int8Array([v]))[0]; break;
-                    case BS_DATA_INT16: s += (new Int16Array([v]))[0]; break;
-                    case BS_DATA_INT32: s += (new Int32Array([v]))[0]; break;
-                    case BS_DATA_UINT8: s += (new Uint8Array([v]))[0]; break;
-                    case BS_DATA_UINT16: s += (new Uint16Array([v]))[0]; break;
-                    case BS_DATA_UINT32: s += (new Uint32Array([v]))[0]; break;
-                }
-                s += ',';
-            } break;
-
-            case BS_DATA_INT64:
-            case BS_DATA_UINT64:
-                let size = 8;
+            case BS_VAL_INT: {
+                if (data & 0b10000) s += '-';
+                let len = data & 0b01111;
                 let v = BigInt(0);
-                while (size--) {
-                    v <<= 8n;
-                    v |= BigInt(b[++i]);
+                for (let j = 0; j < len; j++) {
+                    v |= BigInt(b[++i]) << BigInt(j * 8);
                 }
-                s += '"' + v + '"';
+                s += v;
                 s += ',';
-                break;
+            } break;
 
-            case BS_DATA_FLOAT: {
+            case BS_VAL_FLOAT: {
                 let v = 0;
-                let dec = b[++i];
-                let size = 4;
-                while (size--) {
-                    v <<= 8;
-                    v |= b[++i];
+                for (let j = 0; j < 4; j++) {
+                    v |= b[++i] << (j * 8);
                 }
-                s += ieee32ToFloat(v).toFixed(dec);
+                s += ieee32ToFloat(v).toFixed(data);
                 s += ',';
             } break;
         }

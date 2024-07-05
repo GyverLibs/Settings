@@ -173,7 +173,7 @@ class Builder {
         if (_build.isLoad()) {
             p->beginObj();
             p->addCode(Code::type, type);
-            p->addText(Code::title, title);
+            if (title) p->addText(Code::title, title);
             p->beginArr(Code::content);
         }
         return true;
