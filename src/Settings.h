@@ -1,9 +1,8 @@
+// реализация на GyverHTTP
+
 #pragma once
 #include <Arduino.h>
 #include <GyverHTTP.h>
-
-#include "SettingsBase.h"
-#include "web/settings.h"
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
@@ -11,12 +10,20 @@
 #include <WiFi.h>
 #endif
 
+#ifndef SETT_NO_DNS
+#include <DNSServer.h>
+#endif
+
+#include "SettingsBase.h"
+#include "web/settings.h"
+
 class Settings : public SettingsBase {
    public:
     Settings(const String& title = "", GyverDB* db = nullptr) : SettingsBase(title, db), server(80) {}
 
     void begin() {
         server.begin();
+        
         server.onRequest([this](ghttp::ServerBase::Request req) {
             switch (req.path().hash()) {
                 case SH("/settings"):
@@ -24,27 +31,42 @@ class Settings : public SettingsBase {
                     break;
 
                 case SH("/script.js"):
-                    server.sendFile_P(settings_script, sizeof(settings_script), "text/javascript", true, true);
+                    server.sendFile_P(settings_script_gz, settings_script_gz_len, "text/javascript", true, true);
                     break;
 
                 case SH("/style.css"):
-                    server.sendFile_P(settings_style, sizeof(settings_style), "text/css", true, true);
+                    server.sendFile_P(settings_style_gz, settings_style_gz_len, "text/css", true, true);
                     break;
 
                 default:
-                    server.sendFile_P(settings_index, sizeof(settings_index), "text/html", false, true);
+                    server.sendFile_P(settings_index_gz, settings_index_gz_len, "text/html", false, true);
                     break;
             }
         });
+
+#ifndef SETT_NO_DNS
+        if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
+            dns_f = 1;
+            dns.start(53, "*", WiFi.softAPIP());
+        }
+#endif
     }
 
     void tick() {
+#ifndef SETT_NO_DNS
+        if (dns_f) dns.processNextRequest();
+#endif
         server.tick();
         SettingsBase::tick();
     }
 
-   private:
     ghttp::Server<WiFiServer, WiFiClient> server;
+
+   private:
+#ifndef SETT_NO_DNS
+    DNSServer dns;
+    bool dns_f = false;
+#endif
 
     void send(Text text) {
         server.send(text);

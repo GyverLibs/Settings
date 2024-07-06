@@ -42,31 +42,33 @@ async function compile() {
     index: ${index_len} bytes
     script: ${script_len} bytes
     style: ${style_len} bytes
-    total: ${index_len + script_len + style_len} bytes
+    total: ${((index_len + script_len + style_len) / 1024).toFixed(2)} kB
     
     Build: ${new Date()}
 */
 `;
 
     function addBin(fname, gzip) {
-        let code = '\r\n' + `const uint8_t ${pkg.name}_${fname}[] PROGMEM = {`;
         let data = fs.readFileSync(gzip).toString('hex');
+        let code = '\r\n' + `const uint8_t ${pkg.name}_${fname}[] PROGMEM = {`;
         for (let i = 0; i < data.length; i += 2) {
             if (i % 48 == 0) code += '\r\n    ';
             code += '0x' + data[i] + data[i + 1];
             if (i < data.length - 2) code += ', ';
         }
         code += '\r\n};\r\n'
+        code += `const size_t ${pkg.name}_${fname}_len = ${data.length / 2};`;
+        code += '\r\n'
         return code;
     }
 
-    code += addBin('index', index_gz);
-    code += addBin('script', script_gz);
-    code += addBin('style', style_gz);
+    code += addBin('index_gz', index_gz);
+    code += addBin('script_gz', script_gz);
+    code += addBin('style_gz', style_gz);
 
     fs.writeFile(`${out_folder}/${pkg.name}.h`, code, err => {
         if (err) console.error(err);
-        else console.log('Done! Gzipped to ' + ((index_len + script_len + style_len) / 1024).toFixed(2) + ' kb');
+        else console.log('Done! Gzipped to ' + ((index_len + script_len + style_len) / 1024).toFixed(2) + ' kB');
     });
 }
 

@@ -24,6 +24,6 @@
     "webpack-dev-server": "^5.0.4"
   },
   "dependencies": {
-    "@alexgyver/component": "^1.0.25"
+    "@alexgyver/component": "^1.0.26"
   }
 }

@@ -53,6 +53,8 @@ class Builder {
         _endContainer();
     }
 
+    // passive
+
     // ================= LABEL =================
     void Label(size_t id, Text label, Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
         if (_build.isLoad()) {
@@ -64,6 +66,13 @@ class Builder {
     void Label(size_t id, Text label, Text text, sets::Colors color) {
         Label(id, label, text, (uint32_t)color);
     }
+
+    // ================= TEXT =================
+    void Paragraph(size_t id, Text label, Text text = Text()) {
+        if (_build.isLoad()) _widget(Code::paragraph, id, label, text);
+    }
+
+    // active
 
     // ================= INPUT =================
     bool Input(size_t id, Text label, Text value = Text()) {
