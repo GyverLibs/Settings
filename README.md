@@ -190,9 +190,12 @@ void endMenu();
 bool beginButtons();
 void endButtons();
 
-// виджеты
+// пассивные виджеты
+void Paragraph(size_t id, Text label, Text text = Text());
 void Label(size_t id, Text label, Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR);
 void Label(size_t id, Text label, Text text, sets::Colors color);
+
+// активные виджеты
 bool Input(size_t id, Text label, Text value = Text());
 bool Pass(size_t id, Text label, Text value = Text());
 bool Color(size_t id, Text label, Text value = Text());
