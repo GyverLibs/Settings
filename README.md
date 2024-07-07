@@ -13,7 +13,7 @@
 - Десяток типовых виджетов с возможностью объединения в группы и вложенные страницы
 - Интеграция с библиотекой GyverDB для полностью автоматического хранения данных
 - Компактный бинарный протокол связи
-- Из коробки работает на базе GyverHTTP, легко адаптируется под любую другую библиотеку HTTP сервера
+- Библиотека легко адаптируется под любую библиотеку HTTP сервера, из коробки реализовано три версии: GyverHTTP, стандартный esp-WebServer, ESPAsyncWebserver
 - Это [GyverHub](https://github.com/GyverLibs/GyverHub) на минималках 
 
 ### Совместимость
@@ -34,12 +34,14 @@
 [env]
 framework = arduino
 lib_deps = 
-    https://github.com/GyverLibs/GyverHTTP.git
     https://github.com/GyverLibs/GTL.git
     https://github.com/GyverLibs/StringUtils.git
     https://github.com/GyverLibs/GSON.git
     https://github.com/GyverLibs/GyverDB.git
     https://github.com/GyverLibs/Settings.git
+    https://github.com/GyverLibs/GyverHTTP.git ; для версии Settings
+    esphome/ESPAsyncWebServer-esphome   ; для версии SettingsAsync
+    esphome/ESPAsyncTCP-esphome         ; для версии SettingsAsync
 
 [env:d1_mini]
 platform = espressif8266
@@ -146,7 +148,7 @@ void setup() {
 - `Settings` (*Settings.h*) - на вебсервере GyverHTTP
 - `SettingsESP` (*SettingsESP.h*) - на стандартном вебсервере ESP
 
-### Settings/SettingsBase/SettingsESP
+### Settings/SettingsBase/SettingsESP/SettingsAsync
 ```cpp
 Settings(const String& title = "", GyverDB* db = nullptr);
 

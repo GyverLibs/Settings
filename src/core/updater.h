@@ -27,6 +27,9 @@ class Updater {
         update(id, (float)value, dec);
     }
 
+    void update(size_t id, short value) {
+        _updateInt(id, value);
+    }
     void update(size_t id, int value) {
         _updateInt(id, value);
     }
@@ -34,6 +37,9 @@ class Updater {
         _updateInt(id, value);
     }
 
+    void update(size_t id, unsigned short value) {
+        _updateUint(id, value);
+    }
     void update(size_t id, unsigned int value) {
         _updateUint(id, value);
     }
