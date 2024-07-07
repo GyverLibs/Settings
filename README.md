@@ -16,6 +16,8 @@
 - Библиотека легко адаптируется под любую библиотеку HTTP сервера, из коробки реализовано три версии: GyverHTTP, стандартный esp-WebServer, ESPAsyncWebserver
 - Это [GyverHub](https://github.com/GyverLibs/GyverHub) на минималках 
 
+![promo](/img/promo.png)
+
 ### Совместимость
 Совместима со всеми Arduino платформами (используются Arduino-функции)
 
