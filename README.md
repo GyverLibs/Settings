@@ -203,7 +203,8 @@ void setup() {
 ## Описание классов
 - `SettingsBase` (*SettingsBase.h*) - базовый класс без вебсервера
 - `Settings` (*Settings.h*) - на вебсервере GyverHTTP
-- `SettingsESP` (*SettingsESP.h*) - на стандартном вебсервере ESP
+- `SettingsESP` (*SettingsESP.h*) - на стандартном вебсервере ESP (тут корректно работает DNS)
+- `SettingsAsync` (*SettingsAsync.h*) - на асинхронном ESPAsyncWebserver
 
 ### Settings/SettingsBase/SettingsESP/SettingsAsync
 ```cpp
@@ -215,7 +216,7 @@ void setTitle(const String& title);
 // установить период обновлений
 void setUpdatePeriod(uint16_t prd);
 
-// подкдлючить базу данных
+// подключить базу данных
 void attachDB(GyverDB* db);
 
 // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер)
