@@ -29,7 +29,7 @@ class SettingsBase {
         _updPeriod = prd;
     }
 
-    // подкдлючить базу данных
+    // подключить базу данных
     void attachDB(GyverDB* db) {
         _db = db;
     }

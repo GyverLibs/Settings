@@ -33,14 +33,23 @@
     width: 100%;
 }
 
-.select {
+/* .select {
     opacity: 0;
     position: absolute;
     cursor: pointer;
     background: var(--back);
     padding-top: 10px;
     pointer-events: none;
-    /* min-width: 100px; */
+} */
+
+.select {
+    cursor: pointer;
+    background: none;
+    outline: none;
+    border: none;
+    color: var(--font_tint);
+    font-size: 17px;
+    font-family: var(--font_fam);
 }
 
 .select option {

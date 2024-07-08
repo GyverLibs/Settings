@@ -25,7 +25,7 @@ export default class SelectWidget extends WidgetBase {
                         },
                     }
                 },
-                {
+                /*{
                     tag: 'div',
                     class: 'input_arrow',
                     events: {
@@ -40,7 +40,7 @@ export default class SelectWidget extends WidgetBase {
                         },
                         Arrow('down', 15),
                     ]
-                }
+                }*/
             ]
         }));
 
@@ -49,6 +49,6 @@ export default class SelectWidget extends WidgetBase {
 
     update(value) {
         this.$sel.value = value;
-        this.$out.innerText = this.text.split(';')[value];
+        // this.$out.innerText = this.text.split(';')[value];
     }
 }
