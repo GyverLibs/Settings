@@ -26,6 +26,7 @@ class SettingsESP : public SettingsBase {
         server.begin();
 
         server.on("/settings", HTTP_GET, [this]() {
+            cors_h();
             parse(server.arg(F("action")), server.arg(F("id")), server.arg(F("value")));
         });
 
@@ -87,5 +88,10 @@ class SettingsESP : public SettingsBase {
         server.sendHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
         server.sendHeader(F("Pragma"), F("no-cache"));
         server.sendHeader(F("Expires"), F("0"));
+    }
+    void cors_h() {
+        server.sendHeader(F("Access-Control-Allow-Origin"), F("*"));
+        server.sendHeader(F("Access-Control-Allow-Private-Network"), F("true"));
+        server.sendHeader(F("Access-Control-Allow-Methods"), F("*"));
     }
 };

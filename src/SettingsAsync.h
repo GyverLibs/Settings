@@ -28,9 +28,11 @@ class SettingsAsync : public SettingsBase {
             if (request->hasParam("id")) id = request->getParam("id")->value();
             if (request->hasParam("value")) value = request->getParam("value")->value();
 
-            _request = request;
+            _response = request->beginResponseStream("application/octet-stream");
+            cors_h(_response);
             parse(action, id, value);
-            _request = nullptr;
+            request->send(_response);
+            _response = nullptr;
         });
 
         server.onNotFound([this](AsyncWebServerRequest *request) {
@@ -59,13 +61,10 @@ class SettingsAsync : public SettingsBase {
 
    private:
     AsyncWebServer server;
-    AsyncWebServerRequest *_request = nullptr;
+    AsyncResponseStream *_response = nullptr;
 
     void send(Text text) {
-        if (!_request) return;
-        AsyncResponseStream *response = _request->beginResponseStream("application/octet-stream");
-        response->write(text.str(), text.length());
-        _request->send(response);
+        if (_response) _response->write(text.str(), text.length());
     }
 
     void gzip_h(AsyncWebServerResponse *response) {
@@ -78,5 +77,10 @@ class SettingsAsync : public SettingsBase {
         response->addHeader(F("Cache-Control"), F("no-cache, no-store, must-revalidate"));
         response->addHeader(F("Pragma"), F("no-cache"));
         response->addHeader(F("Expires"), F("0"));
+    }
+    void cors_h(AsyncWebServerResponse *response) {
+        response->addHeader(F("Access-Control-Allow-Origin"), F("*"));
+        response->addHeader(F("Access-Control-Allow-Private-Network"), F("true"));
+        response->addHeader(F("Access-Control-Allow-Methods"), F("*"));
     }
 };
