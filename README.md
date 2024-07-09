@@ -7,19 +7,19 @@
 [![Foo](https://img.shields.io/badge/ПОДПИСАТЬСЯ-НА%20ОБНОВЛЕНИЯ-brightgreen.svg?style=social&logo=telegram&color=blue)](https://t.me/GyverLibs)
 
 # Settings [beta]
-Библиотека для создания простой вебморды esp8266/esp32
+Библиотека для создания простого веб-интерфейса настроек на esp8266/esp32
 - Веб-приложение весит всего 6кб и вшивается в программу в бинарном gzip виде, никакой возни с файлами
 - Удобный билдер панели управления из скетча
-- Десяток типовых виджетов с возможностью объединения в группы и вложенные страницы
+- Десяток типовых виджетов с возможностью объединения в группы и вложенные меню
 - Интеграция с библиотекой GyverDB для полностью автоматического хранения данных
 - Компактный бинарный протокол связи
-- Библиотека легко адаптируется под любую библиотеку HTTP сервера, из коробки реализовано три версии: GyverHTTP, стандартный esp-WebServer, ESPAsyncWebserver
+- Легко адаптируется под любую библиотеку HTTP сервера, из коробки реализовано три версии: GyverHTTP, стандартный esp-WebServer, ESPAsyncWebserver
 - Это [GyverHub](https://github.com/GyverLibs/GyverHub) на минималках 
 
 ![promo](/img/promo.png)
 
 ### Совместимость
-Совместима со всеми Arduino платформами (используются Arduino-функции)
+ESP8266, ESP32
 
 ### Зависимости
 - GTL v1.0.7+
@@ -36,14 +36,14 @@
 [env]
 framework = arduino
 lib_deps = 
-    https://github.com/GyverLibs/GTL.git
-    https://github.com/GyverLibs/StringUtils.git
-    https://github.com/GyverLibs/GSON.git
-    https://github.com/GyverLibs/GyverDB.git
-    https://github.com/GyverLibs/Settings.git
-    https://github.com/GyverLibs/GyverHTTP.git ; для версии Settings
+    GyverLibs/GTL
+    GyverLibs/StringUtils
+    GyverLibs/GSON
+    GyverLibs/GyverDB
+    GyverLibs/GyverHTTP                 ; для версии Settings
     esphome/ESPAsyncWebServer-esphome   ; для версии SettingsAsync
     esphome/ESPAsyncTCP-esphome         ; для версии SettingsAsync
+    https://github.com/GyverLibs/Settings.git
 
 [env:d1_mini]
 platform = espressif8266
@@ -54,6 +54,13 @@ monitor_filters = esp8266_exception_decoder, default
 build_type = debug
 board_build.filesystem = littlefs
 
+[env:esp32dev]
+monitor_speed = 115200
+platform = espressif32
+board = esp32dev
+upload_speed = 921600
+board_build.filesystem = littlefs
+
 [env:esp32-c3]
 monitor_speed = 115200
 platform = espressif32
@@ -61,13 +68,6 @@ board = esp32dev
 board_build.mcu = esp32c3
 upload_speed = 2000000
 board_build.f_cpu = 80000000L
-board_build.filesystem = littlefs
-
-[env:esp32dev]
-monitor_speed = 115200
-platform = espressif32
-board = esp32dev
-upload_speed = 921600
 board_build.filesystem = littlefs
 ```
 </details>
