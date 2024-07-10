@@ -6,7 +6,9 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-Settings	KEYWORD1
+SettingsGyver	KEYWORD1
+SettingsESP	KEYWORD1
+SettingsAsync	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)

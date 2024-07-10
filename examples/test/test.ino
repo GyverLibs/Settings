@@ -15,9 +15,9 @@
 // будет автоматически записываться в файл при изменениях
 GyverDBFile db(&LittleFS, "db.bin");
 
-#include <Settings.h>
+#include <SettingsGyver.h>
 // указывается заголовок меню, подключается база данных
-Settings sett("My Settings", &db);
+SettingsGyver sett("My Settings", &db);
 
 // ключи для хранения в базе данных
 enum kk : size_t {

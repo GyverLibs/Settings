@@ -89,7 +89,7 @@ board_build.filesystem = littlefs
 
 ```cpp
 GyverDB db;
-Settings sett("My Settings", &db);
+SettingsGyver sett("My Settings", &db);
 
 void build(sets::Builder& b) {
     b.Input("input1", "Text");
@@ -202,11 +202,11 @@ void setup() {
 
 ## Описание классов
 - `SettingsBase` (*SettingsBase.h*) - базовый класс без вебсервера
-- `Settings` (*Settings.h*) - на вебсервере GyverHTTP
+- `SettingsGyver` (*SettingsGyver.h*) - на вебсервере GyverHTTP
 - `SettingsESP` (*SettingsESP.h*) - на стандартном вебсервере ESP (тут корректно работает DNS)
 - `SettingsAsync` (*SettingsAsync.h*) - на асинхронном ESPAsyncWebserver
 
-### Settings/SettingsBase/SettingsESP/SettingsAsync
+### SettingsBase/SettingsGyver/SettingsESP/SettingsAsync
 ```cpp
 Settings(const String& title = "", GyverDB* db = nullptr);
 

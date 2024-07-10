@@ -17,9 +17,9 @@
 #include "SettingsBase.h"
 #include "web/settings.h"
 
-class Settings : public SettingsBase {
+class SettingsGyver : public SettingsBase {
    public:
-    Settings(const String& title = "", GyverDB* db = nullptr) : SettingsBase(title, db), server(80) {}
+    SettingsGyver(const String& title = "", GyverDB* db = nullptr) : SettingsBase(title, db), server(80) {}
 
     void begin() {
         server.begin();
