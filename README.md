@@ -264,6 +264,8 @@ bool Date(size_t id, Text label, Text value = Text());
 bool Time(size_t id, Text label, Text value = Text());
 bool DateTime(size_t id, Text label, Text value = Text());
 bool Slider(size_t id, Text label, float min = 0, float max = 100, float step = 1, Text unit = Text(), Text value = Text());
+
+// кнопку можно добавлять как внутри контейнера кнопок, так и как одиночный виджет
 bool Button(size_t id, Text label, uint32_t color = SETS_DEFAULT_COLOR);
 bool Button(size_t id, Text label, sets::Colors color);
 

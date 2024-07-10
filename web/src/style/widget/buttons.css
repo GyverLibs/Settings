@@ -9,23 +9,37 @@
 }
 
 .button {
-    width: 100%;
     display: inline-block;
-    margin: 5px;
+    margin: 6px 0;
+    box-sizing: border-box;
     height: 40px;
     background: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--back);
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
     touch-action: none;
-    user-select:none;
+    user-select: none;
     font-weight: 500;
     font-size: 19px;
 }
 
 .button:active {
     filter: saturate(0.8);
+}
+
+.buttons>.button {
+    margin: 4px;
+    width: 100%;
+}
+
+.group_col>.button {
+    margin: 8px 5px;
+}
+
+.group_col>.button:last-child {
+    border-radius: 0 0 10px 10px;
+    margin: 0;
 }

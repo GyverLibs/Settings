@@ -62,7 +62,7 @@
 .page>.widget {
     background: var(--tab);
     border-radius: 10px;
-    margin: 5px 0;
+    margin: 6px 0;
     box-shadow: 0 0 10px var(--shadow);
 }
 

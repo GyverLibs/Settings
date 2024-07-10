@@ -8,6 +8,7 @@ import { DateWidget, DateTimeWidget, TimeWidget } from "./time";
 import InputWidget from "./input";
 import ButtonsWidget from "./buttons";
 import ParagraphWidget from "./paragraph";
+import Button from "./button";
 
 export const WidgetList = {
     toggle: SwitchWidget,
@@ -21,5 +22,6 @@ export const WidgetList = {
     label: LabelWidget,
     color: ColorWidget,
     buttons: ButtonsWidget,
+    button: Button,
     paragraph: ParagraphWidget,
 }
