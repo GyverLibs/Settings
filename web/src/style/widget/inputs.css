@@ -18,7 +18,7 @@
 
 .value.bold {
     font-weight: 500;
-    font-size: 19px;
+    font-size: 18px;
 }
 
 .input_arrow {
@@ -43,6 +43,7 @@
 } */
 
 .select {
+    text-align: right;
     cursor: pointer;
     background: none;
     outline: none;

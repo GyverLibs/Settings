@@ -18,6 +18,7 @@ export default class WidgetBase {
                 children: [
                     {
                         tag: 'div',
+                        style: 'padding-right: 8px',
                         children: [
                             {
                                 tag: 'label',

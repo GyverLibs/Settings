@@ -133,7 +133,7 @@ class SettingsBase {
     bool _dbupdates = true;
 
     void _answerEmpty() {
-        send("{}");
+        send("");
     }
 
     void _sendBuild() {

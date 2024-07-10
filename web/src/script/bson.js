@@ -34,7 +34,8 @@ const codes = [
 ];
 
 export default function decodeBson(b) {
-    if (!b || !(b instanceof Uint8Array) || !b.length) return null;
+    if (!b || !(b instanceof Uint8Array)) return null;
+    if (!b.length) return {};
 
     const BS_KEY_CODE = (0 << 5);
     const BS_KEY_STR = (1 << 5);

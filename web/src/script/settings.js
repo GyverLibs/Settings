@@ -115,7 +115,7 @@ export default class Settings {
 
     async send(action, id = null, value = null) {
         let url = window.location.origin + '/settings?action=' + action;
-        // let url = 'http://192.168.1.130/settings?action=' + action;
+        // let url = 'http://192.168.1.151/settings?action=' + action;
         if (id) url += '&id=' + id;
         if (value != null) url += '&value=' + value;
 
