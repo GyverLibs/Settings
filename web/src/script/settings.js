@@ -6,6 +6,8 @@ import decodeBson from './bson';
 import unMap from './unmap';
 
 const timeout = 2000;
+const anim_s = '.15s';
+const anim_ms = 140;
 
 export default class Settings {
     pageStack = [];
@@ -13,6 +15,8 @@ export default class Settings {
     cfg = { dark: false };
     pingprd = null;
     offline = false;
+    transOn = null;
+    transOut = null;
 
     constructor() {
         this.$arrow = Arrow('left', 16);
@@ -70,8 +74,17 @@ export default class Settings {
         });
 
         this.$main_col.addEventListener("menuclick", (e) => {
+            window.scrollTo(0, 0);
             e.detail.page.style.display = 'block';
-            e.detail.parent.style.display = 'none';
+            e.detail.page.style.animation = 'shiftLeft ' + anim_s;
+            e.detail.parent.style.animation = 'fadeOut ' + anim_s;
+            this.$main_col.style.minHeight = Math.max(e.detail.parent.offsetHeight, e.detail.page.offsetHeight) + 'px';
+
+            setTimeout(() => {
+                e.detail.parent.style.display = 'none';
+                this.$main_col.style.minHeight = e.detail.page.offsetHeight + 'px';
+            }, anim_ms);
+
             this.pageStack.push({ page: e.detail.page, title: e.detail.label });
             this.$title.innerText = e.detail.label;
             this.$title.style.cursor = 'pointer';
@@ -110,12 +123,18 @@ export default class Settings {
     }
 
     async reload() {
-        this.parse(await this.send('load'));
+        const res = await this.send('load');
+        if (res) this.parse(res);
+        else {
+            this.$offline.style.display = 'inline';
+            this.offline = true;
+            this.restartPing(2000);
+        }
     }
 
     async send(action, id = null, value = null) {
         let url = window.location.origin + '/settings?action=' + action;
-        // let url = 'http://192.168.1.151/settings?action=' + action;
+        // let url = 'http://192.168.1.130/settings?action=' + action;
         if (id) url += '&id=' + id;
         if (value != null) url += '&value=' + value;
 
@@ -136,9 +155,19 @@ export default class Settings {
 
     back() {
         if (this.pageStack.length > 1) {
+            window.scrollTo(0, 0);
+            let right = this.pageStack.pop().page;
+            right.style.animation = 'shiftRight ' + anim_s;
 
-            this.pageStack.pop().page.style.display = 'none';
-            this.pageStack[this.pageStack.length - 1].page.style.display = 'block';
+            let fadein = this.pageStack[this.pageStack.length - 1].page;
+            fadein.style.display = 'block';
+            fadein.style.animation = 'fadeIn ' + anim_s;
+            this.$main_col.style.minHeight = Math.max(fadein.offsetHeight, right.offsetHeight) + 'px';
+
+            setTimeout(() => {
+                right.style.display = 'none';
+                this.$main_col.style.minHeight = fadein.offsetHeight + 'px';
+            }, anim_ms);
 
             this.$title.innerText = this.pageStack[this.pageStack.length - 1].title;
             this.$arrow.style.display = 'block';
@@ -187,9 +216,10 @@ export default class Settings {
         let pages = [];
         this.widgets = new unMap();
         Page(json.content, pages, this.widgets);
-        pages[0].style.display = 'block';
         this.$main_col.replaceChildren(...pages);
         this.pageStack = [{ page: pages[0], title: json.title }];
+        pages[0].style.display = 'block';
+        this.$main_col.style.minHeight = pages[0].offsetHeight + 'px';
     }
 
     updateCfg() {

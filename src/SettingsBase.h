@@ -24,7 +24,7 @@ class SettingsBase {
         _title = title;
     }
 
-    // установить период обновлений
+    // установить период обновлений (умолч. 2500мс)
     void setUpdatePeriod(uint16_t prd) {
         _updPeriod = prd;
     }
@@ -70,7 +70,7 @@ class SettingsBase {
             case SH("set"):
                 if (_db) {
                     if (_dbupdates) _db->useUpdates(false);
-                    _db->set(id, value);
+                    _db->update(id, value);
                     if (_dbupdates) _db->useUpdates(true);
                 }
                 if (_build_cb) {
@@ -129,7 +129,7 @@ class SettingsBase {
     UpdateCallback _upd_cb = nullptr;
     String _title;
     GyverDB* _db = nullptr;
-    uint16_t _updPeriod = 2000;
+    uint16_t _updPeriod = 2500;
     bool _dbupdates = true;
 
     void _answerEmpty() {

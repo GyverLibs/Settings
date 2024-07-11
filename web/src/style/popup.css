@@ -23,18 +23,6 @@
     margin-bottom: 5px;
 }
 
-.fadeOut {
-    visibility: hidden;
-    opacity: 0;
-    transition: visibility 0s linear 300ms, opacity 300ms;
-}
-
-.fadeIn {
-    visibility: visible;
-    opacity: 1;
-    transition: visibility 0s linear 0s, opacity 300ms;
-}
-
 @keyframes fader {
     0% {
         opacity: 0;

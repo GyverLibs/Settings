@@ -3,7 +3,8 @@
 .page {
     padding-top: 10px;
     padding-bottom: 40px;
-    display: none;
+    width: 100%;
+    position: absolute;
 }
 
 .page>.group:first-child {

@@ -4,7 +4,7 @@ import Group from "./group";
 import { WidgetList } from "./widgets/widgets";
 
 export default function Page(data, pages, widgets) {
-    let page = Component.make('div', { class: 'page' });
+    let page = Component.make('div', { class: 'page', style: 'display: none' });
     pages.push(page);
 
     for (let obj of data) {
