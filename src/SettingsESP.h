@@ -26,8 +26,12 @@ class SettingsESP : public SettingsBase {
         server.begin();
 
         server.on("/settings", HTTP_GET, [this]() {
+            String action = server.arg(F("action"));
+            String id = server.arg(F("id"));
+            String value = server.arg(F("value"));
+
             cors_h();
-            parse(server.arg(F("action")), server.arg(F("id")), server.arg(F("value")));
+            parse(action, id, value);
         });
 
         server.onNotFound([this]() {
@@ -75,7 +79,9 @@ class SettingsESP : public SettingsBase {
 #endif
 
     void send(Text text) {
-        server.send(200, "application/octet-stream", text.str(), text.length());
+        server.setContentLength(text.length());
+        server.send(200, "application/octet-stream");
+        server.sendContent(text.str(), text.length());
     }
 
     void gzip_h() {

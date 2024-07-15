@@ -24,7 +24,7 @@ class SettingsBase {
         _title = title;
     }
 
-    // установить период обновлений (умолч. 2500мс)
+    // установить период обновлений (умолч. 2500мс), 0 чтобы отключить
     void setUpdatePeriod(uint16_t prd) {
         _updPeriod = prd;
     }

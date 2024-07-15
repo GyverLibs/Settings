@@ -180,6 +180,7 @@ export default class Settings {
 
     restartPing(prd) {
         if (this.pingprd) clearInterval(this.pingprd);
+        if (!prd) return;
         this.pingprd = setInterval(async () => {
             const res = await this.send(this.offline ? 'load' : 'ping');
             if (res) {

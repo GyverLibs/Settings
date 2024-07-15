@@ -213,7 +213,7 @@ Settings(const String& title = "", GyverDB* db = nullptr);
 // установить заголовок страницы
 void setTitle(const String& title);
 
-// установить период обновлений
+// установить период обновлений (умолч. 2500мс), 0 чтобы отключить
 void setUpdatePeriod(uint16_t prd);
 
 // подключить базу данных

@@ -7,7 +7,7 @@ export default class ButtonsWidget {
 
     constructor(data) {
         for (let b of data.content) {
-            this.buttons.push(new Button(b));
+            if (b.type == 'button') this.buttons.push(new Button(b));
         }
 
         this.$root = Component.make('div', {
