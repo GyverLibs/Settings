@@ -8,8 +8,9 @@ html {
     padding: 0;
     background: var(--back);
     color: var(--font_tint);
-    user-select: none;
     font-family: var(--font_fam);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
 }
 
 body::-webkit-scrollbar {

@@ -39,6 +39,7 @@ class TimeWidgetBase extends WidgetBase {
     }
 
     update(value) {
+        value = value ?? 0;
         this.$input.value = this.unixToDate(value);
         this.$out.innerText = this.unixToText(value);
     }

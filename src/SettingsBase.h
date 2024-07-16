@@ -56,7 +56,7 @@ class SettingsBase {
 
    protected:
     // отправка для родительского класса
-    virtual void send(Text text) {}
+    virtual void send(uint8_t* data, size_t len) {}
 
     // парсить запрос клиента
     void parse(Text action, Text idtxt, Text value) {
@@ -116,7 +116,7 @@ class SettingsBase {
                     if (_upd_cb) _upd_cb(upd);
                     p.endArr();
                     p.endObj();
-                    send(p);
+                    send(p.buf(), p.length());
                 } else {
                     _answerEmpty();
                 }
@@ -133,7 +133,8 @@ class SettingsBase {
     bool _dbupdates = true;
 
     void _answerEmpty() {
-        send("");
+        uint8_t p;
+        send(&p, 0);
     }
 
     void _sendBuild() {
@@ -150,7 +151,7 @@ class SettingsBase {
             _build_cb(builder);
             p.endArr();
             p.endObj();
-            send(p);
+            send(p.buf(), p.length());
         } else {
             _answerEmpty();
         }

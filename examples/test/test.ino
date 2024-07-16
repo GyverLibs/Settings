@@ -13,7 +13,7 @@
 #include <LittleFS.h>
 // база данных для хранения настроек
 // будет автоматически записываться в файл при изменениях
-GyverDBFile db(&LittleFS, "db.bin");
+GyverDBFile db(&LittleFS, "/data.db");
 
 #include <SettingsGyver.h>
 // указывается заголовок меню, подключается база данных
@@ -166,7 +166,11 @@ void setup() {
     sett.onUpdate(update);
 
     // ======== DATABASE ========
+#ifdef ESP32
+    LittleFS.begin(true);
+#else
     LittleFS.begin();
+#endif
     db.begin();
     db.init(kk::txt, "text");
     db.init(kk::pass, "some pass");

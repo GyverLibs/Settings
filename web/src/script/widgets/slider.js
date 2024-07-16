@@ -41,7 +41,7 @@ export default class SliderWidget extends WidgetBase {
     }
 
     update(value) {
-        this.$slider.value = value;
+        this.$slider.value = value ?? 0;
         this.move();
     }
 }

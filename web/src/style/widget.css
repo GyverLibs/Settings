@@ -14,6 +14,7 @@
 .group_title {
     display: flex;
     align-items: center;
+    user-select: none;
 }
 
 .group_title span {
@@ -51,6 +52,9 @@
     cursor: inherit;
     font-size: 18px;
     white-space: nowrap;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
 
 .error_sup {
@@ -75,6 +79,7 @@
 .group_col>.widget:first-child {
     border-top: none;
 }
+
 .group_col>.widget:last-child {
     border-bottom: none;
 }

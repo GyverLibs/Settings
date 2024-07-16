@@ -78,10 +78,10 @@ class SettingsESP : public SettingsBase {
     bool dns_f = false;
 #endif
 
-    void send(Text text) {
-        server.setContentLength(text.length());
-        server.send(200, "application/octet-stream");
-        server.sendContent(text.str(), text.length());
+    void send(uint8_t* data, size_t len) {
+        server.setContentLength(len);
+        server.send(200, "text/plain");
+        server.sendContent((const char*)data, len);
     }
 
     void gzip_h() {

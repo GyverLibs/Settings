@@ -23,7 +23,7 @@ class SettingsGyver : public SettingsBase {
 
     void begin() {
         server.begin();
-        
+
         server.onRequest([this](ghttp::ServerBase::Request req) {
             switch (req.path().hash()) {
                 case SH("/settings"):
@@ -68,7 +68,7 @@ class SettingsGyver : public SettingsBase {
     bool dns_f = false;
 #endif
 
-    void send(Text text) {
-        server.send(text);
+    void send(uint8_t* data, size_t len) {
+        server.sendFile(data, len);
     }
 };

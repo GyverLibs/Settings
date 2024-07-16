@@ -28,7 +28,7 @@ class SettingsAsync : public SettingsBase {
             if (request->hasParam("id")) id = request->getParam("id")->value();
             if (request->hasParam("value")) value = request->getParam("value")->value();
 
-            _response = request->beginResponseStream("application/octet-stream");
+            _response = request->beginResponseStream("text/plain");
             cors_h(_response);
             parse(action, id, value);
             request->send(_response);
@@ -63,8 +63,8 @@ class SettingsAsync : public SettingsBase {
     AsyncWebServer server;
     AsyncResponseStream *_response = nullptr;
 
-    void send(Text text) {
-        if (_response) _response->write(text.str(), text.length());
+    void send(uint8_t *data, size_t len) {
+        if (_response) _response->write(data, len);
     }
 
     void gzip_h(AsyncWebServerResponse *response) {

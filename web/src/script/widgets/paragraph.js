@@ -14,10 +14,10 @@ export default class ParagraphWidget extends WidgetBase {
             }
         }));
 
-        this.update(data.value ?? '');
+        this.update(data.value);
     }
 
     update(value) {
-        this.$out.innerText = value;
+        this.$out.innerText = value ?? '';
     }
 }

@@ -6,7 +6,7 @@
 #include <Arduino.h>
 #include <GyverDBFile.h>
 #include <LittleFS.h>
-GyverDBFile db(&LittleFS, "settings.db");
+GyverDBFile db(&LittleFS, "/data.db");
 
 #include <SettingsESP.h>
 SettingsESP sett("WiFi config", &db);
@@ -41,7 +41,11 @@ void setup() {
     sett.onBuild(build);
 
     // базу данных запускаем до подключения к точке
+#ifdef ESP32
+    LittleFS.begin(true);
+#else
     LittleFS.begin();
+#endif
     db.begin();
     db.init(kk::wifi_ssid, "");
     db.init(kk::wifi_pass, "");

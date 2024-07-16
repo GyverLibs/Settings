@@ -25,7 +25,7 @@ export default class InputWidget extends WidgetBase {
     }
 
     update(value) {
-        value = value.toString();
+        value = value ? value.toString() : '';
         this.empty = (value.length == 0);
         this.$input.innerText = this.empty ? '...' : value;
     }

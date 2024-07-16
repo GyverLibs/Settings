@@ -29,6 +29,6 @@ export default class SelectWidget extends WidgetBase {
     }
 
     update(value) {
-        this.$sel.value = value;
+        this.$sel.value = value ?? 0;
     }
 }

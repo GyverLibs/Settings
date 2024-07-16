@@ -19,6 +19,6 @@ export default class SwitchWidget extends WidgetBase {
     }
 
     update(value) {
-        this.$switch.checked = Number(value);
+        this.$switch.checked = Number(value ?? 0);
     }
 }
