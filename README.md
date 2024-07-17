@@ -100,7 +100,7 @@ DB_KEYS(keys,
     DB_KEY(key1),
     DB_KEY(key2),
     DB_KEY(mykey),
-)
+);
 
 // билдер
 void build(sets::Builder& b) {
