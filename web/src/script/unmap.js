@@ -5,7 +5,7 @@ export default class unMap extends Map {
         super();
     }
     set(id, value) {
-        if (!id) id = 'undef_' + (this.count++);
+        if (id == null) id = 'undef_' + (this.count++);
         super.set(id, value);
     }
 }
