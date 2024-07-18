@@ -34,15 +34,10 @@ ESP8266, ESP32
 ```ini
 [env]
 framework = arduino
-lib_deps = 
-    GyverLibs/GTL
-    GyverLibs/StringUtils
-    GyverLibs/GSON
-    GyverLibs/GyverDB
-    GyverLibs/GyverHTTP                 ; для версии Settings
+lib_deps =
+    https://github.com/GyverLibs/Settings.git
     esphome/ESPAsyncWebServer-esphome   ; для версии SettingsAsync
     esphome/ESPAsyncTCP-esphome         ; для версии SettingsAsync
-    https://github.com/GyverLibs/Settings.git
 
 [env:d1_mini]
 platform = espressif8266
