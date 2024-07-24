@@ -1,5 +1,6 @@
 import { Component } from "@alexgyver/component";
 import WidgetBase from "./widget";
+import { AsyncPrompt } from "../dialog";
 
 export default class InputWidget extends WidgetBase {
     empty = false;
@@ -11,8 +12,8 @@ export default class InputWidget extends WidgetBase {
             class: 'value active',
             var: 'input',
             events: {
-                click: () => {
-                    let res = prompt(undefined, this.empty ? '' : this.$input.innerText);
+                click: async () => {
+                    let res = await AsyncPrompt(data.label, this.empty ? '' : this.$input.innerText);
                     if (res != null) {
                         this.sendEvent(res);
                         this.update(res);

@@ -9,6 +9,7 @@ import InputWidget from "./input";
 import ButtonsWidget from "./buttons";
 import ParagraphWidget from "./paragraph";
 import Button from "./button";
+import ConfirmWidget from "./confirm";
 
 export const WidgetList = {
     toggle: SwitchWidget,
@@ -24,4 +25,5 @@ export const WidgetList = {
     buttons: ButtonsWidget,
     button: Button,
     paragraph: ParagraphWidget,
+    confirm: ConfirmWidget,
 }

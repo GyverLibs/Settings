@@ -6,7 +6,7 @@
 
 [![Foo](https://img.shields.io/badge/ПОДПИСАТЬСЯ-НА%20ОБНОВЛЕНИЯ-brightgreen.svg?style=social&logo=telegram&color=blue)](https://t.me/GyverLibs)
 
-# Settings [beta]
+# Settings
 Библиотека для создания простого веб-интерфейса настроек на esp8266/esp32
 - Веб-приложение весит всего 6кб и вшивается в программу в бинарном gzip виде, никакой возни с файлами
 - Удобный билдер панели управления из скетча
@@ -326,14 +326,33 @@ bool Button(size_t id, Text label, sets::Colors color);
 
 // опции разделяются ;
 bool Select(size_t id, Text label, Text options, Text value = Text());
+
+// для активации отправь пустой update на его id
+bool Confirm(size_t id, Text label);
 ```
 
 Здесь `Text` - универсальный текстовый формат, принимает строки в любом виде. При указании `value` отличным от стандартного будет отправлено его значение. Иначе будет отправлено значение из БД, если она подключена. Если в качестве значения нужно число - используйте конструктор `Value`, например `b.Color("col", "Color", Value(my_color));`, где `my_color` это `uint32_t`.
+
+### Updater
+```cpp
+// пустой апдейт (например для вызова Confirm)
+void update(size_t id);
+
+// апдейт с текстом
+void update(size_t id, Text value);
+
+// апдейт с float
+void update(size_t id, float value, uint8_t dec = 2);
+
+// апдейт с числом
+void update(size_t id, <любой численный тип> value);
+```
 
 <a id="versions"></a>
 
 ## Версии
 - v1.0
+- v1.0.2
 
 <a id="install"></a>
 ## Установка

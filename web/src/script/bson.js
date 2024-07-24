@@ -31,6 +31,7 @@ const codes = [
     'datetime',
     'button',
     'paragraph',
+    'confirm',
 ];
 
 export default function decodeBson(b) {

@@ -153,6 +153,13 @@ class Builder {
         return Button(id, label, (uint32_t)color);
     }
 
+    // misc
+
+    bool Confirm(size_t id, Text label) {
+        if (_build.isLoad()) _widget(Code::confirm, id, label);
+        return _checkSet(id);
+    }
+
    private:
     Build _build;
     GyverDB* _db = nullptr;

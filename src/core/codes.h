@@ -36,6 +36,7 @@ enum class Code : uint8_t {
     datetime,
     button,
     paragraph,
+    confirm,
 };
 
 }

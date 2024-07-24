@@ -10,5 +10,5 @@ export default function popup(text) {
         parent: document.getElementsByClassName('popup_cont')[0],
     });
     setTimeout(() => popup.remove(), 2500);
-    console.log(text);
+    // console.log(text);
 }

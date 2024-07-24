@@ -5,9 +5,9 @@ export default class WidgetBase {
     $root;
     $error;
 
-    constructor(data) {
+    constructor(data, makeWidget = true) {
         this.id = data.id;
-        Component.make('div', {
+        if (makeWidget) Component.make('div', {
             context: this,
             class: 'widget',
             var: 'root',

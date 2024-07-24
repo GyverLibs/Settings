@@ -9,6 +9,12 @@ class Updater {
    public:
     Updater(Packet& p) : p(p) {}
 
+    void update(size_t id) {
+        p.beginObj();
+        p.addUint(sets::Code::id, id);
+        p.endObj();
+    }
+
     void update(size_t id, Text value) {
         p.beginObj();
         p.addUint(sets::Code::id, id);
