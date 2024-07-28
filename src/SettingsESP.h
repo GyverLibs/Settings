@@ -12,7 +12,7 @@
 #endif
 
 #include "SettingsBase.h"
-#include "core/ESP_DNS.h"
+#include "core/DnsWrapper.h"
 #include "web/settings.h"
 
 class SettingsESP : public SettingsBase {
@@ -62,7 +62,7 @@ class SettingsESP : public SettingsBase {
 #endif
 
    private:
-    sets::ESP_DNS _dns;
+    sets::DnsWrapper _dns;
     void send(uint8_t* data, size_t len) {
         server.setContentLength(len);
         server.send(200, "text/plain");

@@ -10,7 +10,7 @@
 
 namespace sets {
 
-class ESP_DNS {
+class DnsWrapper {
    public:
     void begin() {
 #ifndef SETT_NO_DNS

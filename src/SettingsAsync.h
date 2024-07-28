@@ -13,7 +13,7 @@
 #include <ESPAsyncWebServer.h>
 
 #include "SettingsBase.h"
-#include "core/ESP_DNS.h"
+#include "core/DnsWrapper.h"
 #include "web/settings.h"
 
 class SettingsAsync : public SettingsBase {
@@ -65,7 +65,7 @@ class SettingsAsync : public SettingsBase {
    private:
     AsyncWebServer server;
     AsyncResponseStream *_response = nullptr;
-    sets::ESP_DNS _dns;
+    sets::DnsWrapper _dns;
 
     void send(uint8_t *data, size_t len) {
         if (_response) _response->write(data, len);

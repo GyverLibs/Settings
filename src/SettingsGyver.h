@@ -11,7 +11,7 @@
 #endif
 
 #include "SettingsBase.h"
-#include "core/ESP_DNS.h"
+#include "core/DnsWrapper.h"
 #include "web/settings.h"
 
 class SettingsGyver : public SettingsBase {
@@ -52,7 +52,7 @@ class SettingsGyver : public SettingsBase {
     ghttp::Server<WiFiServer, WiFiClient> server;
 
    private:
-    sets::ESP_DNS _dns;
+    sets::DnsWrapper _dns;
     void send(uint8_t* data, size_t len) {
         server.sendFile(data, len);
     }
