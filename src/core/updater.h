@@ -9,12 +9,14 @@ class Updater {
    public:
     Updater(Packet& p) : p(p) {}
 
+    // пустой апдейт (например для вызова Confirm)
     void update(size_t id) {
         p.beginObj();
         p.addUint(sets::Code::id, id);
         p.endObj();
     }
 
+    // апдейт с текстом
     void update(size_t id, Text value) {
         p.beginObj();
         p.addUint(sets::Code::id, id);
@@ -22,6 +24,7 @@ class Updater {
         p.endObj();
     }
 
+    // апдейт с float
     void update(size_t id, float value, uint8_t dec = 2) {
         p.beginObj();
         p.addUint(sets::Code::id, id);

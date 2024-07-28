@@ -3,16 +3,17 @@
 #pragma once
 #include <Arduino.h>
 
-#ifdef ESP32
-#include <AsyncTCP.h>
-#include <WiFi.h>
-#elif defined(ESP8266)
+#ifdef ESP8266
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
+#else
+#include <AsyncTCP.h>
+#include <WiFi.h>
 #endif
 #include <ESPAsyncWebServer.h>
 
 #include "SettingsBase.h"
+#include "core/ESP_DNS.h"
 #include "web/settings.h"
 
 class SettingsAsync : public SettingsBase {
@@ -20,6 +21,7 @@ class SettingsAsync : public SettingsBase {
     SettingsAsync(const String &title = "", GyverDB *db = nullptr) : SettingsBase(title, db), server(80) {}
 
     void begin() {
+        _dns.begin();
         server.begin();
 
         server.on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {
@@ -56,12 +58,14 @@ class SettingsAsync : public SettingsBase {
     }
 
     void tick() {
+        _dns.tick();
         SettingsBase::tick();
     }
 
    private:
     AsyncWebServer server;
     AsyncResponseStream *_response = nullptr;
+    sets::ESP_DNS _dns;
 
     void send(uint8_t *data, size_t len) {
         if (_response) _response->write(data, len);

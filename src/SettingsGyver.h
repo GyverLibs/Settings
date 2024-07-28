@@ -10,11 +10,8 @@
 #include <WiFi.h>
 #endif
 
-#ifndef SETT_NO_DNS
-#include <DNSServer.h>
-#endif
-
 #include "SettingsBase.h"
+#include "core/ESP_DNS.h"
 #include "web/settings.h"
 
 class SettingsGyver : public SettingsBase {
@@ -22,6 +19,7 @@ class SettingsGyver : public SettingsBase {
     SettingsGyver(const String& title = "", GyverDB* db = nullptr) : SettingsBase(title, db), server(80) {}
 
     void begin() {
+        _dns.begin();
         server.begin();
 
         server.onRequest([this](ghttp::ServerBase::Request req) {
@@ -43,19 +41,10 @@ class SettingsGyver : public SettingsBase {
                     break;
             }
         });
-
-#ifndef SETT_NO_DNS
-        if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
-            dns_f = 1;
-            dns.start(53, "*", WiFi.softAPIP());
-        }
-#endif
     }
 
     void tick() {
-#ifndef SETT_NO_DNS
-        if (dns_f) dns.processNextRequest();
-#endif
+        _dns.tick();
         server.tick();
         SettingsBase::tick();
     }
@@ -63,11 +52,7 @@ class SettingsGyver : public SettingsBase {
     ghttp::Server<WiFiServer, WiFiClient> server;
 
    private:
-#ifndef SETT_NO_DNS
-    DNSServer dns;
-    bool dns_f = false;
-#endif
-
+    sets::ESP_DNS _dns;
     void send(uint8_t* data, size_t len) {
         server.sendFile(data, len);
     }
