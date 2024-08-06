@@ -1,0 +1,16 @@
+.color {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+    padding-top: 10px;
+}
+
+.color_out {
+    font-family: 'Courier New', Courier;
+    cursor: pointer;
+    font-size: 19px;
+    font-weight: 600;
+    color: black;
+    padding: 3px 6px;
+    border-radius: 6px;
+}

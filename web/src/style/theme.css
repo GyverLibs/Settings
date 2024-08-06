@@ -9,18 +9,22 @@ body.theme_light {
     --dark: #ddd;
     --back: #f4f4f4;
     --tab: #fff;
-    --font: #000;
+    --font: #111;
     --font_tint: #777;
+    --font_inv: #fff;
     --shadow: #00000012;
+    --shadow_light: #00000007;
 }
 
 body.theme_dark {
-    --dark: #000;
     /* --back: #121213; */
     /* --tab: #282828; */
+    --dark: #000;
     --back: #1c1d22;
     --tab: #27272f;
-    --font: #f2f2f2;
+    --font: #eaeaea;
     --font_tint: #a0a0a0;
+    --font_inv: #000;
     --shadow: #00000049;
+    --shadow_light: #00000022;
 }

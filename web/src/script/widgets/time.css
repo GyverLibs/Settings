@@ -1,0 +1,6 @@
+.date {
+    opacity: 0;
+    position: absolute;
+    pointer-events: none;
+    padding-top: 10px;
+}

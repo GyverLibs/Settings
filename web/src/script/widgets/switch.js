@@ -1,5 +1,6 @@
 import { Component } from "@alexgyver/component";
 import WidgetBase from "./widget";
+import './switch.css';
 
 export default class SwitchWidget extends WidgetBase {
     constructor(data) {

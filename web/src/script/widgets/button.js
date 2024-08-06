@@ -1,6 +1,7 @@
 import { Component } from "@alexgyver/component";
-import { intToColor } from "./misc";
+import { intToColor } from "../utils";
 import WidgetEvent from "./event";
+import './button.css';
 
 export default class Button {
     constructor(data) {

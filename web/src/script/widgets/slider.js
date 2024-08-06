@@ -1,5 +1,6 @@
 import { Component } from "@alexgyver/component";
 import WidgetBase from "./widget";
+import './slider.css';
 
 export default class SliderWidget extends WidgetBase {
     constructor(data) {

@@ -4,6 +4,8 @@ import Group from "./group";
 import { WidgetList } from "./widgets/widgets";
 
 export default function Page(data, pages, widgets) {
+    if (!data.length) return document.createDocumentFragment();
+    
     let page = Component.make('div', { class: 'page', style: 'display: none' });
     pages.push(page);
 

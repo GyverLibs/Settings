@@ -3,6 +3,7 @@
 #pragma once
 #include <Arduino.h>
 #include <GyverHTTP.h>
+#include <LittleFS.h>
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
@@ -12,6 +13,7 @@
 
 #include "SettingsBase.h"
 #include "core/DnsWrapper.h"
+#include "core/ota.h"
 #include "web/settings.h"
 
 class SettingsGyver : public SettingsBase {
@@ -22,10 +24,47 @@ class SettingsGyver : public SettingsBase {
         _dns.begin();
         server.begin();
 
+#ifndef SETS_USE_CORS
+        server.useCors(false);
+#endif
+
         server.onRequest([this](ghttp::ServerBase::Request req) {
             switch (req.path().hash()) {
                 case SH("/settings"):
-                    parse(req.param("action"), req.param("id"), req.param("value").decodeUrl());
+                    parse(req.param("auth"), req.param("action"), req.param("id"), req.param("value").decodeUrl());
+                    break;
+
+                case SH("/fetch"):
+                    if (authenticate(req.param("auth"))) {
+                        File f = openFileRead(req.param("path").decodeUrl());
+                        if (f) server.sendFile(f);
+                        else server.send(500);
+                    } else {
+                        server.send(401);
+                    }
+                    break;
+
+                case SH("/upload"):
+                    if (authenticate(req.param("auth"))) {
+                        File f = openFileWrite(req.param("path").decodeUrl());
+                        if (f) {
+                            req.body().writeTo(f);
+                            server.send(200);
+                        } else server.send(500);
+                    } else {
+                        server.send(401);
+                    }
+                    break;
+
+                case SH("/ota"):
+                    if (authenticate(req.param("auth"))) {
+                        if (sets::beginOta() && req.body().writeTo(Update) && Update.end(true) && !Update.hasError()) {
+                            server.send(200);
+                            restart();
+                        } else server.send(500);
+                    } else {
+                        server.send(401);
+                    }
                     break;
 
                 case SH("/script.js"):
@@ -34,6 +73,10 @@ class SettingsGyver : public SettingsBase {
 
                 case SH("/style.css"):
                     server.sendFile_P(settings_style_gz, settings_style_gz_len, "text/css", true, true);
+                    break;
+
+                case SH("/favicon.svg"):
+                    server.sendFile_P(settings_favicon_gz, settings_favicon_gz_len, "image/svg+xml", true, true);
                     break;
 
                 default:
@@ -53,6 +96,8 @@ class SettingsGyver : public SettingsBase {
 
    private:
     sets::DnsWrapper _dns;
+    bool _rst = false;
+
     void send(uint8_t* data, size_t len) {
         server.sendFile(data, len);
     }

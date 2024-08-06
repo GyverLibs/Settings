@@ -1,6 +1,6 @@
 import { Component } from "@alexgyver/component";
 import WidgetBase from "./widget";
-import { AsyncPrompt } from "../dialog";
+import { AsyncPrompt } from "../ui/dialog";
 
 export default class InputWidget extends WidgetBase {
     empty = false;

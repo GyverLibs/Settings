@@ -1,11 +1,13 @@
 #pragma once
 #include <Arduino.h>
+#include <FS.h>
 #include <GyverDB.h>
 #include <StringUtils.h>
 
 #include "core/builder.h"
 #include "core/colors.h"
 #include "core/containers.h"
+#include "core/fs.h"
 #include "core/packet.h"
 #include "core/timer.h"
 #include "core/updater.h"
@@ -18,6 +20,11 @@ class SettingsBase {
 
    public:
     SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {}
+
+    // установить пароль на вебморду. Пустая строка "" чтобы отключить
+    void setPass(Text pass) {
+        _passh = pass.hash();
+    }
 
     // установить заголовок страницы
     void setTitle(const String& title) {
@@ -52,19 +59,45 @@ class SettingsBase {
     // тикер, вызывать в родительском классе
     void tick() {
         if (_db) _db->tick();
+        if (_rst) {
+            delay(3000);
+            ESP.restart();
+        }
+    }
+
+    // перезагрузить страницу. Можно вызывать где угодно + в обработчике update
+    void reload() {
+        _reload = true;
     }
 
    protected:
     // отправка для родительского класса
     virtual void send(uint8_t* data, size_t len) {}
 
+    File openFileWrite(Text path) {
+        return _fs.openWrite(path.c_str());
+    }
+
+    File openFileRead(Text path) {
+        return _fs.openRead(path.c_str());
+    }
+
+    bool authenticate(Text passh) {
+        return !_passh || (_passh == passh.toInt32HEX());
+    }
+
+    void restart() {
+        _rst = true;
+    }
+
     // парсить запрос клиента
-    void parse(Text action, Text idtxt, Text value) {
+    void parse(Text passh, Text action, Text idtxt, Text value) {
         size_t id = idtxt.toInt32HEX();
+        bool granted = authenticate(passh);
 
         switch (action.hash()) {
             case SH("load"):
-                _sendBuild();
+                _sendBuild(granted);
                 break;
 
             case SH("set"):
@@ -74,10 +107,10 @@ class SettingsBase {
                     if (_dbupdates) _db->useUpdates(true);
                 }
                 if (_build_cb) {
-                    sets::Build action(sets::Build::Type::Set, id, value);
+                    sets::Build action(sets::Build::Type::Set, granted, id, value);
                     sets::Builder b(action);
                     _build_cb(b);
-                    if (b.isReload()) _sendBuild();
+                    if (b.isReload()) _sendBuild(granted);
                     else _answerEmpty();
                 } else {
                     _answerEmpty();
@@ -86,10 +119,10 @@ class SettingsBase {
 
             case SH("click"):
                 if (_build_cb) {
-                    sets::Build action(sets::Build::Type::Click, id);
+                    sets::Build action(sets::Build::Type::Click, granted, id);
                     sets::Builder b(action);
                     _build_cb(b);
-                    if (b.isReload()) _sendBuild();
+                    if (b.isReload()) _sendBuild(granted);
                     else _answerEmpty();
                 } else {
                     _answerEmpty();
@@ -116,9 +149,26 @@ class SettingsBase {
                     if (_upd_cb) _upd_cb(upd);
                     p.endArr();
                     p.endObj();
-                    send(p.buf(), p.length());
+
+                    if (_reload) {
+                        _reload = false;
+                        _sendBuild(granted);
+                    } else {
+                        send(p.buf(), p.length());
+                    }
                 } else {
                     _answerEmpty();
+                }
+                break;
+
+            case SH("fs"):
+                _sendFs(granted);
+                break;
+
+            case SH("remove"):
+                if (granted) {
+                    _fs.remove(value.c_str());
+                    _sendFs(true);
                 }
                 break;
         }
@@ -128,16 +178,35 @@ class SettingsBase {
     BuildCallback _build_cb = nullptr;
     UpdateCallback _upd_cb = nullptr;
     String _title;
+    size_t _passh = 0;
     GyverDB* _db = nullptr;
+    sets::FS _fs;
     uint16_t _updPeriod = 2500;
     bool _dbupdates = true;
+    bool _rst = false;
+    bool _reload = false;
 
     void _answerEmpty() {
         uint8_t p;
         send(&p, 0);
     }
 
-    void _sendBuild() {
+    void _sendFs(bool granted) {
+        String str;
+        if (granted) _fs.list(str, "/");
+
+        sets::Packet p;
+        p.beginObj();
+        p.addCode(sets::Code::type, sets::Code::fs);
+        p.addText(sets::Code::content, str);
+        p.addUint(sets::Code::used, _fs.usedSpace());
+        p.addUint(sets::Code::total, _fs.totalSpace());
+        if (!granted) p.addText(sets::Code::error, "Access denied");
+        p.endObj();
+        send(p.buf(), p.length());
+    }
+
+    void _sendBuild(bool granted) {
         if (_build_cb) {
             sets::Packet p;
             p.reserve(SETS_RESERVE);
@@ -145,8 +214,12 @@ class SettingsBase {
             p.addCode(sets::Code::type, sets::Code::build);
             p.addUint(sets::Code::ping, _updPeriod);
             if (_title.length()) p.addText(sets::Code::title, _title);
+            if (_passh) p.addBool(sets::Code::granted, granted);
+#ifdef ATOMIC_FS_UPDATE
+            p.addBool(sets::Code::gzip, true);
+#endif
             p.beginArr(sets::Code::content);
-            sets::Build action(sets::Build::Type::Build);
+            sets::Build action(sets::Build::Type::Build, granted);
             sets::Builder builder(action, _db, &p);
             _build_cb(builder);
             p.endArr();

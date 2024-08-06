@@ -1,9 +1,6 @@
 @import 'style/main.css';
 @import 'style/widget.css';
-@import 'style/ui.css';
-@import 'style/popup.css';
-@import 'style/dialog.css';
-@import 'style/widget/switch.css';
-@import 'style/widget/inputs.css';
-@import 'style/widget/slider.css';
-@import 'style/widget/buttons.css';
+@import 'style/icons.css';
+@import 'style/fs.css';
+@import 'style/theme.css';
+@import 'style/animations.css';

@@ -1,5 +1,6 @@
 import { Component } from "@alexgyver/component";
 import Button from "./button";
+import './buttons.css';
 
 export default class ButtonsWidget {
     $root;

@@ -1,0 +1,7 @@
+.buttons {
+    background: var(--back);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 0;
+}

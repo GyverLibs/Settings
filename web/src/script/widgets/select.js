@@ -1,34 +1,83 @@
 import { Component } from "@alexgyver/component";
-import { Arrow } from "./misc";
+import { Arrow } from "../utils";
 import WidgetBase from "./widget";
+import { DialogCont } from "../ui/dialog";
+import './select.css';
+
+function SelectDialog(options, selected) {
+    return new Promise(resolve => {
+
+        let dialog = new DialogCont();
+        Component.config(dialog.$root, {
+            style: 'cursor: pointer;',
+            events: {
+                click: () => {
+                    dialog.destroy();
+                    resolve(null);
+                },
+            },
+            child: {
+                tag: 'div',
+                class: 'dialog_cont',
+                child: {
+                    tag: 'div',
+                    class: 'dialog select',
+                    children: options.map((x, i) => Component.make('div',
+                        {
+                            text: x.trim(),
+                            class: 'option' + (selected == i ? ' active' : ''),
+                            events: {
+                                click: e => {
+                                    e.stopPropagation();
+                                    dialog.destroy();
+                                    resolve(i);
+                                }
+                            }
+                        })),
+                }
+            }
+
+        });
+
+    });
+}
 
 export default class SelectWidget extends WidgetBase {
     constructor(data) {
         super(data);
-        data.value = data.value ?? 0;
+        this.options = data.text.split(';');
 
         super.addOutput(Component.make('div', {
             context: this,
-            class: 'input_cont',
+            style: {
+                display: 'flex',
+                alignItems: 'center',
+            },
+            events: {
+                click: async () => {
+                    let res = await SelectDialog(this.options, this.value);
+                    if (res !== null) {
+                        this.update(res);
+                        this.sendEvent(res);
+                    }
+                }
+            },
             children: [
                 {
-                    tag: 'select',
-                    context: this,
-                    var: 'sel',
-                    class: 'select',
-                    children: data.text.split(';').map((x, i) => Component.make('option', { value: i.toString(), text: x, selected: (i == data.value) })),
-                    events: {
-                        change: () => {
-                            this.sendEvent(this.$sel.value);
-                            this.update(this.$sel.value);
-                        },
-                    }
+                    tag: 'span',
+                    class: 'value active',
+                    style: 'padding-right: 7px',
+                    var: 'label',
                 },
+                Arrow('down', 15)
             ]
         }));
+
+        this.update(data.value);
     }
 
     update(value) {
-        this.$sel.value = value ?? 0;
+        this.value = value ?? 0;
+        this.$label.textContent = this.options[this.value];
     }
 }

@@ -3,7 +3,8 @@ import MenuWidget from "./widgets/menu";
 import { WidgetList } from "./widgets/widgets";
 
 export default function Group(title, data, parent, pages, widgets) {
-    if (!data.length) return null;
+    if (!data.length) return document.createDocumentFragment();
+
     let ctx = {};
     let group = Component.make('div', {
         context: ctx,

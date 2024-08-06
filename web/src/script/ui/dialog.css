@@ -1,6 +1,5 @@
-@import 'theme.css';
-
 .dialog_back {
+    display: flex;
     position: fixed;
     top: 0;
     left: 0;
@@ -12,7 +11,6 @@
 
 .dialog_cont {
     margin: auto;
-    margin-top: 100px;
     padding: 0 10px;
     max-width: 500px;
     width: 100%;

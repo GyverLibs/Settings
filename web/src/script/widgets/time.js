@@ -1,5 +1,6 @@
 import { Component } from "@alexgyver/component";
 import WidgetBase from "./widget";
+import './time.css';
 
 class TimeWidgetBase extends WidgetBase {
     constructor(data, type) {

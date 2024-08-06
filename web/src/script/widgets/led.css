@@ -1,0 +1,12 @@
+.led {
+    --color: #d31616;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--color);
+    box-shadow: var(--color) 0 0 9px 1px, inset 2px 3px 0px 0px #fff3;
+}
+
+.led.on {
+    --color: var(--accent);
+}

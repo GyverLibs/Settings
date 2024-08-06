@@ -1,0 +1,46 @@
+.fs_icons {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 15px 10px;
+}
+
+.fs_error {
+    text-align: center;
+    font-size: 19px;
+    color: var(--error);
+    padding: 10px;
+}
+
+.fs_cont {
+    padding-top: 10px;
+}
+
+.fs_row {
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fs_path:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.fs_size {
+    font-size: 13px;
+    padding-right: 6px;
+}
+
+.fs_row:nth-child(odd) {
+    background: var(--shadow_light);
+}
+
+.fs_info {
+    padding: 5px;
+    margin-top: 20px;
+    color: var(--font);
+    text-align: center;
+    font-size: 15px;
+    border-radius: 0 0 10px 10px;
+}

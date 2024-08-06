@@ -6,6 +6,20 @@
 
 namespace sets {
 
+// контейнер гостевого доступа
+class GuestAccess {
+   public:
+    GuestAccess(Builder& b) : b(b) {
+        b.beginGuest();
+    }
+    ~GuestAccess() {
+        b.endGuest();
+    }
+
+   private:
+    Builder& b;
+};
+
 class BasicContainer {
    public:
     BasicContainer(Code type, Builder& b, Text title = Text()) : b(b) {
@@ -19,16 +33,19 @@ class BasicContainer {
     Builder& b;
 };
 
+// контейнер группы виджетов
 class Group : public BasicContainer {
    public:
     Group(Builder& b, Text title = Text()) : BasicContainer(Code::group, b, title) {}
 };
 
+// контейнер вложенного меню
 class Menu : public BasicContainer {
    public:
     Menu(Builder& b, Text title) : BasicContainer(Code::menu, b, title) {}
 };
 
+// контейнер кнопок
 class Buttons : public BasicContainer {
    public:
     Buttons(Builder& b) : BasicContainer(Code::buttons, b) {}

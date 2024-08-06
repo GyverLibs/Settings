@@ -1,12 +1,27 @@
 import { Component } from "@alexgyver/component";
+import './dialog.css';
+
+export class DialogCont {
+    constructor() {
+        Component.make('div', {
+            context: this,
+            var: 'root',
+            class: 'dialog_back',
+            style: 'animation: fadeIn 0.16s;',
+            parent: document.body,
+        });
+    }
+
+    destroy() {
+        this.$root.style.animation = 'fadeOut 0.16s';
+        setTimeout(() => this.$root.remove(), 150);
+    }
+}
 
 export function BaseDialog(label, content, actionOK, actionCancel) {
-    let ctx = {};
-    Component.make('div', {
-        context: ctx,
-        class: 'dialog_back',
-        var: 'back',
-        parent: document.body,
+    let dialog = new DialogCont();
+
+    Component.config(dialog.$root, {
         child: {
             tag: 'div',
             class: 'dialog_cont',
@@ -30,7 +45,7 @@ export function BaseDialog(label, content, actionOK, actionCancel) {
                                 events: {
                                     click: () => {
                                         actionOK();
-                                        ctx.$back.remove();
+                                        dialog.destroy();
                                     },
                                 },
                             },
@@ -46,7 +61,7 @@ export function BaseDialog(label, content, actionOK, actionCancel) {
                                 events: {
                                     click: () => {
                                         actionCancel();
-                                        ctx.$back.remove();
+                                        dialog.destroy();
                                     },
                                 },
                             }
@@ -68,6 +83,7 @@ export function AsyncPrompt(label, value) {
         });
         area.style.height = area.scrollHeight + "px";
         BaseDialog(label, area, () => resolve(area.value), () => resolve(null));
+        setTimeout(() => area.focus(), 10);
     });
 }
 

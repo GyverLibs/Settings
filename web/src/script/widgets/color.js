@@ -1,6 +1,7 @@
 import { Component } from "@alexgyver/component";
 import WidgetBase from "./widget";
-import { intToColor } from "./misc";
+import { intToColor } from "../utils";
+import './color.css';
 
 export default class ColorWidget extends WidgetBase {
     constructor(data) {
@@ -18,10 +19,8 @@ export default class ColorWidget extends WidgetBase {
                     attrs: { 'colorpick-eyedropper-active': false },
                     events: {
                         change: () => {
-                            this.$out.style.background = this.$col.value;
-                            let hex = this.$col.value.slice(1);
-                            if (hex.length == 3) hex = hex.split('').map(x => x + x).join('');
-                            this.sendEvent(parseInt(hex, 16));
+                            this.updateOut();
+                            this.sendEvent(this.hexCol());
                         }
                     }
                 },
@@ -39,8 +38,22 @@ export default class ColorWidget extends WidgetBase {
         this.update(data.value);
     }
 
+    hexCol() {
+        let hex = this.$col.value.slice(1);
+        if (hex.length == 3) hex = hex.split('').map(x => x + x).join('');
+        return parseInt(hex, 16);
+    }
+
     update(value) {
         this.$col.value = intToColor(value ?? 0);
+        this.updateOut();
+    }
+
+    updateOut() {
+        this.$out.textContent = this.$col.value;
         this.$out.style.background = this.$col.value;
+        let mid = 0;
+        this.$col.value.slice(1).match(/.{2}/g).forEach(x => mid += parseInt(x, 16) / 3);
+        this.$out.style.color = mid < 128 ? 'white' : 'black';
     }
 }

@@ -19,12 +19,14 @@ async function compile() {
     const index_gz = out_folder + '/index.html.gz';
     const script_gz = out_folder + '/script.js.gz';
     const style_gz = out_folder + '/style.css.gz';
+    const favicon_gz = out_folder + '/favicon.svg.gz';
 
     try {
         if (!fs.existsSync(out_folder)) fs.mkdirSync(out_folder);
         await gzip(in_folder + '/index.html', index_gz);
         await gzip(in_folder + '/script.js', script_gz);
         await gzip(in_folder + '/style.css', style_gz);
+        await gzip('./src/favicon.svg', favicon_gz);
     } catch (err) {
         console.error(err);
         return;
@@ -33,6 +35,7 @@ async function compile() {
     let index_len = fs.statSync(index_gz).size;
     let script_len = fs.statSync(script_gz).size;
     let style_len = fs.statSync(style_gz).size;
+    let favicon_len = fs.statSync(favicon_gz).size;
 
     let code = `#pragma once
 #include <Arduino.h>
@@ -42,7 +45,8 @@ async function compile() {
     index: ${index_len} bytes
     script: ${script_len} bytes
     style: ${style_len} bytes
-    total: ${((index_len + script_len + style_len) / 1024).toFixed(2)} kB
+    icon: ${favicon_len} bytes
+    total: ${((index_len + script_len + style_len + favicon_len) / 1024).toFixed(2)} kB
     
     Build: ${new Date()}
 */
@@ -65,6 +69,7 @@ async function compile() {
     code += addBin('index_gz', index_gz);
     code += addBin('script_gz', script_gz);
     code += addBin('style_gz', style_gz);
+    code += addBin('favicon_gz', favicon_gz);
 
     fs.writeFile(`${out_folder}/${pkg.name}.h`, code, err => {
         if (err) console.error(err);

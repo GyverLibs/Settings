@@ -10,6 +10,12 @@ const codes = [
     'reload',
     'update',
     'ping',
+    'granted',
+    'fs',
+    'error',
+    'gzip',
+    'used',
+    'total',
 
     'label',
     'title',
@@ -32,6 +38,7 @@ const codes = [
     'button',
     'paragraph',
     'confirm',
+    'led',
 ];
 
 export default function decodeBson(b) {

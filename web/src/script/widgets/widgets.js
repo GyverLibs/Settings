@@ -1,3 +1,5 @@
+import './widgets.css';
+
 import ColorWidget from "./color";
 import LabelWidget from "./label";
 import PassWidget from "./pass";
@@ -10,6 +12,7 @@ import ButtonsWidget from "./buttons";
 import ParagraphWidget from "./paragraph";
 import Button from "./button";
 import ConfirmWidget from "./confirm";
+import LedWidget from "./led";
 
 export const WidgetList = {
     toggle: SwitchWidget,
@@ -26,4 +29,5 @@ export const WidgetList = {
     button: Button,
     paragraph: ParagraphWidget,
     confirm: ConfirmWidget,
+    led: LedWidget,
 }
