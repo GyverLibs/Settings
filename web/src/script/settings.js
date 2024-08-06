@@ -196,7 +196,7 @@ export default class Settings {
         });
 
         this.$main_col.addEventListener("widget_event", async (e) => {
-            let res;
+            let res = null;
             switch (e.data.action) {
                 case 'click': res = await this.send('click', e.data.id); break;
                 case 'set': res = await this.send('set', e.data.id, e.data.value); break;

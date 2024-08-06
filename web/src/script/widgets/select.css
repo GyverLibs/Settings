@@ -1,5 +1,5 @@
 .select {
-    max-height: 400px;
+    max-height: 350px;
     overflow-y: scroll;
     padding: 0;
 }
@@ -17,7 +17,7 @@
 }
 
 .option {
-    font-size: 20px;
+    font-size: 19px;
     padding: 6px 8px;
 }
 

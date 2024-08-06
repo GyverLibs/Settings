@@ -46,11 +46,12 @@
 
 .dialog textarea {
     display: block;
+    max-height: 350px;
     width: 100%;
     box-sizing: border-box;
     margin-top: 10px;
     resize: none;
-    overflow: hidden;
+    overflow-y: scroll;
     background: var(--back);
     color: var(--font);
     border: none;
@@ -59,5 +60,19 @@
     font-size: 16px;
     line-height: 16px;
     min-height: 27px;
+    border-radius: 4px;
+}
+
+.dialog textarea::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+}
+
+.dialog textarea::-webkit-scrollbar-track {
+    display: none;
+}
+
+.dialog textarea::-webkit-scrollbar-thumb {
+    background: var(--dark);
     border-radius: 4px;
 }

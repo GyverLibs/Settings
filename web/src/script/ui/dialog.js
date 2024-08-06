@@ -18,7 +18,7 @@ export class DialogCont {
     }
 }
 
-export function BaseDialog(label, content, actionOK, actionCancel) {
+export function BaseDialog(label, content, actionOK, actionCancel, postRender = null) {
     let dialog = new DialogCont();
 
     Component.config(dialog.$root, {
@@ -71,19 +71,23 @@ export function BaseDialog(label, content, actionOK, actionCancel) {
             }
         }
     });
+    if (postRender) postRender();
 }
 
 export function AsyncPrompt(label, value) {
     return new Promise(resolve => {
         let area = Component.make('textarea', {
             text: value,
+            rows: 1,
             events: {
                 input: () => area.style.height = area.scrollHeight + "px",
             }
         });
-        area.style.height = area.scrollHeight + "px";
-        BaseDialog(label, area, () => resolve(area.value), () => resolve(null));
-        setTimeout(() => area.focus(), 10);
+
+        BaseDialog(label, area, () => resolve(area.value), () => resolve(null), () => {
+            area.focus();
+            area.style.height = area.scrollHeight + "px";
+        });
     });
 }
 
