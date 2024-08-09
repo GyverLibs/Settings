@@ -23,8 +23,8 @@ class SettingsAsync : public sets::SettingsBase {
    public:
     SettingsAsync(const String &title = "", GyverDB *db = nullptr) : sets::SettingsBase(title, db), server(80) {}
 
-    void begin() {
-        _dns.begin();
+    void begin(bool useDns = true) {
+        if (useDns) _dns.begin();
         server.begin();
 
         server.on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {

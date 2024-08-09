@@ -14,10 +14,8 @@ class DnsWrapper {
    public:
     void begin() {
 #ifndef SETT_NO_DNS
-        if (WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA) {
-            dns_f = true;
-            dns.start(53, "*", WiFi.softAPIP());
-        }
+        dns_f = true;
+        dns.start(53, "*", WiFi.softAPIP());
 #endif
     }
 

@@ -21,8 +21,8 @@ class SettingsGyver : public sets::SettingsBase {
    public:
     SettingsGyver(const String& title = "", GyverDB* db = nullptr) : sets::SettingsBase(title, db), server(80) {}
 
-    void begin() {
-        _dns.begin();
+    void begin(bool useDns = true) {
+        if (useDns) _dns.begin();
         server.begin();
 
 #ifndef SETS_USE_CORS
