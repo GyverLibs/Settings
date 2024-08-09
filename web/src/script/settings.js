@@ -95,32 +95,41 @@ export default class Settings {
                     children: [
                         {
                             tag: 'div',
-                            class: 'fs_icons',
+                            class: 'menu_icons',
                             children: [
                                 {
                                     tag: 'div',
-                                    class: 'icon moon',
-                                    title: 'Dark mode',
-                                    events: {
-                                        click: () => {
-                                            document.body.classList.toggle('theme_dark');
-                                            localStorage.setItem('dark', document.body.classList.contains('theme_dark') | 0);
-                                        },
+                                    class: 'menu_icon',
+                                    child: {
+                                        tag: 'div',
+                                        class: 'icon moon',
+                                        title: 'Dark mode',
+                                        events: {
+                                            click: () => {
+                                                document.body.classList.toggle('theme_dark');
+                                                localStorage.setItem('dark', document.body.classList.contains('theme_dark') | 0);
+                                            },
+                                        }
                                     }
                                 },
                                 {
+
                                     tag: 'div',
-                                    class: 'icon key',
-                                    title: 'Auth',
-                                    var: 'auth',
-                                    events: {
-                                        click: async () => {
-                                            let res = await AsyncPrompt('Password', '');
-                                            if (res !== null) {
-                                                localStorage.setItem('auth', hash(res));
-                                                window.location.reload();
-                                            }
-                                        },
+                                    class: 'menu_icon',
+                                    child: {
+                                        tag: 'div',
+                                        class: 'icon key',
+                                        title: 'Auth',
+                                        var: 'auth',
+                                        events: {
+                                            click: async () => {
+                                                let res = await AsyncPrompt('Password', '');
+                                                if (res !== null) {
+                                                    localStorage.setItem('auth', hash(res));
+                                                    window.location.reload();
+                                                }
+                                            },
+                                        }
                                     }
                                 },
                                 {
@@ -130,16 +139,23 @@ export default class Settings {
                                     style: 'display: none',
                                     accept: '.bin',
                                     events: {
-                                        change: () => this.uploadOta(),
+                                        change: () => this.uploadOta(this.$upload_ota.files[0]),
                                     }
                                 },
                                 {
                                     tag: 'div',
-                                    class: 'icon cloud',
-                                    title: 'OTA',
-                                    var: 'ota',
+                                    class: 'menu_icon drop_area',
                                     events: {
-                                        click: () => this.$upload_ota.click(),
+                                        drop: (e) => this.uploadOta(e.dataTransfer.files[0]),
+                                    },
+                                    child: {
+                                        tag: 'div',
+                                        class: 'icon cloud',
+                                        title: 'OTA',
+                                        var: 'ota',
+                                        events: {
+                                            click: () => this.$upload_ota.click(),
+                                        }
                                     }
                                 },
                                 {
@@ -148,16 +164,23 @@ export default class Settings {
                                     var: 'upload_file',
                                     style: 'display: none',
                                     events: {
-                                        change: () => this.uploadFile(),
+                                        change: () => this.uploadFile(this.$upload_file.files[0]),
                                     }
                                 },
                                 {
                                     tag: 'div',
-                                    class: 'icon upload',
-                                    title: 'Upload',
-                                    var: 'upload',
+                                    class: 'menu_icon drop_area',
                                     events: {
-                                        click: () => this.$upload_file.click(),
+                                        drop: (e) => this.uploadFile(e.dataTransfer.files[0]),
+                                    },
+                                    child: {
+                                        tag: 'div',
+                                        class: 'icon upload',
+                                        title: 'Upload',
+                                        var: 'upload',
+                                        events: {
+                                            click: () => this.$upload_file.click(),
+                                        }
                                     }
                                 },
                             ]
@@ -213,6 +236,23 @@ export default class Settings {
             window.history.pushState({ page: 1 }, "", "");
             this.back();
         }
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => {
+            document.body.addEventListener(ev, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            }, false);
+        });
+        ['dragenter', 'dragover'].forEach(e => {
+            document.body.addEventListener(e, function () {
+                document.querySelectorAll('.drop_area').forEach((el) => el.classList.add('active'));
+            }, false);
+        });
+        ['dragleave', 'drop'].forEach(e => {
+            document.body.addEventListener(e, function () {
+                document.querySelectorAll('.drop_area').forEach((el) => el.classList.remove('active'));
+            }, false);
+        });
 
         if (localStorage.hasOwnProperty('dark')) {
             if (Number(localStorage.getItem('dark'))) {
@@ -433,8 +473,7 @@ export default class Settings {
             popup(e);
         }
     }
-    async uploadFile() {
-        let file = this.$upload_file.files[0];
+    async uploadFile(file) {
         this.$upload_file.value = "";
         let path = await AsyncPrompt("Upload", '/' + file.name);
         if (!path) return;
@@ -452,12 +491,12 @@ export default class Settings {
         if (ok) this.parse(await this.send('fs'));
         this.restartPing();
     }
-    async uploadOta() {
+    async uploadOta(file) {
+        if (!file.name.endsWith(this.$upload_ota.accept)) return;
         if (!await AsyncConfirm("Update firmware?")) return;
         this.stopPing();
         this.offline = true;
 
-        let file = this.$upload_ota.files[0];
         this.$upload_ota.value = "";
 
         let data = new FormData();

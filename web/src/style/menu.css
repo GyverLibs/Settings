@@ -1,7 +1,17 @@
-.fs_icons {
+.menu_icons {
     display: flex;
     justify-content: space-evenly;
-    padding: 15px 10px;
+    padding: 10px;
+}
+
+.menu_icon {
+    padding: 8px;
+    border: 2px dashed #0000;
+    border-radius: 5px;
+}
+
+.drop_area.active {
+    border-color: var(--accent);
 }
 
 .fs_error {
