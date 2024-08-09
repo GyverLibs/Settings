@@ -13,12 +13,13 @@
 
 #include "SettingsBase.h"
 #include "core/DnsWrapper.h"
+#include "core/fs.h"
 #include "core/ota.h"
 #include "web/settings.h"
 
-class SettingsGyver : public SettingsBase {
+class SettingsGyver : public sets::SettingsBase {
    public:
-    SettingsGyver(const String& title = "", GyverDB* db = nullptr) : SettingsBase(title, db), server(80) {}
+    SettingsGyver(const String& title = "", GyverDB* db = nullptr) : sets::SettingsBase(title, db), server(80) {}
 
     void begin() {
         _dns.begin();
@@ -36,7 +37,7 @@ class SettingsGyver : public SettingsBase {
 
                 case SH("/fetch"):
                     if (authenticate(req.param("auth"))) {
-                        File f = openFileRead(req.param("path").decodeUrl());
+                        File f = sets::FS.openRead(req.param("path").decodeUrl());
                         if (f) server.sendFile(f);
                         else server.send(500);
                     } else {
@@ -46,7 +47,7 @@ class SettingsGyver : public SettingsBase {
 
                 case SH("/upload"):
                     if (authenticate(req.param("auth"))) {
-                        File f = openFileWrite(req.param("path").decodeUrl());
+                        File f = sets::FS.openWrite(req.param("path").decodeUrl());
                         if (f) {
                             req.body().writeTo(f);
                             server.send(200);
@@ -89,7 +90,7 @@ class SettingsGyver : public SettingsBase {
     void tick() {
         _dns.tick();
         server.tick();
-        SettingsBase::tick();
+        sets::SettingsBase::tick();
     }
 
     ghttp::Server<WiFiServer, WiFiClient> server;

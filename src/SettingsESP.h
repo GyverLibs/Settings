@@ -14,12 +14,13 @@
 
 #include "SettingsBase.h"
 #include "core/DnsWrapper.h"
+#include "core/fs.h"
 #include "core/ota.h"
 #include "web/settings.h"
 
-class SettingsESP : public SettingsBase {
+class SettingsESP : public sets::SettingsBase {
    public:
-    SettingsESP(const String& title = "", GyverDB* db = nullptr) : SettingsBase(title, db), server(80) {}
+    SettingsESP(const String& title = "", GyverDB* db = nullptr) : sets::SettingsBase(title, db), server(80) {}
 
     void begin() {
         _dns.begin();
@@ -42,38 +43,33 @@ class SettingsESP : public SettingsBase {
                 server.send(401);
                 return;
             }
-            
+
             String path = server.arg(F("path"));
-            File f = openFileRead(path);
+            File f = sets::FS.openRead(path);
             if (f) server.streamFile(f, "text/plain");
             else server.send(500);
         });
 
-        server.on("/upload", HTTP_POST,
-        [this]() {
+        server.on("/upload", HTTP_POST, [this]() {
             cors_h();
-            server.send(200);
-        }, [this]() {
+            server.send(200); }, [this]() {
             String auth = server.arg(F("auth"));
             if (!authenticate(auth)) return;
 
             HTTPUpload& upload = server.upload();
             if (upload.status == UPLOAD_FILE_START) {
                 String path = server.arg(F("path"));
-                _file = openFileWrite(path);
+                _file = sets::FS.openWrite(path);
             } else if (upload.status == UPLOAD_FILE_WRITE) {
                 if (_file) _file.write(upload.buf, upload.currentSize);
             } else if (upload.status == UPLOAD_FILE_END) {
                 if (_file) _file.close();
-            } 
-        });
+            } });
 
-        server.on("/ota", HTTP_POST, 
-        [this]() { 
+        server.on("/ota", HTTP_POST, [this]() { 
             cors_h();
             server.send(Update.hasError() ? 500 : 200);
-            if (!Update.hasError()) restart();
-        }, [this]() {
+            if (!Update.hasError()) restart(); }, [this]() {
             String auth = server.arg(F("auth"));
             if (!authenticate(auth)) return;
 
@@ -84,8 +80,7 @@ class SettingsESP : public SettingsBase {
                 Update.write(upload.buf, upload.currentSize);
             } else if (upload.status == UPLOAD_FILE_END) {
                 Update.end(true);
-            } 
-        });
+            } });
 
         server.onNotFound([this]() {
             gzip_h();
@@ -112,7 +107,7 @@ class SettingsESP : public SettingsBase {
     void tick() {
         _dns.tick();
         server.handleClient();
-        SettingsBase::tick();
+        sets::SettingsBase::tick();
     }
 
 #ifdef ESP8266

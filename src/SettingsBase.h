@@ -14,9 +14,11 @@
 
 #define SETS_RESERVE 512
 
+namespace sets {
+
 class SettingsBase {
-    typedef std::function<void(sets::Builder& b)> BuildCallback;
-    typedef std::function<void(sets::Updater& upd)> UpdateCallback;
+    typedef std::function<void(Builder& b)> BuildCallback;
+    typedef std::function<void(Updater& upd)> UpdateCallback;
 
    public:
     SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {}
@@ -74,14 +76,6 @@ class SettingsBase {
     // отправка для родительского класса
     virtual void send(uint8_t* data, size_t len) {}
 
-    File openFileWrite(Text path) {
-        return _fs.openWrite(path.c_str());
-    }
-
-    File openFileRead(Text path) {
-        return _fs.openRead(path.c_str());
-    }
-
     bool authenticate(Text passh) {
         return !_passh || (_passh == passh.toInt32HEX());
     }
@@ -107,8 +101,8 @@ class SettingsBase {
                     if (_dbupdates) _db->useUpdates(true);
                 }
                 if (_build_cb) {
-                    sets::Build action(sets::Build::Type::Set, granted, id, value);
-                    sets::Builder b(action);
+                    Build action(Build::Type::Set, granted, id, value);
+                    Builder b(action);
                     _build_cb(b);
                     if (b.isReload()) _sendBuild(granted);
                     else _answerEmpty();
@@ -119,8 +113,8 @@ class SettingsBase {
 
             case SH("click"):
                 if (_build_cb) {
-                    sets::Build action(sets::Build::Type::Click, granted, id);
-                    sets::Builder b(action);
+                    Build action(Build::Type::Click, granted, id);
+                    Builder b(action);
                     _build_cb(b);
                     if (b.isReload()) _sendBuild(granted);
                     else _answerEmpty();
@@ -131,17 +125,17 @@ class SettingsBase {
 
             case SH("ping"):
                 if (_upd_cb || _db) {
-                    sets::Packet p;
-                    sets::Updater upd(p);
+                    Packet p;
+                    Updater upd(p);
                     p.beginObj();
-                    p.addCode(sets::Code::type, sets::Code::update);
-                    p.beginArr(sets::Code::content);
+                    p.addCode(Code::type, Code::update);
+                    p.beginArr(Code::content);
                     if (_db && _dbupdates) {
                         while (_db->updatesAvailable()) {
                             size_t id = _db->updateNext();
                             p.beginObj();
-                            p.addUint(sets::Code::id, id);
-                            p.addKey(sets::Code::value);
+                            p.addUint(Code::id, id);
+                            p.addKey(Code::value);
                             p.addFromDB(_db, id);
                             p.endObj();
                         }
@@ -167,7 +161,7 @@ class SettingsBase {
 
             case SH("remove"):
                 if (granted) {
-                    _fs.remove(value.c_str());
+                    FS.remove(value);
                     _sendFs(true);
                 }
                 break;
@@ -180,7 +174,6 @@ class SettingsBase {
     String _title;
     size_t _passh = 0;
     GyverDB* _db = nullptr;
-    sets::FS _fs;
     uint16_t _updPeriod = 2500;
     bool _dbupdates = true;
     bool _rst = false;
@@ -193,34 +186,34 @@ class SettingsBase {
 
     void _sendFs(bool granted) {
         String str;
-        if (granted) _fs.list(str, "/");
+        if (granted) FS.listDir(str, "/", true);
 
-        sets::Packet p;
+        Packet p;
         p.beginObj();
-        p.addCode(sets::Code::type, sets::Code::fs);
-        p.addText(sets::Code::content, str);
-        p.addUint(sets::Code::used, _fs.usedSpace());
-        p.addUint(sets::Code::total, _fs.totalSpace());
-        if (!granted) p.addText(sets::Code::error, "Access denied");
+        p.addCode(Code::type, Code::fs);
+        p.addText(Code::content, str);
+        p.addUint(Code::used, FS.usedSpace());
+        p.addUint(Code::total, FS.totalSpace());
+        if (!granted) p.addText(Code::error, "Access denied");
         p.endObj();
         send(p.buf(), p.length());
     }
 
     void _sendBuild(bool granted) {
         if (_build_cb) {
-            sets::Packet p;
+            Packet p;
             p.reserve(SETS_RESERVE);
             p.beginObj();
-            p.addCode(sets::Code::type, sets::Code::build);
-            p.addUint(sets::Code::ping, _updPeriod);
-            if (_title.length()) p.addText(sets::Code::title, _title);
-            if (_passh) p.addBool(sets::Code::granted, granted);
+            p.addCode(Code::type, Code::build);
+            p.addUint(Code::ping, _updPeriod);
+            if (_title.length()) p.addText(Code::title, _title);
+            if (_passh) p.addBool(Code::granted, granted);
 #ifdef ATOMIC_FS_UPDATE
-            p.addBool(sets::Code::gzip, true);
+            p.addBool(Code::gzip, true);
 #endif
-            p.beginArr(sets::Code::content);
-            sets::Build action(sets::Build::Type::Build, granted);
-            sets::Builder builder(action, _db, &p);
+            p.beginArr(Code::content);
+            Build action(Build::Type::Build, granted);
+            Builder builder(action, _db, &p);
             _build_cb(builder);
             p.endArr();
             p.endObj();
@@ -230,3 +223,5 @@ class SettingsBase {
         }
     }
 };
+
+}

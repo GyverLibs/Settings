@@ -2,14 +2,15 @@
 #include <Arduino.h>
 #include <FS.h>
 #include <LittleFS.h>
+#include <StringUtils.h>
 
 #define ST_FS LittleFS
 
 namespace sets {
 
-class FS {
+class FSClass {
    public:
-    void list(String& str, const String& path) {
+    void listDir(String& str, const char* path, bool withSize = false) {
 #ifdef ESP8266
         Dir dir = ST_FS.openDir(path);
         while (dir.next()) {
@@ -18,50 +19,55 @@ class FS {
                 p += dir.fileName();
                 p += '/';
                 Dir sdir = ST_FS.openDir(p);
-                list(str, p);
+                listDir(str, p.c_str(), withSize);
             }
             if (dir.isFile() && dir.fileName().length()) {
                 str += path;
                 str += dir.fileName();
-                str += ':';
-                str += dir.fileSize();
+                if (withSize) {
+                    str += ':';
+                    str += dir.fileSize();
+                }
                 str += ';';
             }
         }
 
 #else  // ESP32
-        File root = ST_FS.open(path.c_str());
+        File root = ST_FS.open(path);
         if (!root || !root.isDirectory()) return;
         File file;
         while (file = root.openNextFile()) {
             if (file.isDirectory()) {
-                list(str, file.path());
+                listDir(str, file.path(), withSize);
             } else {
                 str += '/';
                 str += file.name();
-                str += ':';
-                str += file.size();
+                if (withSize) {
+                    str += ':';
+                    str += file.size();
+                }
                 str += ';';
             }
         }
 #endif
     }
 
-    bool remove(const char* path) {
-        return ST_FS.remove(path);
+    bool remove(Text path) {
+        return ST_FS.remove(path.c_str());
     }
 
-    File openRead(const char* path) {
-        return ST_FS.open(path, "r");
+    File openRead(Text path) {
+        return ST_FS.open(path.c_str(), "r");
     }
 
-    File openWrite(const char* path) {
+    File openWrite(Text path) {
         mkdir(path);
-        return ST_FS.open(path, "w");
+        return ST_FS.open(path.c_str(), "w");
     }
 
-    void mkdir(const char* path) {
+    void mkdir(Text tpath) {
 #ifdef ESP32
+        Text::Cstr path = tpath.c_str();
         if (!ST_FS.exists(path)) {
             if (strchr(path, '/')) {
                 char* pathStr = strdup(path);
@@ -81,9 +87,9 @@ class FS {
 #endif
     }
 
-    void rmdir(const char* path) {
+    void rmdir(Text path) {
 #ifdef ESP32
-        char* pathStr = strdup(path);
+        char* pathStr = strdup(path.c_str());
         if (pathStr) {
             char* ptr = strrchr(pathStr, '/');
             while (ptr) {
@@ -127,5 +133,7 @@ class FS {
 #endif
     }
 };
+
+extern FSClass FS;
 
 }  // namespace sets

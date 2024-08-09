@@ -375,6 +375,7 @@ void LED(Text label, bool value);
 bool Input(size_t id, Text label, Text value = Text());
 
 // ввод пароля
+// можно установить "заглушку" для пароля, например "***", чтобы пароль не отображался в браузере
 bool Pass(size_t id, Text label, Text value = Text());
 
 // ввод цвета, результат в обычном 24-бит формате

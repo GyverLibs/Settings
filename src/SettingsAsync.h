@@ -15,13 +15,13 @@
 
 #include "SettingsBase.h"
 #include "core/DnsWrapper.h"
-#include "core/ota.h"
 #include "core/fs.h"
+#include "core/ota.h"
 #include "web/settings.h"
 
-class SettingsAsync : public SettingsBase {
+class SettingsAsync : public sets::SettingsBase {
    public:
-    SettingsAsync(const String &title = "", GyverDB *db = nullptr) : SettingsBase(title, db), server(80) {}
+    SettingsAsync(const String &title = "", GyverDB *db = nullptr) : sets::SettingsBase(title, db), server(80) {}
 
     void begin() {
         _dns.begin();
@@ -45,7 +45,7 @@ class SettingsAsync : public SettingsBase {
             String auth, path;
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (request->hasParam("path")) path = request->getParam("path")->value();
-        
+
             if (authenticate(auth)) {
                 AsyncWebServerResponse *response = request->beginResponse(ST_FS, path);
                 cors_h(response);
@@ -55,33 +55,24 @@ class SettingsAsync : public SettingsBase {
             }
         });
 
-        server.on("/upload", HTTP_POST, 
-        [this](AsyncWebServerRequest* request) {
-            sendCode(200, request);
-        },
-        [this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
+        server.on("/upload", HTTP_POST, [this](AsyncWebServerRequest *request) { sendCode(200, request); }, [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
             String auth, path;
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (request->hasParam("path")) path = request->getParam("path")->value();
             if (!authenticate(auth)) return;
-            if (!index) _file = openFileWrite(path);
+            if (!index) _file = sets::FS.openWrite(path);
             if (len && _file) _file.write(data, len);
-            if (final && _file) _file.close();
-        });
+            if (final && _file) _file.close(); });
 
-        server.on("/ota", HTTP_POST, 
-        [this](AsyncWebServerRequest* request) {
+        server.on("/ota", HTTP_POST, [this](AsyncWebServerRequest *request) {
             sendCode(Update.hasError() ? 500 : 200, request);
-            if (!Update.hasError()) restart();
-        },
-        [this](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
+            if (!Update.hasError()) restart(); }, [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
             String auth;
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (!authenticate(auth)) return;
             if (!index) sets::beginOta(true, true);
             if (len) Update.write(data, len);
-            if (final) Update.end(true);
-        });
+            if (final) Update.end(true); });
 
         server.onNotFound([this](AsyncWebServerRequest *request) {
             AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", settings_index_gz, settings_index_gz_len);
@@ -111,7 +102,7 @@ class SettingsAsync : public SettingsBase {
 
     void tick() {
         _dns.tick();
-        SettingsBase::tick();
+        sets::SettingsBase::tick();
     }
 
    private:
@@ -123,7 +114,7 @@ class SettingsAsync : public SettingsBase {
     void send(uint8_t *data, size_t len) {
         if (_response) _response->write(data, len);
     }
-    void sendCode(int code, AsyncWebServerRequest* request) {
+    void sendCode(int code, AsyncWebServerRequest *request) {
         AsyncWebServerResponse *response = request->beginResponse(code);
         cors_h(response);
         request->send(response);
