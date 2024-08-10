@@ -3,6 +3,7 @@ import Page from './page';
 import { Arrow, hash, http_post } from './utils';
 import popup from './ui/popup';
 import decodeBson from './bson';
+import { codes } from './codes';
 import unMap from './unmap';
 import { AsyncConfirm, AsyncPrompt } from './ui/dialog';
 
@@ -107,7 +108,7 @@ export default class Settings {
                                         events: {
                                             click: () => {
                                                 document.body.classList.toggle('theme_dark');
-                                                localStorage.setItem('dark', document.body.classList.contains('theme_dark') | 0);
+                                                localStorage.setItem('dark', Number(document.body.classList.contains('theme_dark')));
                                             },
                                         }
                                     }
@@ -289,7 +290,7 @@ export default class Settings {
         if (!res || !res.ok) return null;
 
         try {
-            return decodeBson(new Uint8Array(await res.arrayBuffer()));
+            return decodeBson(new Uint8Array(await res.arrayBuffer()), codes);
         } catch (e) {
             popup(e);
         }

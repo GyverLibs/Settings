@@ -1,49 +1,7 @@
-const codes = [
-    'id',
-    'type',
-    'content',
-    'group',
-    'menu',
-    'buttons',
-
-    'build',
-    'reload',
-    'update',
-    'ping',
-    'granted',
-    'fs',
-    'error',
-    'gzip',
-    'used',
-    'total',
-
-    'label',
-    'title',
-    'text',
-    'value',
-    'color',
-    'min',
-    'max',
-    'step',
-    'unit',
-
-    'input',
-    'pass',
-    'select',
-    'slider',
-    'toggle',
-    'time',
-    'date',
-    'datetime',
-    'button',
-    'paragraph',
-    'confirm',
-    'led',
-];
-
-export default function decodeBson(b) {
+export default function decodeBson(b, codes = []) {
     if (!b || !(b instanceof Uint8Array)) return null;
     if (!b.length) return {};
+    let bins = [];
 
     const BS_KEY_CODE = (0 << 5);
     const BS_KEY_STR = (1 << 5);
@@ -51,10 +9,12 @@ export default function decodeBson(b) {
     const BS_VAL_STR = (3 << 5);
     const BS_VAL_INT = (4 << 5);
     const BS_VAL_FLOAT = (5 << 5);
-    const BS_CONT_OPEN = (6 << 5);
-    const BS_CONT_CLOSE = (7 << 5);
-    const BS_CONT_OBJ = (1);
-    const BS_CONT_ARR = (0);
+    const BS_CONTAINER = (6 << 5);
+    const BS_BINARY = (7 << 5);
+    const BS_BIN_PREFIX = "__BSON_BINARY";
+
+    const BS_CONT_OBJ = (1 << 4);
+    const BS_CONT_OPEN = (1 << 3);
 
     function ieee32ToFloat(intval) {
         var fval = 0.0;
@@ -83,6 +43,16 @@ export default function decodeBson(b) {
     function unpack5(msb5, lsb) {
         return ((msb5 << 8) | lsb) >>> 0;
     }
+    function makeBins(obj) {
+        if (typeof obj !== 'object') return;
+        for (let k in obj) {
+            if (typeof obj[k] === "object" && obj[k] !== null) {
+                makeBins(obj[k]);
+            } else if (typeof obj[k] === "string" && obj[k].startsWith(BS_BIN_PREFIX)) {
+                obj[k] = bins[obj[k].split('#')[1]];
+            }
+        }
+    }
 
     let s = '';
     for (let i = 0; i < b.length; i++) {
@@ -90,14 +60,14 @@ export default function decodeBson(b) {
         const data = b[i] & 0b00011111;
 
         switch (type) {
-            case BS_CONT_CLOSE:
-                if (s[s.length - 1] == ',') s = s.slice(0, -1);
-                s += (data == BS_CONT_OBJ) ? '}' : ']';
-                s += ',';
-                break;
-
-            case BS_CONT_OPEN:
-                s += (data == BS_CONT_OBJ) ? '{' : '[';
+            case BS_CONTAINER:
+                if (data & BS_CONT_OPEN) {
+                    s += (data & BS_CONT_OBJ) ? '{' : '[';
+                } else {
+                    if (s[s.length - 1] == ',') s = s.slice(0, -1);
+                    s += (data & BS_CONT_OBJ) ? '}' : ']';
+                    s += ',';
+                }
                 break;
 
             case BS_KEY_CODE:
@@ -140,12 +110,22 @@ export default function decodeBson(b) {
                 s += ieee32ToFloat(v).toFixed(data);
                 s += ',';
             } break;
+
+            case BS_BINARY: {
+                let len = unpack5(data, b[++i]);
+                i++;
+                s += '"' + BS_BIN_PREFIX + '#' + bins.length + '",';
+                bins.push(b.slice(i, i + len));
+                i += len - 1;
+            } break;
         }
     }
     if (s[s.length - 1] == ',') s = s.slice(0, -1);
 
     try {
-        return JSON.parse(s);
+        let obj = JSON.parse(s);
+        makeBins(obj);
+        return obj;
     } catch (e) {
         throw new Error("JSON error")
     }
