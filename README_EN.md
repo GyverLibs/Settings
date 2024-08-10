@@ -2,9 +2,11 @@ This is an automatic translation, may be incorrect in some places. See sources a
 
 # Settings
 Library for creating a simple settings web interface on ESP8266/ESP32
-- The web application weighs only 7 kb and is sewn to the program in the binary gzip form, no fuss with files
+- The web application weighs about 10 kb and is sewn to the program in the binary gzip form without the forth with files
 - Comfortable builder control panel from sketch
 - A dozen typical widgets with the possibility of unification into groups and nested menu
+- system of authorization with different rights for authorized users and guests
+- file manager and OTA (air update)
 - Integration with the library [gyverdb] (https://github.com/gyverlibs/gyverdb) for fully automatic data storage
 - Compact binary communication protocol
 - Easily adapts to any HTTP server library, three versions are implemented from the box: Gyverhttp, standard ESP-WEBSERVER, ESPASYNCWEBSERVER
@@ -16,11 +18,11 @@ Library for creating a simple settings web interface on ESP8266/ESP32
 ESP8266, ESP32
 
 ### Dependencies
-- gtl v1.0.11+
-- gyverdb v1.0.6+
-- Stringutils v1.4.23+
-- Gyverhttp v1.0.11+
-- Gson v1.5.6+
+- gtl v1.1.1+
+- gyverdb v1.1.2+
+- Stringutils v1.4.24+
+- Gyverhttp v1.0.17+
+- Gson v1.5.9+
 
 <details>
 <summary> platformio.ini </summary>
@@ -69,11 +71,14 @@ Board_Build.filesystem = Littlefs
 <a id="usage"> </a>
 
 ## Usage
-### How it works
+### how it works
 The web server is configured in the library, which sends webmord files when entering the IP board.Webmord files are sewn in the Progmem (to the program code) in binary form - you do not need to upload files to FS, everything works out of the box.A light html file is loaded each time, and scripts and styles are cramped by a browser to speed up loading.In fact, they are loaded once after updating the library.Webmord is a web application that communicates with the HTTP board.When loading, it requests a package with widgets and other information at the board, the package has a binary json format.
 
-### Database
-The library is integrated with [gyverdb] (https://github.com/gyverlibs/gyverdb) - a relatively quick database for storing data from any type.Settings automatically reads and updates the data in the database, so it is recommended to study how to work with the database on the description page Gyverdb.When using Gyverdbfile, the database will automatically write to the file with changes, and the file system will take care of the optimal wear of the Flash memory.When starting, it is recommended to initialize the database by indicating the keys and the corresponding initial values ​​and types.These values ​​will be recorded only in thatCranberry, if the recording in the database does not yet exist.At the same time, the automatic renewal of the database works only for existing records, i.e.Settings will only work with nourishing cells and will not create new ones.Minimum example:
+## Captive Portal
+In all three server implementations, the DNS is configured to work as Captive Portal - if the ESP operates in access point (AP or AP_STA), then when connecting to the point, the browser window with the settings page will automatically open.
+
+### database
+The library is integrated with [gyverdb] (https://github.com/gyverlibs/gyverdb) - a relatively quick database for storing data from any type.Settings automatically reads and updates the data in the database, soCranberries are mental to study how to work with a database on the description page Gyverdb.When using Gyverdbfile, the database will automatically write to the file with changes, and the file system will take care of the optimal wear of the Flash memory.When starting, it is recommended to initialize the database by indicating the keys and the corresponding initial values ​​and types.These values ​​will be recorded only if the recording in the database does not yet exist.At the same time, the automatic renewal of the database works only for existing records, i.e.Settings will only work with nourishing cells and will not create new ones.Minimum example:
 `` `CPP
 // connect libraries and create databases and settings
 #include <gyverdbfile.h>
@@ -133,8 +138,10 @@ sett.tick ();
 }
 `` `
 
-## Mayer
-The package is assembled by a build in a builder - a function in a program that is called when a request from webmord comes.Inside the builder, you need to call the components in the order in which they should be in webmord.Calling the component adds information about it to the package.At this stage, the value is also reading for the widget according to its ID from the database, if it is connected and the value is not indicated clearly.
+## biller
+The package is assembled by a build in a builder - a function in a program that is called when a request from webmord comes.Inside the builder, you need to call the components in the order in which they should be in webmord.Calling the component adds information about it to the package.At this stage, the value is also reading for the widget according to its ID from the database, if it is connected and *the value is not indicated explicitly *.
+
+> If you need the parameter to be read from the database, but you need to specify the argument after it - the value must be specified `Text ()` as it is made in the default function.For example, color for Label `B.Label (Key," Label! ", Text (), sets :: colors :: Mint);`.If you specify an empty line (`B.Label (Key," Label! "," ", Sets :: colors :: Mint);`) - an empty line will go as a value, i.e.The value is not from the database.
 
 `` `CPP
 Gyverdb DB;
@@ -175,8 +182,8 @@ Serial.println (B.Build (). Value ());
 `` `
 
 ### containers
-Widgets can be combined into containers.The container must be started and finished, since the data package is assembled linearly in order to optimize speed and memory.The Begin Container method will always return True for the beauty of the organization of code in the Condition block:
-`` `CPP
+Widgets can be combined into containers.The container must be started and finished, since the data package is assembled linearly in order to optimize speed and memory.The `begin -stagnant method will always return True for the beauty of the organization of code in the conditions:
+```CPP
 VOID Build (Sets :: Builder & B) {
 if (B.Begingroup ("Group 1")) {
 B.INPUT ("Input1" _H, "text");
@@ -199,7 +206,8 @@ B.INPUT ("Input1" _H, "text");
 
 You can create an invested menu.The specified title will be displayed on the button and in the page heading at the entrance to the menu.All widgets and groups located in the block with the menu will be on a separate page.The nuclearment of the menu is unlimited.
 `` `CPP
-VOID Build (Sets :: Builder & B) {B.Input ("Input1" _H, "Text 1");
+VOID Build (Sets :: Builder & B) {
+B.INPUT ("Input1" _H, "Text 1");
 
 {
 sets :: menu g (b, "submenu");
@@ -236,7 +244,7 @@ B.Label ("LBL2" _H, "Millis ()", "", sets :: colors :: RED);
 }
 VOID update (Sets :: Updater & Upd) {
 UPD.UPDATE ("LBL1" _H, RANDOM (100));
-upd.update ("lbl2" _h, millis ());
+UPD.UPDATE ("LBL2" _H, Millis ());
 }
 
 VOID setup () {
@@ -248,15 +256,49 @@ sett.onupdate (update);
 
 Webmord monitors the status of the device, with a communication loss, the Offline text will appear in the page title.After losing the connection, webmord will request information about widgets, this is very convenient when developing - for example, add a widget, load the firmware.During this time, webmord already understands that the device is offline and with the first successful connection, it displays relevant widgets.When changing the values ​​of webmord widgets, he also monitors the delivery of the package, when the communication error will appear the inscription error in the corresponding widget.
 
+### Authorization
+The system provides for authorization: if in the firmware, indicate the password different from the empty line - webmord will work in the “guest” mode: only widgets allowed to guests are displayed, the file manager and OTA are hidden and blocked.To enter the password, you need to go to the menu (right upper button) and press on the key.The gray key means that the authorization is disabled, the green is authorized, red - the wrong password.The password can contain any characters and have any length - in explicitly it is not stored and not transmitted.The password is stored in the browser and the authorization works automatically when the page reloads.
+
+The Guest virtual container is provided for the separation of admin and guest access.If the password is installed and the client is not authorized, he will only see widgets from guest containers.For the correct operation, the guest container should not be interrupted by conventional containers.Example:
+
+`` `CPP
+if (B.Begingroup ("Group 1")) {
+// Guests do not see
+b.pass (kk :: pass, "password");
+
+// Widgets that guests and admins see
+{
+Sets :: Guestaccess G (b);
+B.Input (kk :: uintw, "uint");
+B.INPUT (KK :: Intw,Cranberries "int");
+B.INPUT (KK :: int64W, "int 64");
+}
+
+// Guests do not see
+{
+Sets :: Menu M (b, "subject sub");
+B.Label (kk :: lbl2, "millis ()", "", sets :: colors :: red);
+}
+
+B.EndGroup ();
+}
+`` `
+In the guest container, you can place several ordinary containers, such as groups.
+
 ## description of classes
-- `settingsbase` (*settingsbase.h*) - base class without a web server
 - `settingsgyver` (*settingsgyver.h*) - on the webcerver Gyverhttp
-- `settingSesp` (*settingSesp.h*) - on the standard ESP webcierver (DNS works correctly here)
+- `settingSesp` (*settingSesp.h*) - on the standard ESP webcierver
 - `settingsasync` (*settingsasync.h*) - on asynchronous Espasyncwebserver
 
 ## settingsbase/settingsgyver/settingSesp/settingsasync
 `` `CPP
 Settings (const string & title = "", gyverdb* db = nullptr);
+
+// Install the password on the webmord.Empty line "" to turn off
+Void setpass (Text Pass);
+
+// Reload page.Can be called anywhere + in the update processor
+VOID RELOAD ();
 
 // Install page title
 VOID settitle (Constation String & Title);
@@ -285,46 +327,111 @@ VOID Tick ();
 // Info about build
 Build Build ();
 
-// Reload page
+// Reload page (call in action)
 VOID RELOAD ();
 
 // containers
+// allow unauthorized customers the following code
+Bool Betinguest ();
+
+// prohibit non -authorized customers
+VOID Enguest ();
+
+// group
 Bool BeginGroup (Text Title = Text ());
 VOID EndGroup ();
 
+// Bethered menu
 Bool Beginmenu (Text Title);
 VOID ENDMENU ();
 
+// Row buttons
 Bool Beginbuttons ();
 VOID Endbuttons ();
 
-// Passive widgets
+// Widgets
+// Passive
+// multi -line text
 VOID Paragraph (Size_T ID, Text Label, Text Text = Text ());
+
+// Text value
 Void Label (Size_T ID, Text Label, Text Text = Text (), Uint32_T Color = Sets_default_color);
 Void Label (Size_t ID, Text Label, Text Text, Sets :: Colors Color);
 
-// Active widgets
+// without ID
+Void Label (Text Label, Text Text = Text (), Uint32_t Color = Sets_default_color);
+Void Label (Text Label, Text Text, Sets :: Colors Color);
+
+// LED (turned on - green, turned off - red)
+VOID LED (SIZE_T ID, Text Label, Bool Value);
+VOID LED (Text Label, Bool Value);
+
+// Active
+// Entering text and numbers
 Bool Input (Size_T ID, Text Label, Text Value = Text ());
+
+// Password entering
+// you can install a "plug" for a password, for example "***" so that the password does not display in the browser
 Bool Pass (Size_T ID, Text Label, Text Value = Text ());
+
+// Input of color, the result in the usual 24-bit format
 Bool Color (Size_T ID, Text Label, Text Value = Text ());
+
+// switch, result 1/0
 Bool Switch (Size_T ID, Text Label, Text Value = Text ());
+
+// Date, result in unix seconds
 Bool Date (Size_T ID, Text Label, Text Value = Text ());
-Bool Time (Size_T ID, Text Label, Text Value = Text ());
+
+// Date and time, result in UNIX seconds
 Bool DateTime (Size_T ID, Text Label, Text Value = Text ());
-Bool Slider (Size_T ID, Text Label, Float Min =0, Float Max = 100, Float Step = 1, Text Unit = Text (), Text Value = Text ());
+
+// Time, result in seconds from the beginning of the day
+Bool Time (Size_T ID, Text Label, Text Value = Text ());
+
+// Slider
+Bool Slider (Size_t ID, Text Label, Float Min = 0, Float Max = 100, Float Step = 1, Text Unit = Text (), Text Value = Text ());
 
 // button can be added both inside the buttons container, and as a single widget
 Bool Button (Size_T ID, Text Label, Uint32_T Color = Sets_default_color);
 Bool Button (Size_T ID, Text Label, Sets :: Colors Color);
 
-// options are divided;
+// list of choice, options in the form of text are separated;
 Bool Select (Size_T ID, Text Label, Text Options, Text Value = Text ());
 
-// For activation, send an empty update to its ID
+// Confirmation window, for activation, send an empty update to its ID
 Bool Confirm (Size_T ID, Text Label);
 `` `
 
-Here `Text` is a universal text format, takes lines in any form.When indicating `value`, its value will be sent different from the standard.Otherwise, the value from the database will be sent if it is connected.If you need the value of the number - use the `value` designer, for example` B.color ("color", "color", value (my_color)); `where` my_color` is `uint32_t`.
+Here `Text` is a universal text format, takes lines in any form.When indicating `value`, its value will be sent different from the standard.Otherwise, the value from the database will be sent if it is connected.If you need a value as a value - use the constructor `vaLue`, for example `B.color (" color "," color ", value (my_color));` where `my_color` is` uint32_t`.
+
+### Build
+Info about build
+`` `CPP
+// Client is authorized (or password is not indicated, i.e. all admins)
+Bool ISGranted ();
+
+// ID widget (action)
+size_t id ();
+
+// Widget value (action)
+Text & Value ();
+`` `
+
+### containers
+`` `CPP
+// Guest access container
+Class guestaccess (Builder & B);
+
+// Container group of widgets
+Class Group (Builder & B, Text Title = Text ());
+
+// container of an invested menu
+Class Menu (Builder & B, Text Title);
+
+// Container buttons
+Class Buttons (Builder & B);
+`` `
 
 ## updater
 `` `CPP
@@ -337,8 +444,8 @@ VOID update (Size_T ID, Text Value);
 // update with Float
 VOID update (Size_t ID, Float Value, Uint8_t Dec = 2);
 
-// update with the number
-VOID update (size_t ID, <Any numerical type> value);
+// Update with the number
+VOID update (Size_T ID, <Any numerical type> value);
 `` `
 
 <a id="versions"> </a>
@@ -348,6 +455,12 @@ VOID update (size_t ID, <Any numerical type> value);
 - V1.0.2
 - Added a confirm widget (a pop -up confirmation window)
 - custom pop -up windows for Input (Input now works on a view of AP wifi points on Xiaomi)
+- V1.0.5
+- Added LED widget
+- Added file manager
+- Added Ot Update
+- Added authorization and guest filter of widgets
+- New style for Select
 
 <a id="install"> </a>
 ## Installation
@@ -379,4 +492,4 @@ When reporting about bugs or incorrect work of the library, it is necessary to i
 - version of Arduino ide
 - whether the built -in examples work correctly, in which the functions and designs are used, leading to a bug in your code
 - what code has been loaded, what work was expected from it and how it works in reality
-- Ideally, attach the minimum code in which the bug is observed.Not a canvas of thousands of lines, but the minimum code
+- Ideally, attach the minimum code in which the bug is observed.Not a canvas of a thousand lines, but a minimum code
