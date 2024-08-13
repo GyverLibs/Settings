@@ -25,7 +25,7 @@ class SettingsGyver : public sets::SettingsBase {
         if (useDns) _dns.begin();
         server.begin();
 
-#ifndef SETS_USE_CORS
+#ifdef SETS_NO_CORS
         server.useCors(false);
 #endif
 

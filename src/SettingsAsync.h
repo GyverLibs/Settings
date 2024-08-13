@@ -132,7 +132,7 @@ class SettingsAsync : public sets::SettingsBase {
         response->addHeader(F("Expires"), F("0"));
     }
     void cors_h(AsyncWebServerResponse *response) {
-#ifdef SETS_USE_CORS
+#ifndef SETS_NO_CORS
         response->addHeader(F("Access-Control-Allow-Origin"), F("*"));
         response->addHeader(F("Access-Control-Allow-Private-Network"), F("true"));
         response->addHeader(F("Access-Control-Allow-Methods"), F("*"));

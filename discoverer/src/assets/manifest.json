@@ -1,0 +1,18 @@
+{
+    "theme_color": "@theme_color",
+    "background_color": "@background_color",
+    "display": "standalone",
+    "start_url": ".",
+    "name": "@name",
+    "short_name": "@name",
+    "description": "@descr",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

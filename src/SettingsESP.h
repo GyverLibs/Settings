@@ -138,7 +138,7 @@ class SettingsESP : public sets::SettingsBase {
         server.sendHeader(F("Expires"), F("0"));
     }
     void cors_h() {
-#ifdef SETS_USE_CORS
+#ifndef SETS_NO_CORS
         server.sendHeader(F("Access-Control-Allow-Origin"), F("*"));
         server.sendHeader(F("Access-Control-Allow-Private-Network"), F("true"));
         server.sendHeader(F("Access-Control-Allow-Methods"), F("*"));

@@ -90,6 +90,14 @@ class SettingsBase {
         bool granted = authenticate(passh);
 
         switch (action.hash()) {
+            case SH("discover"): {
+                String str(F(R"raw({"type":"discover","name":")raw"));
+                if (_title.length()) str += _title;
+                else str += F("Unnamed");
+                str += "\"}";
+                send((uint8_t*)str.c_str(), str.length());
+            } break;
+
             case SH("load"):
                 _sendBuild(granted);
                 break;
@@ -224,4 +232,4 @@ class SettingsBase {
     }
 };
 
-}
+}  // namespace sets
