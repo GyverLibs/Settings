@@ -19,6 +19,6 @@ export default class LabelWidget extends WidgetBase {
     }
 
     update(value) {
-        this.$out.innerText = value ?? '';
+        this.$out.innerText = (value ?? '') + '';
     }
 }

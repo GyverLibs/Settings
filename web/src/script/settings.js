@@ -108,7 +108,7 @@ export default class Settings {
                                         events: {
                                             click: () => {
                                                 document.body.classList.toggle('theme_dark');
-                                                localStorage.setItem('dark', Number(document.body.classList.contains('theme_dark')));
+                                                localStorage.setItem('dark', document.body.classList.contains('theme_dark') ? 1 : 0);
                                             },
                                         }
                                     }

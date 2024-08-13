@@ -1,3 +1,6 @@
 web/node_modules
 web/package-lock.json
 web/dist
+discoverer/node_modules
+discoverer/package-lock.json
+discoverer/dist

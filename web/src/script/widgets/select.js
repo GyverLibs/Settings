@@ -77,7 +77,7 @@ export default class SelectWidget extends WidgetBase {
     }
 
     update(value) {
-        this.value = value ?? 0;
+        this.value = (value ?? 0) + '';
         this.$label.textContent = this.options[this.value];
     }
 }

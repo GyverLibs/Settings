@@ -21,9 +21,9 @@ export default class SliderWidget extends WidgetBase {
                 type: 'range',
                 class: 'slider',
                 var: 'slider',
-                min: data.min ?? 0,
-                max: data.max ?? 100,
-                step: data.step ?? 1,
+                min: (data.min ?? 0) + '',
+                max: (data.max ?? 100) +'',
+                step: (data.step ?? 1) + '',
                 events: {
                     input: () => this.move(),
                     change: () => this.sendEvent(this.$slider.value),
@@ -42,7 +42,7 @@ export default class SliderWidget extends WidgetBase {
     }
 
     update(value) {
-        this.$slider.value = value ?? 0;
+        this.$slider.value = (value ?? 0) + '';
         this.move();
     }
 }

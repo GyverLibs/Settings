@@ -28,7 +28,7 @@ export default class InputWidget extends WidgetBase {
     }
 
     update(value) {
-        this.text = value ? value.toString() : '';
+        this.text = (value ?? '') + '';
         let disp = '...';
         if (this.text.length) {
             let lines = this.text.split('\n');
