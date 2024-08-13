@@ -21,6 +21,7 @@ enum class Code : uint8_t {
     gzip,
     used,
     total,
+    rssi,
 
     label,
     title,

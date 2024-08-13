@@ -6,6 +6,7 @@ import decodeBson from './bson';
 import { codes } from './codes';
 import unMap from './unmap';
 import { AsyncConfirm, AsyncPrompt } from './ui/dialog';
+import { changeRSSI, makeRSSI } from './ui/rssi';
 
 const timeout = 2000;
 const anim_s = '.11s';
@@ -29,6 +30,7 @@ export default class Settings {
     transOut = null;
     authF = false;
     granted = false;
+    firstBuild = true;
     auth = 0;
     ping_prd = 2000;
 
@@ -62,10 +64,10 @@ export default class Settings {
                                     ]
                                 },
                                 {
-                                    tag: 'sup',
-                                    class: 'error_sup',
-                                    text: 'Offline!',
-                                    var: 'offline',
+                                    tag: 'div',
+                                    class: 'rssi',
+                                    var: 'rssi',
+                                    html: makeRSSI(),
                                 }
                             ]
                         },
@@ -275,8 +277,7 @@ export default class Settings {
         const res = await this.send('load');
         this.parse(res);
         if (!res) {
-            this.$offline.style.display = 'inline';
-            this.offline = true;
+            this.setOffline(true);
             this.restartPing();
         }
     }
@@ -334,18 +335,17 @@ export default class Settings {
         this.ping_int = setInterval(async () => {
             const res = await this.send(this.offline ? 'load' : 'ping');
             this.parse(res);
-            if (res) {
-                this.offline = false;
-            } else {
-                this.offline = true;
-                this.authF = false;
-            }
-            this.$offline.style.display = this.offline ? 'inline' : 'none';
+            if (!res) this.authF = false;
+            this.setOffline(!res);
         }, this.ping_prd);
     }
     stopPing() {
         if (this.ping_int) clearInterval(this.ping_int);
         this.ping_int = null;
+    }
+    setOffline(offline) {
+        this.offline = offline;
+        if (offline) changeRSSI(this.$rssi, 0);
     }
 
     parse(packet) {
@@ -365,13 +365,14 @@ export default class Settings {
                         this.$auth.style.backgroundColor = this.granted ? 'var(--accent)' : 'var(--error)';
                         this.$ota.style.display = this.granted ? 'inline-block' : 'none';
                         this.$upload.style.display = this.granted ? 'inline-block' : 'none';
-                        if (!this.granted) popup('Unauthorized');
+                        if (!this.granted && this.firstBuild) popup('Unauthorized');
                     } else {
                         this.$auth.style.backgroundColor = 'var(--font_tint)';
                         this.granted = true;
                     }
                 }
                 if (packet.gzip) this.$upload_ota.accept = '.gz';
+                this.firstBuild = false;
                 break;
 
             case 'update':
@@ -384,6 +385,7 @@ export default class Settings {
                 this.renderFS(packet);
                 break;
         }
+        if (packet.rssi) changeRSSI(this.$rssi, packet.rssi);
     }
 
     renderUI(json) {
@@ -514,7 +516,7 @@ export default class Settings {
         this.restartPing();
     }
     makeUrl(cmd, params = {}) {
-        // const base_url = 'http://192.168.1.54';
+        // const base_url = 'http://192.168.1.95';
         const base_url = window.location.origin;
 
         if (this.auth) params.auth = this.auth.toString(16);

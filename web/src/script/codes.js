@@ -16,6 +16,7 @@ export const codes = [
     'gzip',
     'used',
     'total',
+    'rssi',
 
     'label',
     'title',

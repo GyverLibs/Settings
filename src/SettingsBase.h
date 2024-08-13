@@ -137,6 +137,7 @@ class SettingsBase {
                     Updater upd(p);
                     p.beginObj();
                     p.addCode(Code::type, Code::update);
+                    p.addUint(Code::rssi, constrain(2 * (WiFi.RSSI() + 100), 0, 100));
                     p.beginArr(Code::content);
                     if (_db && _dbupdates) {
                         while (_db->updatesAvailable()) {
@@ -214,6 +215,7 @@ class SettingsBase {
             p.beginObj();
             p.addCode(Code::type, Code::build);
             p.addUint(Code::ping, _updPeriod);
+            p.addUint(Code::rssi, constrain(2 * (WiFi.RSSI() + 100), 0, 100));
             if (_title.length()) p.addText(Code::title, _title);
             if (_passh) p.addBool(Code::granted, granted);
 #ifdef ATOMIC_FS_UPDATE

@@ -1,0 +1,6 @@
+.rssi {
+    display: inline-block;
+    width: 21px;
+    /* transform: rotate(45deg); */
+    transform: translateY(-5px);
+}
