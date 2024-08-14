@@ -9,7 +9,7 @@
     icon: 302 bytes
     total: 10.80 kB
     
-    Build: Wed Aug 14 2024 11:11:46 GMT+0300 (Москва, стандартное время)
+    Build: Thu Aug 15 2024 02:02:29 GMT+0300 (Москва, стандартное время)
 */
 
 const uint8_t settings_index_gz[] PROGMEM = {
