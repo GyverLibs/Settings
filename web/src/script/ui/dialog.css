@@ -50,16 +50,17 @@
     width: 100%;
     box-sizing: border-box;
     margin-top: 10px;
+    margin-bottom: 5px;
     resize: none;
     overflow-y: scroll;
     background: var(--back);
     color: var(--font);
     border: none;
     outline: none;
-    padding: 5px;
+    padding: 7px;
     font-size: 16px;
     line-height: 16px;
-    min-height: 27px;
+    min-height: 30px;
     border-radius: 4px;
 }
 
