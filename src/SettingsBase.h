@@ -21,7 +21,9 @@ class SettingsBase {
     typedef std::function<void(Updater& upd)> UpdateCallback;
 
    public:
-    SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {}
+    SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {
+        useAutoUpdates(true);
+    }
 
     // установить пароль на вебморду. Пустая строка "" чтобы отключить
     void setPass(Text pass) {
@@ -43,9 +45,10 @@ class SettingsBase {
         _db = db;
     }
 
-    // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер)
+    // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер) (умолч. true)
     void useAutoUpdates(bool use) {
         _dbupdates = use;
+        if (_db) _db->useUpdates(use);
     }
 
     // обработчик билда
