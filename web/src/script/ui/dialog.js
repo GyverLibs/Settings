@@ -86,6 +86,7 @@ export function AsyncPrompt(label, value) {
 
         BaseDialog(label, area, () => resolve(area.value), () => resolve(null), () => {
             area.focus();
+            area.setSelectionRange(area.value.length, area.value.length);  // cursor end
             area.style.height = area.scrollHeight + "px";
         });
     });
