@@ -2,5 +2,6 @@
     display: inline-block;
     width: 21px;
     /* transform: rotate(45deg); */
-    transform: translateY(-5px);
+    /* transform: translateY(-5px); */
+    transform: translateX(-2px) translateY(-10px) rotate(45deg);
 }

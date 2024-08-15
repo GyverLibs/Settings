@@ -516,7 +516,7 @@ export default class Settings {
         this.restartPing();
     }
     makeUrl(cmd, params = {}) {
-        // const base_url = 'http://192.168.1.95';
+        // const base_url = 'http://192.168.1.54';
         const base_url = window.location.origin;
 
         if (this.auth) params.auth = this.auth.toString(16);

@@ -107,7 +107,14 @@ export default function decodeBson(b, codes = []) {
                 for (let j = 0; j < 4; j++) {
                     v |= b[++i] << (j * 8);
                 }
-                s += ieee32ToFloat(v).toFixed(data);
+                let f = ieee32ToFloat(v);
+                if (isNaN(f)) {
+                    s += '"NaN"';
+                } else if (!isFinite(f)) {
+                    s += '"Infinity"';
+                } else {
+                    s += f.toFixed(data);
+                }
                 s += ',';
             } break;
 
