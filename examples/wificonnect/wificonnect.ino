@@ -24,7 +24,7 @@ void build(sets::Builder& b) {
         b.Pass(kk::wifi_pass, "Password");
         if (b.Button(kk::apply, "Save & Restart")) {
             db.update();  // сохраняем БД не дожидаясь таймаута
-            ESP.reset();
+            ESP.restart();
         }
     }
 }
