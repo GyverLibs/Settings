@@ -1,4 +1,5 @@
-// простой пример настройки подключения к WiFi с WiFiConnector
+// простой пример настройки подключения к WiFi с библиотекой WiFiConnector
+// https://github.com/GyverLibs/WiFiConnector
 
 #include <Arduino.h>
 #include <GyverDBFile.h>
