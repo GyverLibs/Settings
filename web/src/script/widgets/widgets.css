@@ -4,7 +4,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width: 80%;
+    /* max-width: 80%; */
 }
 
 .value.active {

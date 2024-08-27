@@ -149,12 +149,16 @@ void loop() {
 
 > Если нужно, чтобы параметр читался из БД, но нужно указать аргумент после него - значением нужно указать `Text()` как и сделано в функции по умолчанию. Например цвет для Label `b.Label(key, "Label!", Text(), sets::Colors::Mint);`. Если указать пустую строку (`b.Label(key, "Label!", "", sets::Colors::Mint);`) - в качестве значения и отправится пустая строка, т.е. значение не из БД.
 
+> Указатель на текущий объект Settings внутри билдера или обработчика обновлений можно получить из `sets::thisSettings`
+
 ```cpp
 GyverDB db;
 SettingsGyver sett("My Settings", &db);
 
 void build(sets::Builder& b) {
     b.Input("input1"_h, "Text");
+
+    // здесь sets::thisSettings - указатель на объект sett
 }
 
 void setup() {

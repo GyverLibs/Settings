@@ -1,3 +1,8 @@
+.menubutton {
+    width: 25px;
+    height: 25px;
+}
+
 .menu_icons {
     display: flex;
     justify-content: space-evenly;

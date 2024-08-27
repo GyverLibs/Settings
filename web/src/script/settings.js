@@ -73,7 +73,8 @@ export default class Settings {
                         },
                         {
                             tag: 'div',
-                            class: 'icon bars',
+                            class: 'icon bars menubutton',
+                            var: 'menubutton',
                             events: {
                                 click: async () => {
                                     iconFill(this.$ota, 'var(--font_tint)');
@@ -82,12 +83,14 @@ export default class Settings {
                                     this.$main_menu.classList.toggle('hidden');
                                     if (this.$main_menu.classList.contains('hidden')) {
                                         this.parse(await this.send('load'));
+                                        this.$menubutton.classList = 'icon bars menubutton';
                                     } else {
                                         this.parse(await this.send('fs'));
+                                        this.$menubutton.classList = 'icon cross menubutton';
                                     }
                                 },
                             }
-                        }
+                        },
                     ]
                 },
                 {
@@ -124,15 +127,6 @@ export default class Settings {
                                         class: 'icon key',
                                         title: 'Auth',
                                         var: 'auth',
-                                        events: {
-                                            click: async () => {
-                                                let res = await AsyncPrompt('Password', '');
-                                                if (res !== null) {
-                                                    localStorage.setItem('auth', hash(res));
-                                                    window.location.reload();
-                                                }
-                                            },
-                                        }
                                     }
                                 },
                                 {
@@ -366,6 +360,13 @@ export default class Settings {
                         this.$ota.style.display = this.granted ? 'inline-block' : 'none';
                         this.$upload.style.display = this.granted ? 'inline-block' : 'none';
                         if (!this.granted && this.firstBuild) popup('Unauthorized');
+                        this.$auth.addEventListener('click', async () => {
+                            let res = await AsyncPrompt('Password', '');
+                            if (res !== null) {
+                                localStorage.setItem('auth', hash(res));
+                                window.location.reload();
+                            }
+                        });
                     } else {
                         this.$auth.style.backgroundColor = 'var(--font_tint)';
                         this.granted = true;
