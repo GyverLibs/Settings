@@ -99,6 +99,8 @@ class SettingsBase {
                 String str(F(R"raw({"type":"discover","name":")raw"));
                 if (_title.length()) str += _title;
                 else str += F("Unnamed");
+                str += F(R"raw(","mac":")raw");
+                str += WiFi.macAddress();
                 str += "\"}";
                 send((uint8_t*)str.c_str(), str.length());
             } break;
