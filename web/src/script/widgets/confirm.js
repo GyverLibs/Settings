@@ -9,7 +9,7 @@ export default class ConfirmWidget extends WidgetBase {
     }
 
     async update(value) {
-        let res = await AsyncConfirm(this.text);
+        let res = await AsyncConfirm(value ?? this.text);
         this.sendEvent(res ? 1 : 0);
     }
 }

@@ -188,7 +188,7 @@ class Builder {
 
     // misc
 
-    bool Confirm(size_t id, Text label) {
+    bool Confirm(size_t id, Text label = "") {
         if (_isBuild()) _widget(Code::confirm, id, label);
         return _isSet(id);
     }

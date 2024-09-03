@@ -1,6 +1,6 @@
 {
   "name": "settings",
-  "version": "1.0.12",
+  "version": "1.0.14",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config ./webpack.single.js & webpack --config ./webpack.index.js",
