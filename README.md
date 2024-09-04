@@ -34,7 +34,6 @@ ESP8266, ESP32
 
 ### Известные баги
 - На мобильном Safari (iOS) не работают [виджеты выбора даты, времени и цвета](https://github.com/GyverLibs/Settings/issues/8#issuecomment-2328495474) из за [бага в движке браузера](https://bugs.webkit.org/show_bug.cgi?id=234009)
-- Библиотека не добавляется в реестр PlatformIO по неизвестным техническим причинам, используйте депс на .git как указано ниже
 
 <details>
 <summary>platformio.ini</summary>
@@ -43,7 +42,7 @@ ESP8266, ESP32
 [env]
 framework = arduino
 lib_deps =
-    https://github.com/GyverLibs/Settings.git
+    GyverLibs/Settings
     ;esphome/ESPAsyncWebServer-esphome   ; для версии SettingsAsync
     ;esphome/ESPAsyncTCP-esphome         ; для версии SettingsAsync
 
