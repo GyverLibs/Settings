@@ -32,6 +32,10 @@ ESP8266, ESP32
 - GyverHTTP v1.0.17+
 - GSON v1.5.9+
 
+### Известные баги
+- На iOS (webkit Safari) не работают виджеты выбора даты, времени и цвета из за [бага в движке браузера](https://bugs.webkit.org/show_bug.cgi?id=234009)
+- Библиотека не добавляется в реестр PlatformIO по неизвестным техническим причинам, используйте депс на .git как указано ниже
+
 <details>
 <summary>platformio.ini</summary>
 
@@ -40,8 +44,8 @@ ESP8266, ESP32
 framework = arduino
 lib_deps =
     https://github.com/GyverLibs/Settings.git
-    esphome/ESPAsyncWebServer-esphome   ; для версии SettingsAsync
-    esphome/ESPAsyncTCP-esphome         ; для версии SettingsAsync
+    ;esphome/ESPAsyncWebServer-esphome   ; для версии SettingsAsync
+    ;esphome/ESPAsyncTCP-esphome         ; для версии SettingsAsync
 
 [env:d1_mini]
 platform = espressif8266
@@ -307,6 +311,8 @@ if (b.beginGroup("Group 1")) {
 ```
 В гостевой контейнер можно поместить несколько обычных контейнеров, например групп.
 
+> Примечание: если вложенное меню закрыто от гостей, но содержит ещё одно вложенное меню - кнопка открытия меню будет отображаться, но само меню будет пустым
+
 ## Описание классов
 - `SettingsGyver` (*SettingsGyver.h*) - на вебсервере GyverHTTP
 - `SettingsESP` (*SettingsESP.h*) - на стандартном вебсервере ESP
@@ -421,8 +427,8 @@ bool Button(size_t id, Text label, sets::Colors color);
 // список выбора, опции в виде текста разделяются ;
 bool Select(size_t id, Text label, Text options, Text value = Text());
 
-// окно подтверждения, для активации отправь пустой update на его id
-bool Confirm(size_t id, Text label);
+// окно подтверждения, для активации отправь пустой update на его id или update с текстом подтверждения
+bool Confirm(size_t id, Text label = "");
 ```
 
 Здесь `Text` - универсальный текстовый формат, принимает строки в любом виде. При указании `value` отличным от стандартного будет отправлено его значение. Иначе будет отправлено значение из БД, если она подключена. Если в качестве значения нужно число - используйте конструктор `Value`, например `b.Color("col", "Color", Value(my_color));`, где `my_color` это `uint32_t`.
