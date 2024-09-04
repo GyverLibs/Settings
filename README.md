@@ -33,7 +33,7 @@ ESP8266, ESP32
 - GSON v1.5.9+
 
 ### Известные баги
-- На iOS (webkit Safari) не работают [виджеты выбора даты, времени и цвета](https://github.com/GyverLibs/Settings/issues/8#issuecomment-2328495474) из за [бага в движке браузера](https://bugs.webkit.org/show_bug.cgi?id=234009)
+- На мобильном Safari (iOS) не работают [виджеты выбора даты, времени и цвета](https://github.com/GyverLibs/Settings/issues/8#issuecomment-2328495474) из за [бага в движке браузера](https://bugs.webkit.org/show_bug.cgi?id=234009)
 - Библиотека не добавляется в реестр PlatformIO по неизвестным техническим причинам, используйте депс на .git как указано ниже
 
 <details>
