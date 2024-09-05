@@ -40,6 +40,8 @@ void setup() {
     LittleFS.begin();
 #endif
     db.begin();
+    db.init(kk::wifi_ssid, "");
+    db.init(kk::wifi_pass, "");
 
     // подключение и реакция на подключение или ошибку
     WiFiConnector.onConnect([]() {
