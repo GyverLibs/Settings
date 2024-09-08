@@ -17,6 +17,7 @@
 - Компактный бинарный протокол связи
 - Легко адаптируется под любую библиотеку HTTP сервера, из коробки реализовано три версии: GyverHTTP, стандартный esp-WebServer, ESPAsyncWebserver
 - Это [GyverHub](https://github.com/GyverLibs/GyverHub) на минималках 
+- Исходник веб-приложения [здесь](https://github.com/GyverLibs/Settings-web)
 
 > Есть [Android-приложение](https://github.com/GyverLibs/Settings-discover) для поиска устройств с библиотекой
 
@@ -32,9 +33,7 @@ ESP8266, ESP32
 - GyverHTTP v1.0.17+
 - GSON v1.5.9+
 
-### Информация
-- На мобильном Safari (iOS) не работают [виджеты выбора даты, времени и цвета](https://github.com/GyverLibs/Settings/issues/8#issuecomment-2328495474) из за [бага в движке браузера](https://bugs.webkit.org/show_bug.cgi?id=234009)
-- Исходник веб-приложения [здесь](https://github.com/GyverLibs/Settings-web)
+> При установке из реестра PIO или Arduino IDE все зависимости установятся автоматически
 
 <details>
 <summary>platformio.ini</summary>
