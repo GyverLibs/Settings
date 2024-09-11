@@ -1,5 +1,17 @@
 #include "ota.h"
 
+#include <Arduino.h>
+#include <FS.h>
+
+#ifdef ESP8266
+#include <ESP8266WiFi.h>
+#include <Updater.h>
+#include <flash_hal.h>
+#else
+#include <Update.h>
+#include <WiFi.h>
+#endif
+
 namespace sets {
 
 bool beginOta(bool ota_flash, bool async) {
@@ -25,11 +37,11 @@ bool beginOta(bool ota_flash, bool async) {
         ota_size = UPDATE_SIZE_UNKNOWN;
 #endif
     }
-    
+
 #ifdef ESP8266
     if (async) Update.runAsync(true);
 #endif
     return Update.begin(ota_size, ota_type);
 }
 
-}
+}  // namespace sets
