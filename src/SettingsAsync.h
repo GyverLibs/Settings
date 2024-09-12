@@ -5,11 +5,9 @@
 #include <LittleFS.h>
 
 #ifdef ESP8266
-#include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
 #else
 #include <AsyncTCP.h>
-#include <WiFi.h>
 #endif
 #include <ESPAsyncWebServer.h>
 

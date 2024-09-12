@@ -4,6 +4,12 @@
 #include <GyverDB.h>
 #include <StringUtils.h>
 
+#ifdef ESP8266
+#include <ESP8266WiFi.h>
+#else
+#include <WiFi.h>
+#endif
+
 #include "core/SettingsBase_class.h"
 #include "core/builder.h"
 #include "core/colors.h"

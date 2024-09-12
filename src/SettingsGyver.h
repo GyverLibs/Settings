@@ -5,12 +5,6 @@
 #include <GyverHTTP.h>
 #include <LittleFS.h>
 
-#ifdef ESP8266
-#include <ESP8266WiFi.h>
-#else
-#include <WiFi.h>
-#endif
-
 #include "SettingsBase.h"
 #include "core/DnsWrapper.h"
 #include "core/fs.h"
