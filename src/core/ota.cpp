@@ -8,7 +8,6 @@
 #include <Updater.h>
 #include <flash_hal.h>
 #else
-#include <Update.h>
 #include <WiFi.h>
 #endif
 
