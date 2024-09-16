@@ -428,7 +428,7 @@ bool Input(size_t id, Text label, Text value = Text());
 // можно установить "заглушку" для пароля, например "***", чтобы пароль не отображался в браузере
 bool Pass(size_t id, Text label, Text value = Text());
 
-// ввод цвета [результат - 24-бит целочисленное]
+// ввод цвета [результат - 24-бит DEC число]
 bool Color(size_t id, Text label, Text value = Text());
 
 // переключатель [результат 1/0]

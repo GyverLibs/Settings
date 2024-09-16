@@ -128,7 +128,7 @@ class Builder {
     }
 
     // ================= COLOR =================
-    // ввод цвета [результат - 24-бит целочисленное]
+    // ввод цвета [результат - 24-бит DEC число]
     bool Color(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::color, id, label, value);
         return _isSet(id);
