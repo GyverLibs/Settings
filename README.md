@@ -379,7 +379,7 @@ void tick();
 // инфо о билде
 Build build();
 
-// перезагрузить страницу (вызывать в действии)
+// перезагрузить страницу (вызывать в действии, например if (...click() b.reload()))
 void reload();
 
 // КОНТЕЙНЕРЫ
@@ -406,49 +406,51 @@ void endButtons();
 // многострочный текст
 void Paragraph(size_t id, Text label, Text text = Text());
 
-// текстовое значение
+// текстовое значение, может обновляться по id
 void Label(size_t id, Text label, Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR);
 void Label(size_t id, Text label, Text text, sets::Colors color);
 
-// без id
+// текстовое значение без id
 void Label(Text label, Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR);
 void Label(Text label, Text text, sets::Colors color);
 
-// светодиод (включен - зелёный, выключен - красный)
+// светодиод (value true включен - зелёный, value false выключен - красный)
 void LED(size_t id, Text label, bool value);
+
+// светодиод без id
 void LED(Text label, bool value);
 
 // АКТИВНЫЕ
-// ввод текста и цифр
+// ввод текста и цифр [результат - строка]
 bool Input(size_t id, Text label, Text value = Text());
 
-// ввод пароля
+// ввод пароля [результат - строка]
 // можно установить "заглушку" для пароля, например "***", чтобы пароль не отображался в браузере
 bool Pass(size_t id, Text label, Text value = Text());
 
-// ввод цвета, результат в обычном 24-бит формате
+// ввод цвета [результат - 24-бит целочисленное]
 bool Color(size_t id, Text label, Text value = Text());
 
-// переключатель, результат 1/0
+// переключатель [результат 1/0]
 bool Switch(size_t id, Text label, Text value = Text());
 
-// дата, результат в unix секундах
+// дата [результат - unix секунды]
 bool Date(size_t id, Text label, Text value = Text());
 
-// дата и время, результат в unix секундах
+// дата и время [результат - unix секунды]
 bool DateTime(size_t id, Text label, Text value = Text());
 
-// время, результат в секундах с начала суток
+// время [результат - секунды с начала суток]
 bool Time(size_t id, Text label, Text value = Text());
 
-// слайдер
+// слайдер [результат - число]
 bool Slider(size_t id, Text label, float min = 0, float max = 100, float step = 1, Text unit = Text(), Text value = Text());
 
 // кнопку можно добавлять как внутри контейнера кнопок, так и как одиночный виджет
 bool Button(size_t id, Text label, uint32_t color = SETS_DEFAULT_COLOR);
 bool Button(size_t id, Text label, sets::Colors color);
 
-// список выбора, опции в виде текста разделяются ;
+// список выбора, опции в виде текста разделяются ; [результат - индекс (число)]
 bool Select(size_t id, Text label, Text options, Text value = Text());
 
 // окно подтверждения, для активации отправь пустой update на его id или update с текстом подтверждения

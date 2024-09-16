@@ -46,6 +46,7 @@ class Builder {
     }
 
     // ================= GROUP =================
+    // группа виджетов
     bool beginGroup(Text title = Text()) {
         return _beginContainer(Code::group, title);
     }
@@ -54,6 +55,7 @@ class Builder {
     }
 
     // ================= MENU =================
+    // вложенное меню
     bool beginMenu(Text title) {
         return _beginContainer(Code::menu, title);
     }
@@ -62,6 +64,7 @@ class Builder {
     }
 
     // ================= BUTTONS =================
+    // ряд кнопок
     bool beginButtons() {
         return _beginContainer(Code::buttons);
     }
@@ -72,6 +75,7 @@ class Builder {
     // passive
 
     // ================= LABEL =================
+    // текстовое значение, может обновляться по id
     void Label(size_t id, Text label, Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
         if (_isBuild()) {
             _beginWidget(Code::label, id, label, text);
@@ -90,6 +94,7 @@ class Builder {
     }
 
     // ================= LED =================
+    // светодиод (value true включен - зелёный, value false выключен - красный)
     void LED(size_t id, Text label, bool value) {
         if (_isBuild()) {
             _beginWidget(Code::led, id, label, Value(value));
@@ -101,6 +106,7 @@ class Builder {
     }
 
     // ================= TEXT =================
+    // текстовый абзац
     void Paragraph(size_t id, Text label, Text text = Text()) {
         if (_isBuild()) _widget(Code::paragraph, id, label, text);
     }
@@ -108,48 +114,56 @@ class Builder {
     // active
 
     // ================= INPUT =================
+    // ввод текста и цифр [результат - строка]
     bool Input(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::input, id, label, value);
         return _isSet(id);
     }
 
     // ================= PASS =================
+    // ввод пароля [результат - строка]
     bool Pass(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::pass, id, label, value);
         return _isSet(id);
     }
 
     // ================= COLOR =================
+    // ввод цвета [результат - 24-бит целочисленное]
     bool Color(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::color, id, label, value);
         return _isSet(id);
     }
 
     // ================= SWITCH =================
+    // переключатель [результат 1/0]
     bool Switch(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::toggle, id, label, value);
         return _isSet(id);
     }
 
     // ================= SWITCH =================
+    // дата [результат - unix секунды]
     bool Date(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::date, id, label, value);
         return _isSet(id);
     }
 
     // ================= SWITCH =================
+    // время [результат - секунды с начала суток]
     bool Time(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::time, id, label, value);
         return _isSet(id);
     }
 
     // ================= SWITCH =================
+    // дата и время [результат - unix секунды]
     bool DateTime(size_t id, Text label, Text value = Text()) {
         if (_isBuild()) _widget(Code::datetime, id, label, value);
         return _isSet(id);
     }
 
     // ================= SLIDER =================
+    // слайдер [результат - число]
     bool Slider(size_t id, Text label, float min = 0, float max = 100, float step = 1, Text unit = Text(), Text value = Text()) {
         if (_isBuild()) {
             _beginWidget(Code::slider, id, label, value);
@@ -163,7 +177,7 @@ class Builder {
     }
 
     // ================= SELECT =================
-    // опции разделяются ;
+    // опции разделяются ; [результат - индекс (число)]
     bool Select(size_t id, Text label, Text options, Text value = Text()) {
         if (_isBuild()) {
             _beginWidget(Code::select, id, label, value);
@@ -174,6 +188,7 @@ class Builder {
     }
 
     // ================= BUTTON =================
+    // кнопку можно добавлять как внутри контейнера кнопок, так и как одиночный виджет
     bool Button(size_t id, Text label, uint32_t color = SETS_DEFAULT_COLOR) {
         if (_isBuild()) {
             _beginWidget(Code::button, id, label);
@@ -187,7 +202,7 @@ class Builder {
     }
 
     // misc
-
+    // окно подтверждения, для активации отправь пустой update на его id или update с текстом подтверждения
     bool Confirm(size_t id, Text label = "") {
         if (_isBuild()) _widget(Code::confirm, id, label);
         return _isSet(id);
