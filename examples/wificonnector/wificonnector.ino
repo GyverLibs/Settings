@@ -48,7 +48,7 @@ void setup() {
         Serial.print("Connected! ");
         Serial.println(WiFi.localIP());
     });
-    WiFiConnector.onTimeout([]() {
+    WiFiConnector.onError([]() {
         Serial.print("Error! start AP ");
         Serial.println(WiFi.softAPIP());
     });
