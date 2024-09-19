@@ -33,6 +33,16 @@ class Builder {
         return _reload;
     }
 
+    // было действие с каким-то из виджетов выше
+    bool wasSet() {
+        return _was_set;
+    }
+
+    // сбросить флаг чтения wasSet
+    void clearSet() {
+        _was_set = false;
+    }
+
     // ================= GUEST =================
     // разрешить неавторизованным клиентам следующий код
     bool beginGuest() {
@@ -214,6 +224,7 @@ class Builder {
     sets::Packet* p = nullptr;
     bool _reload = false;
     bool _enabled = true;
+    bool _was_set = false;
 
     void _widget(Code type, size_t id, Text& label, const Text& value = Text()) {
         _beginWidget(type, id, label, value);
@@ -258,7 +269,8 @@ class Builder {
     }
 
     bool _isSet(size_t id) {
-        return _enabled && _build.isAction() && id == _build.id();
+        _was_set |= (_enabled && _build.isAction() && id == _build.id());
+        return _was_set;
     }
 };
 
