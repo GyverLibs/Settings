@@ -269,8 +269,9 @@ class Builder {
     }
 
     bool _isSet(size_t id) {
-        _was_set |= (_enabled && _build.isAction() && id == _build.id());
-        return _was_set;
+        bool set = (_enabled && _build.isAction() && id == _build.id());
+        _was_set |= set;
+        return set;
     }
 };
 
