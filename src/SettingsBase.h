@@ -1,8 +1,11 @@
 #pragma once
 #include <Arduino.h>
 #include <FS.h>
-#include <GyverDB.h>
 #include <StringUtils.h>
+
+#ifndef SETT_NO_DB
+#include <GyverDB.h>
+#endif
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
@@ -10,7 +13,6 @@
 #include <WiFi.h>
 #endif
 
-#include "core/SettingsBase_class.h"
 #include "core/builder.h"
 #include "core/colors.h"
 #include "core/containers.h"
@@ -28,7 +30,11 @@ class SettingsBase {
     typedef std::function<void(Updater& upd)> UpdateCallback;
 
    public:
+#ifndef SETT_NO_DB
     SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {
+#else
+    SettingsBase(const String& title = "") : _title(title) {
+#endif
         useAutoUpdates(true);
     }
 
@@ -47,15 +53,19 @@ class SettingsBase {
         _updPeriod = prd;
     }
 
-    // подключить базу данных
+// подключить базу данных
+#ifndef SETT_NO_DB
     void attachDB(GyverDB* db) {
         _db = db;
     }
+#endif
 
     // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер) (умолч. true)
     void useAutoUpdates(bool use) {
         _dbupdates = use;
+#ifndef SETT_NO_DB
         if (_db) _db->useUpdates(use);
+#endif
     }
 
     // обработчик билда
@@ -70,7 +80,9 @@ class SettingsBase {
 
     // тикер, вызывать в родительском классе
     void tick() {
+#ifndef SETT_NO_DB
         if (_db) _db->tick();
+#endif
         if (_rst) {
             delay(3000);
             ESP.restart();
@@ -98,7 +110,6 @@ class SettingsBase {
     void parse(Text passh, Text action, Text idtxt, Text value) {
         size_t id = idtxt.toInt32HEX();
         bool granted = authenticate(passh);
-        thisSettings = this;
 
         switch (action.hash()) {
             case SH("discover"): {
@@ -116,14 +127,16 @@ class SettingsBase {
                 break;
 
             case SH("set"):
+#ifndef SETT_NO_DB
                 if (_db) {
                     if (_dbupdates) _db->useUpdates(false);
                     _db->update(id, value);
                     if (_dbupdates) _db->useUpdates(true);
                 }
+#endif
                 if (_build_cb) {
                     Build action(Build::Type::Set, granted, id, value);
-                    Builder b(action);
+                    Builder b(this, action);
                     _build_cb(b);
                     if (b.isReload()) _sendBuild(granted);
                     else _answerEmpty();
@@ -135,7 +148,7 @@ class SettingsBase {
             case SH("click"):
                 if (_build_cb) {
                     Build action(Build::Type::Click, granted, id);
-                    Builder b(action);
+                    Builder b(this, action);
                     _build_cb(b);
                     if (b.isReload()) _sendBuild(granted);
                     else _answerEmpty();
@@ -145,13 +158,18 @@ class SettingsBase {
                 break;
 
             case SH("ping"):
+#ifndef SETT_NO_DB
                 if (_upd_cb || _db) {
+#else
+                if (_upd_cb) {
+#endif
                     Packet p;
                     Updater upd(p);
                     p.beginObj();
                     p.addCode(Code::type, Code::update);
                     p.addUint(Code::rssi, constrain(2 * (WiFi.RSSI() + 100), 0, 100));
                     p.beginArr(Code::content);
+#ifndef SETT_NO_DB
                     if (_db && _dbupdates) {
                         while (_db->updatesAvailable()) {
                             size_t id = _db->updateNext();
@@ -162,6 +180,7 @@ class SettingsBase {
                             p.endObj();
                         }
                     }
+#endif
                     if (_upd_cb) _upd_cb(upd);
                     p.endArr();
                     p.endObj();
@@ -188,7 +207,6 @@ class SettingsBase {
                 }
                 break;
         }
-        thisSettings = nullptr;
     }
 
    private:
@@ -196,7 +214,9 @@ class SettingsBase {
     UpdateCallback _upd_cb = nullptr;
     String _title;
     size_t _passh = 0;
+#ifndef SETT_NO_DB
     GyverDB* _db = nullptr;
+#endif
     uint16_t _updPeriod = 2500;
     bool _dbupdates = true;
     bool _rst = false;
@@ -237,7 +257,11 @@ class SettingsBase {
 #endif
             p.beginArr(Code::content);
             Build action(Build::Type::Build, granted);
-            Builder builder(action, _db, &p);
+#ifndef SETT_NO_DB
+            Builder builder(this, action, &p, _db);
+#else
+            Builder builder(this, action, &p);
+#endif
             _build_cb(builder);
             p.endArr();
             p.endObj();

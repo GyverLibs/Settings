@@ -1,7 +1,10 @@
 #pragma once
 #include <Arduino.h>
 #include <GSON.h>
+
+#ifndef SETT_NO_DB
 #include <GyverDB.h>
+#endif
 
 #include "codes.h"
 
@@ -46,7 +49,9 @@ class Packet : public BSON {
         beginArr((uint16_t)key);
     }
 
-    void addFromDB(GyverDB* db, size_t hash) {
+    void addFromDB(void* dbp, size_t hash) {
+#ifndef SETT_NO_DB
+        GyverDB* db = (GyverDB*)dbp;
         gdb::Entry en = db->get(hash);
         switch (en.type()) {
             case gdb::Type::Int:
@@ -74,6 +79,7 @@ class Packet : public BSON {
             default:
                 addInt(0);
         }
+#endif
     }
 
     using BSON::addBool;

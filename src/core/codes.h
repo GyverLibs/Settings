@@ -34,6 +34,7 @@ enum class Code : uint8_t {
     unit,
 
     input,
+    number,
     pass,
     select,
     slider,

@@ -19,7 +19,11 @@
 
 class SettingsAsync : public sets::SettingsBase {
    public:
+#ifndef SETT_NO_DB
     SettingsAsync(const String &title = "", GyverDB *db = nullptr) : sets::SettingsBase(title, db), server(80) {}
+#else
+    SettingsAsync(const String &title = "") : sets::SettingsBase(title), server(80) {}
+#endif
 
     void begin(bool useDns = true) {
         if (useDns) _dns.begin();

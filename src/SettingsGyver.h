@@ -13,7 +13,11 @@
 
 class SettingsGyver : public sets::SettingsBase {
    public:
+#ifndef SETT_NO_DB
     SettingsGyver(const String& title = "", GyverDB* db = nullptr) : sets::SettingsBase(title, db), server(80) {}
+#else
+    SettingsGyver(const String& title = "") : sets::SettingsBase(title), server(80) {}
+#endif
 
     void begin(bool useDns = true) {
         if (useDns) _dns.begin();

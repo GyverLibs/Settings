@@ -46,11 +46,11 @@ enum kk : size_t {
 // билдер! Тут строится наше окно настроек
 void build(sets::Builder& b) {
     // можно узнать, было ли действие по виджету
-    if (b.build().isAction()) {
+    if (b.build.isAction()) {
         Serial.print("Set: 0x");
-        Serial.print(b.build().id(), HEX);
+        Serial.print(b.build.id, HEX);
         Serial.print(" = ");
-        Serial.println(b.build().value());
+        Serial.println(b.build.value);
     }
 
     // группа. beginGroup всегда вернёт true для удобства организации кода

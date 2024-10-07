@@ -13,9 +13,9 @@ SettingsESP sett("WiFi config", &db);
 
 DB_KEYS(
     kk,
-    DB_KEY(wifi_ssid),
-    DB_KEY(wifi_pass),
-    DB_KEY(apply));
+    wifi_ssid,
+    wifi_pass,
+    apply);
 
 void build(sets::Builder& b) {
     {

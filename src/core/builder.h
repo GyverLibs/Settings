@@ -1,12 +1,13 @@
 #pragma once
 #include <Arduino.h>
-#include <GyverDB.h>
-#include <StreamWriter.h>
 
+#include "AnyPtr.h"
 #include "build.h"
 #include "colors.h"
 #include "containers_class.h"
 #include "packet.h"
+
+#define _NO_ID (size_t) - 1
 
 namespace sets {
 
@@ -14,18 +15,26 @@ class Builder {
     friend class BasicContainer;
 
    public:
-    Builder(Build build, GyverDB* db = nullptr, sets::Packet* p = nullptr) : _build(build), _db(db), p(p) {
+    Builder(void* settings, Build& build, sets::Packet* p = nullptr, void* db = nullptr) : build(build), _settings(settings), p(p), _db(db) {
         endGuest();
     }
 
     // инфо о билде
-    Build build() {
-        return _build;
+    Build& build;
+
+    // авто-ID следующего виджета
+    size_t nextID() {
+        return _auto_id - 1;
+    }
+
+    // указатель на текущий SettingsXxx
+    void* thisSettings() {
+        return _settings;
     }
 
     // перезагрузить страницу
     void reload() {
-        if (_build.isAction()) _reload = 1;
+        if (build.isAction()) _reload = 1;
     }
 
     // страница будет перезагружена
@@ -46,13 +55,13 @@ class Builder {
     // ================= GUEST =================
     // разрешить неавторизованным клиентам следующий код
     bool beginGuest() {
-        if (!_build.isGranted()) _enabled = true;
+        if (!build.granted) _enabled = true;
         return true;
     }
 
     // запретить неавторизованным клиентам
     void endGuest() {
-        if (!_build.isGranted()) _enabled = false;
+        if (!build.granted) _enabled = false;
     }
 
     // ================= GROUP =================
@@ -86,161 +95,218 @@ class Builder {
 
     // ================= LABEL =================
     // текстовое значение, может обновляться по id
-    void Label(size_t id, Text label, Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
-        if (_isBuild()) {
-            _beginWidget(Code::label, id, label, text);
-            if (color != SETS_DEFAULT_COLOR) p->addUint(Code::color, color);
-            _endWidget();
-        }
+    void Label(size_t id, Text label = "", Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
+        _widget(Code::label, id, label, &text, color);
     }
     void Label(size_t id, Text label, Text text, sets::Colors color) {
         Label(id, label, text, (uint32_t)color);
     }
-    void Label(Text label, Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
-        Label(-1, label, text, color);
+    void Label(Text label = "", Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
+        Label(_NO_ID, label, text, color);
     }
     void Label(Text label, Text text, sets::Colors color) {
-        Label(label, text, (uint32_t)color);
+        Label(_NO_ID, label, text, (uint32_t)color);
     }
 
     // ================= LED =================
-    // светодиод (value true включен - зелёный, value false выключен - красный)
+    // светодиод (value 1 включен - зелёный, value 0 выключен - красный)
     void LED(size_t id, Text label, bool value) {
-        if (_isBuild()) {
-            _beginWidget(Code::led, id, label, Value(value));
-            _endWidget();
-        }
+        _widget(Code::led, id, label, &value);
+    }
+    void LED(size_t id, Text label = "") {
+        _widget(Code::led, id, label);
     }
     void LED(Text label, bool value) {
-        LED(-1, label, value);
+        LED(_NO_ID, label, value);
+    }
+    void LED(Text label = "") {
+        LED(_NO_ID, label);
     }
 
     // ================= TEXT =================
     // текстовый абзац
-    void Paragraph(size_t id, Text label, Text text = Text()) {
-        if (_isBuild()) _widget(Code::paragraph, id, label, text);
+    void Paragraph(size_t id, Text label = "", Text text = Text()) {
+        _widget(Code::paragraph, id, label, &text);
+    }
+    void Paragraph(Text label = "", Text text = Text()) {
+        Paragraph(_NO_ID, label, text);
     }
 
     // active
 
     // ================= INPUT =================
-    // ввод текста и цифр [результат - строка]
-    bool Input(size_t id, Text label, Text value = Text()) {
-        if (_isBuild()) _widget(Code::input, id, label, value);
-        return _isSet(id);
+    // ввод текста и цифр [результат - строка], подключаемая переменная - любой тип
+    bool Input(size_t id, Text label = "", AnyPtr value = nullptr) {
+        _widget(Code::input, id, label, value);
+        return _isSet(id, value);
+    }
+    bool Input(Text label = "", AnyPtr value = nullptr) {
+        return Input(_next(), label, value);
+    }
+
+    // ================= NUMBER =================
+    // ввод цифр [результат - строка], подключаемая переменная - любой тип
+    bool Number(size_t id, Text label = "", AnyPtr value = nullptr) {
+        _widget(Code::number, id, label, value);
+        return _isSet(id, value);
+    }
+    bool Number(Text label = "", AnyPtr value = nullptr) {
+        return Number(_next(), label, value);
     }
 
     // ================= PASS =================
-    // ввод пароля [результат - строка]
-    bool Pass(size_t id, Text label, Text value = Text()) {
-        if (_isBuild()) _widget(Code::pass, id, label, value);
-        return _isSet(id);
+    // ввод пароля [результат - строка], подключаемая переменная - любой тип
+    bool Pass(size_t id, Text label = "", AnyPtr value = nullptr) {
+        _widget(Code::pass, id, label, value);
+        return _isSet(id, value);
+    }
+    bool Pass(Text label = "", AnyPtr value = nullptr) {
+        return Pass(_next(), label, value);
     }
 
     // ================= COLOR =================
-    // ввод цвета [результат - 24-бит DEC число]
-    bool Color(size_t id, Text label, Text value = Text()) {
-        if (_isBuild()) _widget(Code::color, id, label, value);
-        return _isSet(id);
+    // ввод цвета [результат - 24-бит DEC число], подключаемая переменная - uint32_t
+    bool Color(size_t id, Text label = "", uint32_t* value = nullptr) {
+        _widget(Code::color, id, label, value);
+        return _isSet(id, value);
+    }
+    bool Color(Text label = "", uint32_t* value = nullptr) {
+        return Color(_next(), label, value);
     }
 
     // ================= SWITCH =================
-    // переключатель [результат 1/0]
-    bool Switch(size_t id, Text label, Text value = Text()) {
-        if (_isBuild()) _widget(Code::toggle, id, label, value);
-        return _isSet(id);
+    // переключатель [результат 1/0], подключаемая переменная - bool
+    bool Switch(size_t id, Text label = "", bool* value = nullptr) {
+        _widget(Code::toggle, id, label, value);
+        return _isSet(id, value);
+    }
+    bool Switch(Text label = "", bool* value = nullptr) {
+        return Switch(_next(), label, value);
     }
 
-    // ================= SWITCH =================
-    // дата [результат - unix секунды]
-    bool Date(size_t id, Text label, Text value = Text()) {
-        if (_isBuild()) _widget(Code::date, id, label, value);
-        return _isSet(id);
+    // ================= DATE =================
+    // дата [результат - unix секунды], подключаемая переменная - uint32_t
+    bool Date(size_t id, Text label = "", uint32_t* value = nullptr) {
+        _widget(Code::date, id, label, value);
+        return _isSet(id, value);
+    }
+    bool Date(Text label = "", uint32_t* value = nullptr) {
+        return Date(_next(), label, value);
     }
 
-    // ================= SWITCH =================
-    // время [результат - секунды с начала суток]
-    bool Time(size_t id, Text label, Text value = Text()) {
-        if (_isBuild()) _widget(Code::time, id, label, value);
-        return _isSet(id);
+    // ================= TIME =================
+    // время [результат - секунды с начала суток], подключаемая переменная - uint32_t
+    bool Time(size_t id, Text label = "", uint32_t* value = nullptr) {
+        _widget(Code::time, id, label, value);
+        return _isSet(id, value);
+    }
+    bool Time(Text label = "", uint32_t* value = nullptr) {
+        return Time(_next(), label, value);
     }
 
-    // ================= SWITCH =================
-    // дата и время [результат - unix секунды]
-    bool DateTime(size_t id, Text label, Text value = Text()) {
-        if (_isBuild()) _widget(Code::datetime, id, label, value);
-        return _isSet(id);
+    // ================= DATETIME =================
+    // дата и время [результат - unix секунды], подключаемая переменная - uint32_t
+    bool DateTime(size_t id, Text label = "", uint32_t* value = nullptr) {
+        _widget(Code::datetime, id, label, value);
+        return _isSet(id, value);
+    }
+    bool DateTime(Text label = "", uint32_t* value = nullptr) {
+        return DateTime(_next(), label, value);
     }
 
     // ================= SLIDER =================
-    // слайдер [результат - число]
-    bool Slider(size_t id, Text label, float min = 0, float max = 100, float step = 1, Text unit = Text(), Text value = Text()) {
-        if (_isBuild()) {
-            _beginWidget(Code::slider, id, label, value);
+    // слайдер [результат - число], подключаемая переменная - любой тип
+    bool Slider(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr) {
+        if (_beginWidget(Code::slider, id, label, value)) {
             p->addFloat(Code::min, min);
             p->addFloat(Code::max, max);
             p->addFloat(Code::step, step);
-            p->addText(Code::unit, unit);
+            if (unit.length()) p->addText(Code::unit, unit);
             _endWidget();
         }
-        return _isSet(id);
+        return _isSet(id, value);
+    }
+    bool Slider(Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr) {
+        return Slider(_next(), label, min, max, step, unit, value);
     }
 
     // ================= SELECT =================
-    // опции разделяются ; [результат - индекс (число)]
-    bool Select(size_t id, Text label, Text options, Text value = Text()) {
-        if (_isBuild()) {
-            _beginWidget(Code::select, id, label, value);
+    // опции разделяются ; [результат - индекс (число)], подключаемая переменная - uint8_t
+    bool Select(size_t id, Text label, Text options, uint8_t* value = nullptr) {
+        if (_beginWidget(Code::select, id, label, value)) {
             p->addText(Code::text, options);
             _endWidget();
         }
-        return _isSet(id);
+        return _isSet(id, value);
+    }
+    bool Select(Text label, Text options, uint8_t* value = nullptr) {
+        return Select(_next(), label, options, value);
     }
 
     // ================= BUTTON =================
     // кнопку можно добавлять как внутри контейнера кнопок, так и как одиночный виджет
-    bool Button(size_t id, Text label, uint32_t color = SETS_DEFAULT_COLOR) {
-        if (_isBuild()) {
-            _beginWidget(Code::button, id, label);
-            if (color != SETS_DEFAULT_COLOR) p->addUint(Code::color, color);
-            _endWidget();
-        }
-        return _isSet(id);
+    bool Button(size_t id, Text label = "", uint32_t color = SETS_DEFAULT_COLOR) {
+        _widget(Code::button, id, label, nullptr, color);
+        return _isSet(id, nullptr);
     }
+    bool Button(Text label = "", uint32_t color = SETS_DEFAULT_COLOR) {
+        return Button(_next(), label, color);
+    }
+
     bool Button(size_t id, Text label, sets::Colors color) {
         return Button(id, label, (uint32_t)color);
+    }
+    bool Button(Text label, sets::Colors color) {
+        return Button(_next(), label, (uint32_t)color);
     }
 
     // misc
     // окно подтверждения, для активации отправь пустой update на его id или update с текстом подтверждения
     bool Confirm(size_t id, Text label = "") {
-        if (_isBuild()) _widget(Code::confirm, id, label);
-        return _isSet(id);
+        _widget(Code::confirm, id, label);
+        return _isSet(id, nullptr);
     }
 
    private:
-    Build _build;
-    GyverDB* _db = nullptr;
+    void* _settings;
     sets::Packet* p = nullptr;
+    void* _db = nullptr;
+    size_t _auto_id = UINT32_MAX;
     bool _reload = false;
     bool _enabled = true;
     bool _was_set = false;
+    bool _set_f = false;
 
-    void _widget(Code type, size_t id, Text& label, const Text& value = Text()) {
-        _beginWidget(type, id, label, value);
-        _endWidget();
+    size_t _next() {
+        return --_auto_id;
     }
 
-    void _beginWidget(Code type, size_t id, Text& label, const Text& value = Text()) {
-        p->beginObj();
-        p->addCode(Code::type, type);
-        if (id != (size_t)-1) p->addUint(Code::id, id);
-        p->addText(Code::label, label);
-        if (value) p->addText(Code::value, value);
-        else if (_db) {
-            p->addKey(Code::value);
-            p->addFromDB(_db, id);
+    bool _widget(Code type, size_t id, Text& label, AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        if (_beginWidget(type, id, label, value, color)) {
+            _endWidget();
+            return true;
         }
+        return false;
+    }
+
+    bool _beginWidget(Code type, size_t id, Text& label, AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        if (_enabled && build.isBuild()) {
+            p->beginObj();
+            p->addCode(Code::type, type);
+            if (label.length()) p->addText(Code::label, label);
+            if (color != SETS_DEFAULT_COLOR) p->addUint(Code::color, color);
+            if (id != _NO_ID) p->addUint(Code::id, id);
+
+            if (value) {
+                p->addKey(Code::value);
+                value.write(p);
+            } else if (_db && id != _NO_ID) {
+                p->addKey(Code::value);
+                p->addFromDB(_db, id);
+            }
+            return true;
+        }
+        return false;
     }
 
     void _endWidget() {
@@ -248,28 +314,26 @@ class Builder {
     }
 
     bool _beginContainer(Code type, Text title = Text()) {
-        if (_build.isBuild()) {
+        if (build.isBuild()) {
             p->beginObj();
             p->addCode(Code::type, type);
-            if (title) p->addText(Code::title, title);
+            if (title.length()) p->addText(Code::title, title);
             p->beginArr(Code::content);
         }
         return true;
     }
 
     void _endContainer() {
-        if (_build.isBuild()) {
+        if (build.isBuild()) {
             p->endArr();
             p->endObj();
         }
     }
 
-    bool _isBuild() {
-        return _enabled && _build.isBuild();
-    }
-
-    bool _isSet(size_t id) {
-        bool set = (_enabled && _build.isAction() && id == _build.id());
+    bool _isSet(size_t id, AnyPtr value) {
+        bool set = (!_set_f && _enabled && build.isAction() && id == build.id);
+        if (set) _set_f = true;
+        if (value && set) value.read(build.value);
         _was_set |= set;
         return set;
     }
