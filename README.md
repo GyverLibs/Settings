@@ -498,25 +498,33 @@ void build(sets::Builder& b) {
 Для разделения админского и гостевого доступа предусмотрен виртуальный контейнер Guest. Если пароль установлен и клиент не авторизован - он будет видеть только виджеты из гостевых контейнеров. Для корректной работы гостевой контейнер не должен прерываться обычными контейнерами. Пример:
 
 ```cpp
-if (b.beginGroup("Group 1")) {
-    // гости не видят
-    b.Pass(kk::pass, "Password");
+void setup() {
+    // ...
+    // sett.setPass("pass1234");
+    sett.setPass(F("pass1234"));  // любая строка
+}
 
-    // виджеты, которые видят гости и админы
-    {
-        sets::GuestAccess g(b);
-        b.Input(kk::uintw, "uint");
-        b.Input(kk::intw, "int");
-        b.Input(kk::int64w, "int 64");
+void build(sets::Builder& b) {
+    if (b.beginGroup("Group 1")) {
+        // гости не видят
+        b.Pass(kk::pass, "Password");
+
+        // виджеты, которые видят гости и админы
+        {
+            sets::GuestAccess g(b);
+            b.Input(kk::uintw, "uint");
+            b.Input(kk::intw, "int");
+            b.Input(kk::int64w, "int 64");
+        }
+
+        // гости не видят
+        {
+            sets::Menu m(b, "sub sub");
+            b.Label(kk::lbl2, "millis()", "", sets::Colors::Red);
+        }
+
+        b.endGroup();
     }
-
-    // гости не видят
-    {
-        sets::Menu m(b, "sub sub");
-        b.Label(kk::lbl2, "millis()", "", sets::Colors::Red);
-    }
-
-    b.endGroup();
 }
 ```
 В гостевой контейнер можно поместить несколько обычных контейнеров, например групп.
