@@ -11,6 +11,7 @@ class AnyPtr {
         ConstFstr,
         Char,
         String,
+        Bool,
         Int8,
         Int16,
         Int32,
@@ -28,6 +29,7 @@ class AnyPtr {
     AnyPtr(Text* p) : p(p), type(p->valid() ? Type::Text : Type::None) {}
     AnyPtr(float* p) : p(p), type(Type::Float) {}
     AnyPtr(double* p) : p(p), type(Type::Double) {}
+    AnyPtr(bool* p) : p(p), type(Type::Bool) {}
 
     template <typename T>
     AnyPtr(T* p) : p(p) {
@@ -51,6 +53,7 @@ class AnyPtr {
             case Type::String: pkt->addText(*((String*)p)); break;
             case Type::Char: pkt->addText((char*)p); break;
 
+            case Type::Bool: pkt->addBool(*((bool*)p)); break;
             case Type::Int8: pkt->addInt(*((int8_t*)p)); break;
             case Type::Int16: pkt->addInt(*((int16_t*)p)); break;
             case Type::Int32: pkt->addInt(*((int32_t*)p)); break;
@@ -67,6 +70,7 @@ class AnyPtr {
             case Type::String: value.toString(*((String*)p)); break;
             case Type::Char: value.toStr((char*)p, len); break;
 
+            case Type::Bool: *((bool*)p) = value.toBool(); break;
             case Type::Int8: *((int8_t*)p) = value.toInt(); break;
             case Type::Int16: *((int16_t*)p) = value.toInt(); break;
             case Type::Int32: *((int32_t*)p) = value.toInt(); break;

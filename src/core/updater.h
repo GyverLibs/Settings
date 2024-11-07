@@ -9,6 +9,22 @@ class Updater {
    public:
     Updater(Packet& p) : p(p) {}
 
+    // всплывающее уведомление красное
+    void alert(Text text) {
+        p.beginObj();
+        p.addCode(sets::Code::type, sets::Code::alert);
+        p.addText(sets::Code::text, text);
+        p.endObj();
+    }
+
+    // всплывающее уведомление зелёное
+    void notice(Text text) {
+        p.beginObj();
+        p.addCode(sets::Code::type, sets::Code::notice);
+        p.addText(sets::Code::text, text);
+        p.endObj();
+    }
+
     // пустой апдейт (например для вызова Confirm)
     void update(size_t id) {
         p.beginObj();

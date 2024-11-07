@@ -56,7 +56,7 @@ struct Data {
 };
 
 Data data;
-bool cfm_f = false;
+bool cfm_f, notice_f, alert_f;
 
 void build(sets::Builder& b) {
     {
@@ -83,7 +83,7 @@ void build(sets::Builder& b) {
         // b.Label("", data.label);
         // b.LED("", data.led);
         b.Label("", data.input);
-        b.LED("", data.sw);
+        b.LED("", data.sw, sets::Colors::Aqua, sets::Colors::Pink);
         b.Paragraph("", data.paragr);
         b.Input("", &data.input);
         b.Input("", AnyPtr(data.inputc, 20));
@@ -99,10 +99,17 @@ void build(sets::Builder& b) {
         if (b.Button()) Serial.println("btn 1");
     }
 
-    if (b.Button("Confirm")) cfm_f = true;
+    if (b.beginButtons()) {
+        if (b.Button("Notice")) notice_f = true;
+        if (b.Button("Error")) alert_f = true;
+        if (b.Button("Confirm")) cfm_f = true;
+        b.endButtons();
+    }
 
-    if (b.Confirm(kk::conf, "Confirm")) {
-        Serial.println(b.build.value);
+    bool res;
+    if (b.Confirm(kk::conf, "Confirm", &res)) {
+        Serial.println(res);
+        // Serial.println(b.build.value.toBool());
     }
 }
 
@@ -110,6 +117,14 @@ void update(sets::Updater& u) {
     if (cfm_f) {
         cfm_f = false;
         u.update(kk::conf);
+    }
+    if (notice_f) {
+        notice_f = false;
+        u.notice("Уведомление");
+    }
+    if (alert_f) {
+        alert_f = false;
+        u.alert("Ошибка");
     }
 }
 

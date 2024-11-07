@@ -109,6 +109,24 @@ class Builder {
     }
 
     // ================= LED =================
+    // светодиод с цветом на выбор
+    void LED(size_t id, Text label, bool value, uint32_t colorOff, uint32_t colorOn) {
+        if (_beginWidget(Code::led, id, label, &value)) {
+            p->addUint(Code::color_off, colorOff);
+            p->addUint(Code::color_on, colorOn);
+            _endWidget();
+        }
+    }
+    void LED(size_t id, Text label, bool value, Colors colorOff, Colors colorOn) {
+        LED(id, label, value, (uint32_t)colorOff, (uint32_t)colorOn);
+    }
+    void LED(Text label, bool value, uint32_t colorOff, uint32_t colorOn) {
+        LED(_NO_ID, label, value, colorOff, colorOn);
+    }
+    void LED(Text label, bool value, Colors colorOff, Colors colorOn) {
+        LED(_NO_ID, label, value, (uint32_t)colorOff, (uint32_t)colorOn);
+    }
+
     // светодиод (value 1 включен - зелёный, value 0 выключен - красный)
     void LED(size_t id, Text label, bool value) {
         _widget(Code::led, id, label, &value);
@@ -262,9 +280,9 @@ class Builder {
 
     // misc
     // окно подтверждения, для активации отправь пустой update на его id или update с текстом подтверждения
-    bool Confirm(size_t id, Text label = "") {
+    bool Confirm(size_t id, Text label = "", bool* ptr = nullptr) {
         _widget(Code::confirm, id, label);
-        return _isSet(id, nullptr);
+        return _isSet(id, ptr);
     }
 
    private:

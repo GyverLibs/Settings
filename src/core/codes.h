@@ -32,6 +32,8 @@ enum class Code : uint8_t {
     max,
     step,
     unit,
+    color_on,
+    color_off,
 
     input,
     number,
@@ -46,6 +48,8 @@ enum class Code : uint8_t {
     paragraph,
     confirm,
     led,
+    alert,
+    notice,
 };
 
 }
