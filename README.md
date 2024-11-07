@@ -153,7 +153,7 @@ void build(sets::Builder& b) {
     b.Input("my_inp"_h, "My input");    // хэш-строка
     b.Input(SH("my_inp"), "My input");  // хэш-строка
     b.Input(12, "My input");            // вручную числом
-    b.Input(keys::my_inp, "My input");  // enum
+    b.Input(kk::my_inp, "My input");  // enum
     b.Input(kk::my_inp, "My input");    // GyverDB-хэш
 }
 ```
