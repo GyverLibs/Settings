@@ -29,6 +29,17 @@ class SettingsBase {
     typedef std::function<void(Builder& b)> BuildCallback;
     typedef std::function<void(Updater& upd)> UpdateCallback;
 
+    struct Config {
+        // таймаут отправки слайдера, мс. 0 чтобы отключить
+        uint16_t sliderTout = 100;
+
+        // таймаут ожидания ответа сервера, мс
+        uint16_t requestTout = 2000;
+
+        // период обновлений, мс. 0 чтобы отключить
+        uint16_t updateTout = 2500;
+    };
+
    public:
 #ifndef SETT_NO_DB
     SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {
@@ -50,7 +61,7 @@ class SettingsBase {
 
     // установить период обновлений (умолч. 2500мс), 0 чтобы отключить
     void setUpdatePeriod(uint16_t prd) {
-        _updPeriod = prd;
+        config.updateTout = prd;
     }
 
 // подключить базу данных
@@ -62,7 +73,7 @@ class SettingsBase {
 
     // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер) (умолч. true)
     void useAutoUpdates(bool use) {
-        _dbupdates = use;
+        _db_update = use;
 #ifndef SETT_NO_DB
         if (_db) _db->useUpdates(use);
 #endif
@@ -93,6 +104,9 @@ class SettingsBase {
     void reload() {
         _reload = true;
     }
+
+    // настройки вебморды
+    Config config;
 
    protected:
     // отправка для родительского класса
@@ -129,9 +143,9 @@ class SettingsBase {
             case SH("set"):
 #ifndef SETT_NO_DB
                 if (_db) {
-                    if (_dbupdates) _db->useUpdates(false);
+                    if (_db_update) _db->useUpdates(false);
                     _db->update(id, value);
-                    if (_dbupdates) _db->useUpdates(true);
+                    if (_db_update) _db->useUpdates(true);
                 }
 #endif
                 if (_build_cb) {
@@ -170,7 +184,7 @@ class SettingsBase {
                     p.addUint(Code::rssi, constrain(2 * (WiFi.RSSI() + 100), 0, 100));
                     p.beginArr(Code::content);
 #ifndef SETT_NO_DB
-                    if (_db && _dbupdates) {
+                    if (_db && _db_update) {
                         while (_db->updatesAvailable()) {
                             size_t id = _db->updateNext();
                             p.beginObj();
@@ -217,8 +231,7 @@ class SettingsBase {
 #ifndef SETT_NO_DB
     GyverDB* _db = nullptr;
 #endif
-    uint16_t _updPeriod = 2500;
-    bool _dbupdates = true;
+    bool _db_update = true;
     bool _rst = false;
     bool _reload = false;
 
@@ -248,7 +261,9 @@ class SettingsBase {
             p.reserve(SETS_RESERVE);
             p.beginObj();
             p.addCode(Code::type, Code::build);
-            p.addUint(Code::ping, _updPeriod);
+            p.addUint(Code::update_tout, config.updateTout);
+            p.addUint(Code::request_tout, config.requestTout);
+            p.addUint(Code::slider_tout, config.sliderTout);
             p.addUint(Code::rssi, constrain(2 * (WiFi.RSSI() + 100), 0, 100));
             if (_title.length()) p.addText(Code::title, _title);
             if (_passh) p.addBool(Code::granted, granted);

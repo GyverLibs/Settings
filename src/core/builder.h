@@ -108,6 +108,24 @@ class Builder {
         Label(_NO_ID, label, text, (uint32_t)color);
     }
 
+    // лейбл с численным значением (выполняется быстрее, весит меньше)
+    template <typename T>
+    void LabelNum(size_t id, Text label, T text, uint32_t color = SETS_DEFAULT_COLOR) {
+        _widget(Code::label, id, label, &text, color);
+    }
+    template <typename T>
+    void LabelNum(size_t id, Text label, T text, sets::Colors color) {
+        LabelNum(id, label, text, (uint32_t)color);
+    }
+    template <typename T>
+    void LabelNum(Text label, T text, uint32_t color = SETS_DEFAULT_COLOR) {
+        LabelNum(_NO_ID, label, text, color);
+    }
+    template <typename T>
+    void LabelNum(Text label, T text, sets::Colors color) {
+        LabelNum(_NO_ID, label, text, (uint32_t)color);
+    }
+
     // ================= LED =================
     // светодиод с цветом на выбор
     void LED(size_t id, Text label, bool value, uint32_t colorOff, uint32_t colorOn) {

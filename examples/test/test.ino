@@ -165,6 +165,11 @@ void setup() {
     sett.onBuild(build);
     sett.onUpdate(update);
 
+    // настройки вебморды
+    // sett.config.requestTout = 3000;
+    // sett.config.sliderTout = 500;
+    // sett.config.updateTout = 1000;
+
     // ======== DATABASE ========
 #ifdef ESP32
     LittleFS.begin(true);
