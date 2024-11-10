@@ -87,22 +87,22 @@ class SettingsESP : public sets::SettingsBase {
         server.onNotFound([this]() {
             gzip_h();
             no_cache_h();
-            server.send_P(200, "text/html", (PGM_P)settings_index_gz, settings_index_gz_len);
+            server.send_P(200, "text/html", (PGM_P)settings_index_gz, sizeof(settings_index_gz));
         });
         server.on("/script.js", HTTP_GET, [this]() {
             gzip_h();
             cache_h();
-            server.send_P(200, "text/javascript", (PGM_P)settings_script_gz, settings_script_gz_len);
+            server.send_P(200, "text/javascript", (PGM_P)settings_script_gz, sizeof(settings_script_gz));
         });
         server.on("/style.css", HTTP_GET, [this]() {
             gzip_h();
             cache_h();
-            server.send_P(200, "text/css", (PGM_P)settings_style_gz, settings_style_gz_len);
+            server.send_P(200, "text/css", (PGM_P)settings_style_gz, sizeof(settings_style_gz));
         });
         server.on("/favicon.svg", HTTP_GET, [this]() {
             gzip_h();
             cache_h();
-            server.send_P(200, "image/svg+xml", (PGM_P)settings_favicon_gz, settings_favicon_gz_len);
+            server.send_P(200, "image/svg+xml", (PGM_P)settings_favicon_gz, sizeof(settings_favicon_gz));
         });
     }
 

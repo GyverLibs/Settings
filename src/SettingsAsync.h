@@ -77,25 +77,25 @@ class SettingsAsync : public sets::SettingsBase {
             if (final) Update.end(true); });
 
         server.onNotFound([this](AsyncWebServerRequest *request) {
-            AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", settings_index_gz, settings_index_gz_len);
+            AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", settings_index_gz, sizeof(settings_index_gz));
             gzip_h(response);
             no_cache_h(response);
             request->send(response);
         });
         server.on("/script.js", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            AsyncWebServerResponse *response = request->beginResponse_P(200, "text/javascript", settings_script_gz, settings_script_gz_len);
+            AsyncWebServerResponse *response = request->beginResponse_P(200, "text/javascript", settings_script_gz, sizeof(settings_script_gz));
             gzip_h(response);
             cache_h(response);
             request->send(response);
         });
         server.on("/style.css", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", settings_style_gz, settings_style_gz_len);
+            AsyncWebServerResponse *response = request->beginResponse_P(200, "text/css", settings_style_gz, sizeof(settings_style_gz));
             gzip_h(response);
             cache_h(response);
             request->send(response);
         });
         server.on("/favicon.svg", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            AsyncWebServerResponse *response = request->beginResponse_P(200, "image/svg+xml", settings_favicon_gz, settings_favicon_gz_len);
+            AsyncWebServerResponse *response = request->beginResponse_P(200, "image/svg+xml", settings_favicon_gz, sizeof(settings_favicon_gz));
             gzip_h(response);
             cache_h(response);
             request->send(response);

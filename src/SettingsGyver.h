@@ -67,19 +67,19 @@ class SettingsGyver : public sets::SettingsBase {
                     break;
 
                 case SH("/script.js"):
-                    server.sendFile_P(settings_script_gz, settings_script_gz_len, "text/javascript", true, true);
+                    server.sendFile_P(settings_script_gz, sizeof(settings_script_gz), "text/javascript", true, true);
                     break;
 
                 case SH("/style.css"):
-                    server.sendFile_P(settings_style_gz, settings_style_gz_len, "text/css", true, true);
+                    server.sendFile_P(settings_style_gz, sizeof(settings_style_gz), "text/css", true, true);
                     break;
 
                 case SH("/favicon.svg"):
-                    server.sendFile_P(settings_favicon_gz, settings_favicon_gz_len, "image/svg+xml", true, true);
+                    server.sendFile_P(settings_favicon_gz, sizeof(settings_favicon_gz), "image/svg+xml", true, true);
                     break;
 
                 default:
-                    server.sendFile_P(settings_index_gz, settings_index_gz_len, "text/html", false, true);
+                    server.sendFile_P(settings_index_gz, sizeof(settings_index_gz), "text/html", false, true);
                     break;
             }
         });
