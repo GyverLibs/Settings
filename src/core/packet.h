@@ -8,10 +8,20 @@
 
 #include "codes.h"
 
+#define PACKET_OVERLAP 128
+
 namespace sets {
+
+class Packet;
+typedef void (*SendHook)(void* settptr, Packet& packet);
 
 class Packet : public BSON {
    public:
+    Packet() {}
+    Packet(size_t maxsize, void* settptr, SendHook hook) : _max_size(maxsize), _settptr(settptr), _hook(hook) {
+        reserve(maxsize + PACKET_OVERLAP);
+    }
+
     void addKey(Code key) {
         addKey((uint16_t)key);
     }
@@ -82,6 +92,13 @@ class Packet : public BSON {
 #endif
     }
 
+    void checkLen() {
+        if (_max_size && _hook && length() > _max_size) {
+            _hook(_settptr, *this);
+            clear();
+        }
+    }
+
     using BSON::addBool;
     using BSON::addCode;
     using BSON::addFloat;
@@ -91,6 +108,11 @@ class Packet : public BSON {
     using BSON::addUint;
     using BSON::beginArr;
     using BSON::beginObj;
+
+   private:
+    size_t _max_size = 0;
+    void* _settptr = nullptr;
+    SendHook _hook = nullptr;
 };
 
 }  // namespace sets

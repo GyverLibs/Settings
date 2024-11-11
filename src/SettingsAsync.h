@@ -30,6 +30,7 @@ class SettingsAsync : public sets::SettingsBase {
         server.begin();
 
         server.on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {
+            setPacketSize(0);   // TODO некорректно работает, видимо есть ограниченный внутренний буфер
             String auth, action, id, value;
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (request->hasParam("action")) action = request->getParam("action")->value();

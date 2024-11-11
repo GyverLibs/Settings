@@ -98,6 +98,6 @@ class SettingsGyver : public sets::SettingsBase {
     bool _rst = false;
 
     void send(uint8_t* data, size_t len) {
-        server.sendFile(data, len);
+        server.send(Text(data, len));
     }
 };

@@ -126,6 +126,23 @@ class Builder {
         LabelNum(_NO_ID, label, text, (uint32_t)color);
     }
 
+    // лейбл с численным значением (выполняется быстрее, весит меньше)
+    void LabelFloat(size_t id, Text label, float text, uint8_t dec = 2, uint32_t color = SETS_DEFAULT_COLOR) {
+        if (_beginWidget(Code::label, id, label, &text, color)) {
+            p->addUint(Code::step, dec);
+            _endWidget();
+        }
+    }
+    void LabelFloat(size_t id, Text label, float text, uint8_t dec, sets::Colors color) {
+        LabelFloat(id, label, text, dec, (uint32_t)color);
+    }
+    void LabelFloat(Text label, float text, uint8_t dec = 2, uint32_t color = SETS_DEFAULT_COLOR) {
+        LabelFloat(_NO_ID, label, text, dec, color);
+    }
+    void LabelFloat(Text label, float text, uint8_t dec, sets::Colors color) {
+        LabelFloat(_NO_ID, label, text, dec, (uint32_t)color);
+    }
+
     // ================= LED =================
     // светодиод с цветом на выбор
     void LED(size_t id, Text label, bool value, uint32_t colorOff, uint32_t colorOn) {
@@ -347,6 +364,7 @@ class Builder {
 
     void _endWidget() {
         p->endObj();
+        p->checkLen();
     }
 
     bool _beginContainer(Code type, Text title = Text()) {

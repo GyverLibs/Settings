@@ -21,8 +21,6 @@
 #include "core/timer.h"
 #include "core/updater.h"
 
-#define SETS_RESERVE 512
-
 namespace sets {
 
 class SettingsBase {
@@ -103,6 +101,11 @@ class SettingsBase {
     // перезагрузить страницу. Можно вызывать где угодно + в обработчике update
     void reload() {
         _reload = true;
+    }
+
+    // установить размер пакета (умолч. 1024 Б). 0 - отключить разбивку на пакеты
+    void setPacketSize(size_t size) {
+        _packet_size = size;
     }
 
     // настройки вебморды
@@ -228,6 +231,7 @@ class SettingsBase {
     UpdateCallback _upd_cb = nullptr;
     String _title;
     size_t _passh = 0;
+    size_t _packet_size = 1024;
 #ifndef SETT_NO_DB
     GyverDB* _db = nullptr;
 #endif
@@ -257,8 +261,7 @@ class SettingsBase {
 
     void _sendBuild(bool granted) {
         if (_build_cb) {
-            Packet p;
-            p.reserve(SETS_RESERVE);
+            Packet p(_packet_size, this, _hook);
             p.beginObj();
             p.addCode(Code::type, Code::build);
             p.addUint(Code::update_tout, config.updateTout);
@@ -284,6 +287,10 @@ class SettingsBase {
         } else {
             _answerEmpty();
         }
+    }
+
+    static void _hook(void* settptr, Packet& p) {
+        static_cast<SettingsBase*>(settptr)->send(p.buf(), p.length());
     }
 };
 

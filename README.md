@@ -596,6 +596,9 @@ void onUpdate(UpdateCallback cb);
 // тикер, вызывать в родительском классе
 void tick();
 
+// установить размер пакета (умолч. 1024 Б). 0 - отключить разбивку на пакеты. Не работает для Async-версии
+void setPacketSize(size_t size);
+
 // настройки вебморды
 Config config;
 {
@@ -663,6 +666,11 @@ void LabelNum(size_t id, Text label, T text, uint32_t color = SETS_DEFAULT_COLOR
 void LabelNum(size_t id, Text label, T text, sets::Colors color);
 void LabelNum(Text label, T text, uint32_t color = SETS_DEFAULT_COLOR);
 void LabelNum(Text label, T text, sets::Colors color);
+
+void LabelFloat(size_t id, Text label, float text, uint8_t dec = 2, uint32_t color = SETS_DEFAULT_COLOR);
+void LabelFloat(size_t id, Text label, float text, uint8_t dec, sets::Colors color);
+void LabelFloat(Text label, float text, uint8_t dec = 2, uint32_t color = SETS_DEFAULT_COLOR);
+void LabelFloat(Text label, float text, uint8_t dec, sets::Colors color);
 
 // ================= LED =================
 // светодиод (value 1 включен - зелёный, value 0 выключен - красный)
@@ -846,6 +854,10 @@ void update(size_t id, <любой численный тип> value);
 - v1.1.6
   - Добавлен виджет LabelNum для чисел
   - Добавлены настройки вебморды (таймаут соединения, слайдеров, апдейтов)
+
+- v1.1.8
+  - Разбивка на пакеты для меньшего использования памяти
+  - Добавлен LabelFloat
 
 <a id="install"></a>
 ## Установка

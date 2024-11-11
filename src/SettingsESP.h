@@ -29,6 +29,7 @@ class SettingsESP : public sets::SettingsBase {
         server.begin();
 
         server.on("/settings", HTTP_GET, [this]() {
+            _first = true;
             String auth = server.arg(F("auth"));
             String action = server.arg(F("action"));
             String id = server.arg(F("id"));
@@ -121,10 +122,14 @@ class SettingsESP : public sets::SettingsBase {
    private:
     sets::DnsWrapper _dns;
     File _file;
+    bool _first = true;
 
     void send(uint8_t* data, size_t len) {
-        server.setContentLength(len);
-        server.send(200, "text/plain");
+        if (_first) {
+            _first = false;
+            server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+            server.send(200, "text/plain");
+        }
         server.sendContent((const char*)data, len);
     }
 
