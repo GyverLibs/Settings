@@ -484,6 +484,20 @@ void build(sets::Builder& b) {
 }
 ```
 
+Можно располагать виджеты горизонтально в строку, у них может быть общее название. Если у виджета задано название - он будет пытаться растянуться на всю ширину, если нет - то не будет. Частый вариант использования - первый виджет с названием, остальные мелкие без:
+```cpp
+void build(sets::Builder& b) {
+    {
+        sets::Row g(b);
+        // sets::Row g(b, "Row");
+
+        b.Slider("Slider");
+        b.LED();
+        b.Switch();
+    }
+}
+```
+
 Отдельный тип контейнера - кнопки, внутри него можно добавлять только кнопки:
 ```cpp
 void build(sets::Builder& b) {
@@ -649,6 +663,10 @@ void endGroup();
 bool beginMenu(Text title);
 void endMenu();
 
+// горизонтальная группа виджетов
+bool beginRow(Text title = Text());
+void endRow();
+
 // ряд кнопок
 bool beginButtons();
 void endButtons();
@@ -791,6 +809,9 @@ class Group(Builder& b, Text title = Text());
 
 // контейнер вложенного меню
 class Menu(Builder& b, Text title);
+
+// горизонтальный контейнер
+class Row(Builder& b, Text title);
 
 // контейнер кнопок
 class Buttons(Builder& b);

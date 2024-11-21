@@ -10,6 +10,7 @@ enum class Code : uint8_t {
     group,
     menu,
     buttons,
+    row,
 
     build,
     reload,

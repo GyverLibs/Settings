@@ -51,4 +51,10 @@ class Buttons : public BasicContainer {
     Buttons(Builder& b) : BasicContainer(Code::buttons, b) {}
 };
 
+// горизонтальный контейнер
+class Row : public BasicContainer {
+   public:
+    Row(Builder& b, Text title = Text()) : BasicContainer(Code::row, b, title) {}
+};
+
 }  // namespace sets

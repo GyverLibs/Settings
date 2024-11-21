@@ -73,6 +73,15 @@ class Builder {
         _endContainer();
     }
 
+    // ================= ROW =================
+    // горизонтальная группа виджетов
+    bool beginRow(Text title = Text()) {
+        return _beginContainer(Code::row, title);
+    }
+    void endRow() {
+        _endContainer();
+    }
+
     // ================= MENU =================
     // вложенное меню
     bool beginMenu(Text title) {
