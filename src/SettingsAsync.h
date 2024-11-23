@@ -50,7 +50,7 @@ class SettingsAsync : public sets::SettingsBase {
             if (request->hasParam("path")) path = request->getParam("path")->value();
 
             if (authenticate(auth)) {
-                AsyncWebServerResponse *response = request->beginResponse(ST_FS, path);
+                AsyncWebServerResponse *response = request->beginResponse(ST_FS, path, emptyString);
                 cors_h(response);
                 request->send(response);
             } else {
