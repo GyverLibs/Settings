@@ -53,6 +53,7 @@ class Builder {
     }
 
     // ================= GUEST =================
+
     // разрешить неавторизованным клиентам следующий код
     bool beginGuest() {
         if (!build.granted) _enabled = true;
@@ -65,6 +66,7 @@ class Builder {
     }
 
     // ================= GROUP =================
+
     // группа виджетов
     bool beginGroup(Text title = Text()) {
         return _beginContainer(Code::group, title);
@@ -74,6 +76,7 @@ class Builder {
     }
 
     // ================= ROW =================
+
     // горизонтальная группа виджетов
     bool beginRow(Text title = Text()) {
         return _beginContainer(Code::row, title);
@@ -83,6 +86,7 @@ class Builder {
     }
 
     // ================= MENU =================
+
     // вложенное меню
     bool beginMenu(Text title) {
         return _beginContainer(Code::menu, title);
@@ -92,6 +96,7 @@ class Builder {
     }
 
     // ================= BUTTONS =================
+
     // ряд кнопок
     bool beginButtons() {
         return _beginContainer(Code::buttons);
@@ -107,13 +112,13 @@ class Builder {
     void Label(size_t id, Text label = "", Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
         _widget(Code::label, id, label, &text, color);
     }
-    void Label(size_t id, Text label, Text text, sets::Colors color) {
+    void Label(size_t id, Text label, Text text, Colors color) {
         Label(id, label, text, (uint32_t)color);
     }
     void Label(Text label = "", Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR) {
         Label(_NO_ID, label, text, color);
     }
-    void Label(Text label, Text text, sets::Colors color) {
+    void Label(Text label, Text text, Colors color) {
         Label(_NO_ID, label, text, (uint32_t)color);
     }
 
@@ -123,7 +128,7 @@ class Builder {
         _widget(Code::label, id, label, &text, color);
     }
     template <typename T>
-    void LabelNum(size_t id, Text label, T text, sets::Colors color) {
+    void LabelNum(size_t id, Text label, T text, Colors color) {
         LabelNum(id, label, text, (uint32_t)color);
     }
     template <typename T>
@@ -131,7 +136,7 @@ class Builder {
         LabelNum(_NO_ID, label, text, color);
     }
     template <typename T>
-    void LabelNum(Text label, T text, sets::Colors color) {
+    void LabelNum(Text label, T text, Colors color) {
         LabelNum(_NO_ID, label, text, (uint32_t)color);
     }
 
@@ -142,13 +147,13 @@ class Builder {
             _endWidget();
         }
     }
-    void LabelFloat(size_t id, Text label, float text, uint8_t dec, sets::Colors color) {
+    void LabelFloat(size_t id, Text label, float text, uint8_t dec, Colors color) {
         LabelFloat(id, label, text, dec, (uint32_t)color);
     }
     void LabelFloat(Text label, float text, uint8_t dec = 2, uint32_t color = SETS_DEFAULT_COLOR) {
         LabelFloat(_NO_ID, label, text, dec, color);
     }
-    void LabelFloat(Text label, float text, uint8_t dec, sets::Colors color) {
+    void LabelFloat(Text label, float text, uint8_t dec, Colors color) {
         LabelFloat(_NO_ID, label, text, dec, (uint32_t)color);
     }
 
@@ -238,12 +243,18 @@ class Builder {
 
     // ================= SWITCH =================
     // переключатель [результат 1/0], подключаемая переменная - bool
-    bool Switch(size_t id, Text label = "", bool* value = nullptr) {
-        _widget(Code::toggle, id, label, value);
+    bool Switch(size_t id, Text label = "", bool* value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        _widget(Code::toggle, id, label, value, color);
         return _isSet(id, value);
     }
-    bool Switch(Text label = "", bool* value = nullptr) {
-        return Switch(_next(), label, value);
+    bool Switch(size_t id, Text label, bool* value, Colors color) {
+        return Switch(id, label, value, (uint32_t)color);
+    }
+    bool Switch(Text label = "", bool* value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        return Switch(_next(), label, value, color);
+    }
+    bool Switch(Text label, bool* value, Colors color) {
+        return Switch(_next(), label, value, (uint32_t)color);
     }
 
     // ================= DATE =================
@@ -278,8 +289,8 @@ class Builder {
 
     // ================= SLIDER =================
     // слайдер [результат - число], подключаемая переменная - любой тип
-    bool Slider(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr) {
-        if (_beginWidget(Code::slider, id, label, value)) {
+    bool Slider(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        if (_beginWidget(Code::slider, id, label, value, color)) {
             p->addFloat(Code::min, min);
             p->addFloat(Code::max, max);
             p->addFloat(Code::step, step);
@@ -288,8 +299,14 @@ class Builder {
         }
         return _isSet(id, value);
     }
-    bool Slider(Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr) {
-        return Slider(_next(), label, min, max, step, unit, value);
+    bool Slider(size_t id, Text label, float min, float max, float step, Text unit, AnyPtr value, Colors color) {
+        return Slider(id, label, min, max, step, unit, value, (uint32_t)color);
+    }
+    bool Slider(Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        return Slider(_next(), label, min, max, step, unit, value, color);
+    }
+    bool Slider(Text label, float min, float max, float step, Text unit, AnyPtr value, Colors color) {
+        return Slider(_next(), label, min, max, step, unit, value, (uint32_t)color);
     }
 
     // ================= SELECT =================
@@ -315,10 +332,10 @@ class Builder {
         return Button(_next(), label, color);
     }
 
-    bool Button(size_t id, Text label, sets::Colors color) {
+    bool Button(size_t id, Text label, Colors color) {
         return Button(id, label, (uint32_t)color);
     }
-    bool Button(Text label, sets::Colors color) {
+    bool Button(Text label, Colors color) {
         return Button(_next(), label, (uint32_t)color);
     }
 

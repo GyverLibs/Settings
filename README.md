@@ -733,8 +733,10 @@ bool Color(Text label = "", uint32_t* value = nullptr);
 
 // ================= SWITCH =================
 // переключатель [результат 1/0], подключаемая переменная - bool
-bool Switch(size_t id, Text label = "", bool* value = nullptr);
-bool Switch(Text label = "", bool* value = nullptr);
+bool Switch(size_t id, Text label = "", bool* value = nullptr, uint32_t color = SETS_DEFAULT_COLOR);
+bool Switch(size_t id, Text label, bool* value, Colors color);
+bool Switch(Text label = "", bool* value = nullptr, uint32_t color = SETS_DEFAULT_COLOR);
+bool Switch(Text label, bool* value, Colors color);
 
 // ================= DATE =================
 // дата [результат - unix секунды], подключаемая переменная - uint32_t
@@ -753,8 +755,10 @@ bool DateTime(Text label = "", uint32_t* value = nullptr);
 
 // ================= SLIDER =================
 // слайдер [результат - число], подключаемая переменная - любой тип
-bool Slider(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr);
-bool Slider(Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr);
+bool Slider(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR);
+bool Slider(size_t id, Text label, float min, float max, float step, Text unit, AnyPtr value, Colors color);
+bool Slider(Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR);
+bool Slider(Text label, float min, float max, float step, Text unit, AnyPtr value, Colors color);
 
 // ================= SELECT =================
 // опции разделяются ; [результат - индекс (число)], подключаемая переменная - uint8_t
@@ -880,6 +884,9 @@ void update(size_t id, <любой численный тип> value);
 - v1.1.8
   - Разбивка на пакеты для меньшего использования памяти
   - Добавлен LabelFloat
+
+- v1.1.12
+  - Добавлена поддержка цвета виджетам Slider и Switch
 
 <a id="install"></a>
 ## Установка
