@@ -17,6 +17,7 @@
 #include "core/colors.h"
 #include "core/containers.h"
 #include "core/fs.h"
+#include "core/logger.h"
 #include "core/packet.h"
 #include "core/timer.h"
 #include "core/updater.h"
@@ -26,6 +27,7 @@ namespace sets {
 class SettingsBase {
     typedef std::function<void(Builder& b)> BuildCallback;
     typedef std::function<void(Updater& upd)> UpdateCallback;
+    typedef std::function<void(Text path)> FileCallback;
 
     struct Config {
         // таймаут отправки слайдера, мс. 0 чтобы отключить
@@ -36,6 +38,14 @@ class SettingsBase {
 
         // период обновлений, мс. 0 чтобы отключить
         uint16_t updateTout = 2500;
+    };
+
+    struct CustomJS {
+        const char* p = nullptr;
+        size_t len;
+        uint8_t hash = 0;
+        bool isFile;
+        bool gz;
     };
 
    public:
@@ -77,14 +87,24 @@ class SettingsBase {
 #endif
     }
 
-    // обработчик билда
+    // обработчик билда типа f(sets::Builder& b)
     void onBuild(BuildCallback cb) {
         _build_cb = cb;
     }
 
-    // обработчик обновлений
+    // обработчик обновлений типа f(sets::Updater& upd)
     void onUpdate(UpdateCallback cb) {
         _upd_cb = cb;
+    }
+
+    // обработчик скачивания файлов с устройства типа f(Text path)
+    void onFetch(FileCallback cb) {
+        fetch_cb = cb;
+    }
+
+    // обработчик загрузки файлов на устройство типа f(Text path)
+    void onUpload(FileCallback cb) {
+        upload_cb = cb;
     }
 
     // тикер, вызывать в родительском классе
@@ -108,10 +128,36 @@ class SettingsBase {
         _packet_size = size;
     }
 
+    // установить кастом js код из PROGMEM
+    void setCustom(const char* js, size_t len, bool gz = false) {
+        custom.isFile = false;
+        custom.p = js;
+        custom.gz = gz;
+        custom.len = len;
+        custom.hash = 0;
+        while (len--) custom.hash += pgm_read_byte(js++);
+    }
+
+    // установить кастом js код из файла
+    void setCustomFile(const char* path, bool gz = false) {
+        custom.isFile = true;
+        custom.p = path;
+        custom.gz = gz;
+        custom.hash = 0;
+        File f = sets::FS.openRead(custom.p);
+        if (f) {
+            while (f.available()) custom.hash += f.read();
+        }
+    }
+
     // настройки вебморды
     Config config;
 
    protected:
+    CustomJS custom;
+    FileCallback fetch_cb = nullptr;
+    FileCallback upload_cb = nullptr;
+
     // отправка для родительского класса
     virtual void send(uint8_t* data, size_t len) {}
 
@@ -182,25 +228,26 @@ class SettingsBase {
 #endif
                     Packet p;
                     Updater upd(p);
-                    p.beginObj();
-                    p.addCode(Code::type, Code::update);
-                    p.addUint(Code::rssi, constrain(2 * (WiFi.RSSI() + 100), 0, 100));
-                    p.beginArr(Code::content);
+                    p('{');
+                    p[Code::type] = Code::update;
+                    p[Code::rssi] = constrain(2 * (WiFi.RSSI() + 100), 0, 100);
+                    if (p[Code::content]('[')) {
 #ifndef SETT_NO_DB
-                    if (_db && _db_update) {
-                        while (_db->updatesAvailable()) {
-                            size_t id = _db->updateNext();
-                            p.beginObj();
-                            p.addUint(Code::id, id);
-                            p.addKey(Code::value);
-                            p.addFromDB(_db, id);
-                            p.endObj();
+                        if (_db && _db_update) {
+                            while (_db->updatesAvailable()) {
+                                size_t id = _db->updateNext();
+                                p('{');
+                                p[Code::id] = id;
+                                p[Code::value];
+                                p.addFromDB(_db, id);
+                                p('}');
+                            }
                         }
-                    }
 #endif
-                    if (_upd_cb) _upd_cb(upd);
-                    p.endArr();
-                    p.endObj();
+                        if (_upd_cb) _upd_cb(upd);
+                        p(']');
+                    }
+                    p('}');
 
                     if (_reload) {
                         _reload = false;
@@ -249,40 +296,42 @@ class SettingsBase {
         if (granted) FS.listDir(str, "/", true);
 
         Packet p;
-        p.beginObj();
-        p.addCode(Code::type, Code::fs);
-        p.addText(Code::content, str);
-        p.addUint(Code::used, FS.usedSpace());
-        p.addUint(Code::total, FS.totalSpace());
-        if (!granted) p.addText(Code::error, "Access denied");
-        p.endObj();
+        p('{');
+        p[Code::type] = Code::fs;
+        p[Code::content] = str;
+        p[Code::used] = FS.usedSpace();
+        p[Code::total] = FS.totalSpace();
+        if (!granted) p[Code::error] = F("Access denied");
+        p('}');
         send(p.buf(), p.length());
     }
 
     void _sendBuild(bool granted) {
         if (_build_cb) {
             Packet p(_packet_size, this, _hook);
-            p.beginObj();
-            p.addCode(Code::type, Code::build);
-            p.addUint(Code::update_tout, config.updateTout);
-            p.addUint(Code::request_tout, config.requestTout);
-            p.addUint(Code::slider_tout, config.sliderTout);
-            p.addUint(Code::rssi, constrain(2 * (WiFi.RSSI() + 100), 0, 100));
-            if (_title.length()) p.addText(Code::title, _title);
-            if (_passh) p.addBool(Code::granted, granted);
+            p('{');
+            p[Code::type] = Code::build;
+            p[Code::update_tout] = config.updateTout;
+            p[Code::request_tout] = config.requestTout;
+            p[Code::slider_tout] = config.sliderTout;
+            p[Code::rssi] = constrain(2 * (WiFi.RSSI() + 100), 0, 100);
+            if (custom.p) p[Code::custom_hash] = custom.hash;
+            if (_title.length()) p[Code::title] = _title;
+            if (_passh) p[Code::granted] = granted;
 #ifdef ATOMIC_FS_UPDATE
-            p.addBool(Code::gzip, true);
+            p[Code::gzip] = true;
 #endif
-            p.beginArr(Code::content);
-            Build action(Build::Type::Build, granted);
+            if (p[Code::content]('[')) {
+                Build action(Build::Type::Build, granted);
 #ifndef SETT_NO_DB
-            Builder builder(this, action, &p, _db);
+                Builder builder(this, action, &p, _db);
 #else
-            Builder builder(this, action, &p);
+                Builder builder(this, action, &p);
 #endif
-            _build_cb(builder);
-            p.endArr();
-            p.endObj();
+                _build_cb(builder);
+                p(']');
+            }
+            p('}');
             send(p.buf(), p.length());
         } else {
             _answerEmpty();

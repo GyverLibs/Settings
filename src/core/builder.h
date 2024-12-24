@@ -5,9 +5,10 @@
 #include "build.h"
 #include "colors.h"
 #include "containers_class.h"
+#include "logger.h"
 #include "packet.h"
 
-#define _NO_ID (size_t) - 1
+#define _NO_ID ((size_t)(-1))
 
 namespace sets {
 
@@ -106,6 +107,22 @@ class Builder {
     }
 
     // passive
+    // ================= LOG =================
+    void Log(size_t id, Logger& log, Text label = "") {
+        if (_enabled && build.isBuild()) {
+            (*p)('{');
+            (*p)[Code::type] = Code::log;
+            if (label.length()) (*p)[Code::label] = label;
+            if (id != _NO_ID) (*p)[Code::id] = id;
+            (*p)[Code::value];
+            p->addLogger(log);
+            (*p)('}');
+            p->checkLen();
+        }
+    }
+    void Log(Logger& log, Text label = "") {
+        Log(_NO_ID, log, label);
+    }
 
     // ================= LABEL =================
     // текстовое значение, может обновляться по id
@@ -143,7 +160,7 @@ class Builder {
     // лейбл с численным значением (выполняется быстрее, весит меньше)
     void LabelFloat(size_t id, Text label, float text, uint8_t dec = 2, uint32_t color = SETS_DEFAULT_COLOR) {
         if (_beginWidget(Code::label, id, label, &text, color)) {
-            p->addUint(Code::step, dec);
+            (*p)[Code::step] = dec;
             _endWidget();
         }
     }
@@ -161,8 +178,8 @@ class Builder {
     // светодиод с цветом на выбор
     void LED(size_t id, Text label, bool value, uint32_t colorOff, uint32_t colorOn) {
         if (_beginWidget(Code::led, id, label, &value)) {
-            p->addUint(Code::color_off, colorOff);
-            p->addUint(Code::color_on, colorOn);
+            (*p)[Code::color_off] = colorOff;
+            (*p)[Code::color_on] = colorOn;
             _endWidget();
         }
     }
@@ -291,10 +308,10 @@ class Builder {
     // слайдер [результат - число], подключаемая переменная - любой тип
     bool Slider(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
         if (_beginWidget(Code::slider, id, label, value, color)) {
-            p->addFloat(Code::min, min);
-            p->addFloat(Code::max, max);
-            p->addFloat(Code::step, step);
-            if (unit.length()) p->addText(Code::unit, unit);
+            (*p)[Code::min] = min;
+            (*p)[Code::max] = max;
+            (*p)[Code::step] = step;
+            if (unit.length()) (*p)[Code::unit] = unit;
             _endWidget();
         }
         return _isSet(id, value);
@@ -309,11 +326,45 @@ class Builder {
         return Slider(_next(), label, min, max, step, unit, value, (uint32_t)color);
     }
 
+    // ================= SLIDER2 =================
+    // двойной слайдер [результат - число], подключаемая переменная - любой тип
+    bool Slider2(size_t id_min, size_t id_max, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value_min = nullptr, AnyPtr value_max = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        if (_enabled && build.isBuild()) {
+            (*p)('{');
+            (*p)[Code::id2] = Code::slider2;
+            if (label.length()) (*p)[Code::label] = label;
+            if (color != SETS_DEFAULT_COLOR) (*p)[Code::color] = color;
+            (*p)[Code::min] = min;
+            (*p)[Code::max] = max;
+            (*p)[Code::step] = step;
+            if (unit.length()) (*p)[Code::unit] = unit;
+            (*p)[Code::id] = id_min;
+            (*p)[Code::id2] = id_max;
+
+            if ((*p)[Code::value]('[')) {
+                if (value_min) value_min.write(p);
+                else if (_db) p->addFromDB(_db, id_min);
+
+                if (value_max) value_max.write(p);
+                else if (_db) p->addFromDB(_db, id_max);
+                (*p)(']');
+            }
+
+            (*p)('}');
+            p->checkLen();
+            return _isSet(id_min, value_min) || _isSet(id_max, value_max);
+        }
+        return false;
+    }
+    bool Slider2(size_t id_min, size_t id_max, Text label, float min, float max, float step, Text unit, AnyPtr value_min, AnyPtr value_max, Colors color) {
+        return Slider2(id_min, id_max, label, min, max, step, unit, value_min, value_max, (uint32_t)color);
+    }
+
     // ================= SELECT =================
     // опции разделяются ; [результат - индекс (число)], подключаемая переменная - uint8_t
     bool Select(size_t id, Text label, Text options, uint8_t* value = nullptr) {
         if (_beginWidget(Code::select, id, label, value)) {
-            p->addText(Code::text, options);
+            (*p)[Code::text] = options;
             _endWidget();
         }
         return _isSet(id, value);
@@ -346,6 +397,30 @@ class Builder {
         return _isSet(id, ptr);
     }
 
+    // ================= CUSTOM =================
+    // кастомный виджет, type соответствует имени класса. params - ключи и значения
+    bool Custom(Text type, size_t id, const BSON& params = BSON(), AnyPtr value = nullptr) {
+        if (_enabled && build.isBuild()) {
+            (*p)('{');
+            (*p)[Code::id] = id;
+            (*p)[Code::type] = type;
+            p->add(params);
+
+            if (value) {
+                (*p)[Code::value];
+                value.write(p);
+            } else if (_db) {
+                (*p)[Code::value];
+                p->addFromDB(_db, id);
+            }
+
+            (*p)('}');
+            p->checkLen();
+            return _isSet(id, value);
+        }
+        return false;
+    }
+
    private:
     void* _settings;
     sets::Packet* p = nullptr;
@@ -370,17 +445,17 @@ class Builder {
 
     bool _beginWidget(Code type, size_t id, Text& label, AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
         if (_enabled && build.isBuild()) {
-            p->beginObj();
-            p->addCode(Code::type, type);
-            if (label.length()) p->addText(Code::label, label);
-            if (color != SETS_DEFAULT_COLOR) p->addUint(Code::color, color);
-            if (id != _NO_ID) p->addUint(Code::id, id);
+            (*p)('{');
+            (*p)[Code::type] = type;
+            if (label.length()) (*p)[Code::label] = label;
+            if (color != SETS_DEFAULT_COLOR) (*p)[Code::color] = color;
+            if (id != _NO_ID) (*p)[Code::id] = id;
 
             if (value) {
-                p->addKey(Code::value);
+                (*p)[Code::value];
                 value.write(p);
             } else if (_db && id != _NO_ID) {
-                p->addKey(Code::value);
+                (*p)[Code::value];
                 p->addFromDB(_db, id);
             }
             return true;
@@ -389,24 +464,24 @@ class Builder {
     }
 
     void _endWidget() {
-        p->endObj();
+        (*p)('}');
         p->checkLen();
     }
 
     bool _beginContainer(Code type, Text title = Text()) {
         if (build.isBuild()) {
-            p->beginObj();
-            p->addCode(Code::type, type);
-            if (title.length()) p->addText(Code::title, title);
-            p->beginArr(Code::content);
+            (*p)('{');
+            (*p)[Code::type] = type;
+            if (title.length()) (*p)[Code::title] = title;
+            (*p)[Code::content]('[');
         }
         return true;
     }
 
     void _endContainer() {
         if (build.isBuild()) {
-            p->endArr();
-            p->endObj();
+            (*p)(']');
+            (*p)('}');
         }
     }
 

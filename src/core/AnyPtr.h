@@ -46,20 +46,20 @@ class AnyPtr {
 
     void write(sets::Packet* pkt) {
         switch (type) {
-            case Type::ConstChar: pkt->addText((const char*)p); break;
-            case Type::ConstFstr: pkt->addText((const __FlashStringHelper*)p); break;
+            case Type::ConstChar: *pkt += (const char*)p; break;
+            case Type::ConstFstr: *pkt += (const __FlashStringHelper*)p; break;
 
-            case Type::Text: pkt->addText(*((Text*)p)); break;
-            case Type::String: pkt->addText(*((String*)p)); break;
-            case Type::Char: pkt->addText((char*)p); break;
+            case Type::Text: *pkt += *((Text*)p); break;
+            case Type::String: *pkt += *((String*)p); break;
+            case Type::Char: *pkt += (char*)p; break;
 
-            case Type::Bool: pkt->addBool(*((bool*)p)); break;
-            case Type::Int8: pkt->addInt(*((int8_t*)p)); break;
-            case Type::Int16: pkt->addInt(*((int16_t*)p)); break;
-            case Type::Int32: pkt->addInt(*((int32_t*)p)); break;
+            case Type::Bool: *pkt += *((bool*)p); break;
+            case Type::Int8: *pkt += *((int8_t*)p); break;
+            case Type::Int16: *pkt += *((int16_t*)p); break;
+            case Type::Int32: *pkt += *((int32_t*)p); break;
 
-            case Type::Float: pkt->addFloat(*((float*)p), 4); break;
-            case Type::Double: pkt->addFloat(*((double*)p), 4); break;
+            case Type::Float: *pkt += *((float*)p); break;
+            case Type::Double: *pkt += *((double*)p); break;
 
             default: break;
         }

@@ -5,6 +5,7 @@ namespace sets {
 
 enum class Code : uint8_t {
     id,
+    id2,
     type,
     content,
     group,
@@ -25,11 +26,13 @@ enum class Code : uint8_t {
     used,
     total,
     rssi,
+    custom_hash,
 
     label,
     title,
     text,
     value,
+    data,
     color,
     min,
     max,
@@ -43,6 +46,7 @@ enum class Code : uint8_t {
     pass,
     select,
     slider,
+    slider2,
     toggle,
     time,
     date,
@@ -53,6 +57,7 @@ enum class Code : uint8_t {
     led,
     alert,
     notice,
+    log,
 };
 
 }

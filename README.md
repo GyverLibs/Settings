@@ -8,7 +8,7 @@
 
 # Settings
 Библиотека для создания простого веб-интерфейса настроек на esp8266/esp32
-- Веб-приложение весит около 10кб и вшивается в программу в бинарном gzip виде без возни с файлами
+- Веб-приложение весит около 15кб и вшивается в программу в бинарном gzip виде без возни с файлами
 - Удобный билдер панели управления из скетча
 - Десяток типовых виджетов с возможностью объединения в группы и вложенные меню
 - Система авторизации с разными правами для авторизованных юзеров и гостей
@@ -27,11 +27,11 @@
 ESP8266, ESP32
 
 ### Зависимости
-- GTL v1.1.1+
-- GyverDB v1.1.2+
-- StringUtils v1.4.24+
-- GyverHTTP v1.0.17+
-- GSON v1.5.9+
+- GTL v1.1.14+
+- GyverDB v1.1.8+
+- StringUtils v1.4.28+
+- GyverHTTP v1.0.23+
+- BSON v2.0.0+
 
 > При установке из реестра PIO или Arduino IDE все зависимости установятся автоматически
 
@@ -602,17 +602,29 @@ void attachDB(GyverDB* db);
 // использовать автоматические обновления из БД (при изменении записи новое значение отправится в браузер)
 void useAutoUpdates(bool use);
 
-// обработчик билда
+// обработчик билда типа f(sets::Builder& b)
 void onBuild(BuildCallback cb);
 
-// обработчик обновлений
+// обработчик обновлений типа f(sets::Updater& upd)
 void onUpdate(UpdateCallback cb);
+
+// обработчик скачивания файлов с устройства типа f(Text path)
+void onFetch(FileCallback cb);
+
+// обработчик загрузки файлов на устройство типа f(Text path)
+void onUpload(FileCallback cb);
 
 // тикер, вызывать в родительском классе
 void tick();
 
 // установить размер пакета (умолч. 1024 Б). 0 - отключить разбивку на пакеты. Не работает для Async-версии
 void setPacketSize(size_t size);
+
+// установить кастом js код из PROGMEM
+void setCustom(const char* js, size_t len, bool gz = false);
+
+// установить кастом js код из файла
+void setCustomFile(const char* path, bool gz = false);
 
 // настройки вебморды
 Config config;
@@ -673,6 +685,11 @@ void endButtons();
 
 // ВИДЖЕТЫ
 // ПАССИВНЫЕ
+
+// ================= LOG =================
+void Log(size_t id, Logger& log, Text label = "");
+void Log(Logger& log, Text label = "");
+
 // ================= LABEL =================
 // текстовое значение, может обновляться по id
 void Label(size_t id, Text label = "", Text text = Text(), uint32_t color = SETS_DEFAULT_COLOR);
@@ -760,6 +777,10 @@ bool Slider(size_t id, Text label, float min, float max, float step, Text unit, 
 bool Slider(Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR);
 bool Slider(Text label, float min, float max, float step, Text unit, AnyPtr value, Colors color);
 
+// двойной слайдер [результат - число], подключаемая переменная - любой тип
+bool Slider2(size_t id_min, size_t id_max, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value_min = nullptr, AnyPtr value_max = nullptr, uint32_t color = SETS_DEFAULT_COLOR);
+bool Slider2(size_t id_min, size_t id_max, Text label, float min, float max, float step, Text unit, AnyPtr value_min, AnyPtr value_max, Colors color);
+
 // ================= SELECT =================
 // опции разделяются ; [результат - индекс (число)], подключаемая переменная - uint8_t
 bool Select(size_t id, Text label, Text options, uint8_t* value = nullptr);
@@ -776,6 +797,9 @@ bool Button(Text label, sets::Colors color);
 // misc
 // окно подтверждения, для активации отправь пустой update на его id или update с текстом подтверждения
 bool Confirm(size_t id, Text label = "", bool* ptr = nullptr);
+
+// кастомный виджет, type соответствует имени класса. params - ключи и значения
+bool Custom(Text type, size_t id, const BSON& params = BSON(), AnyPtr value = nullptr);
 ```
 
 - `Text` - универсальный текстовый формат, принимает строки в любом виде. При указании `value` отличным от стандартного будет отправлено его значение. Иначе будет отправлено значение из БД, если она подключена. Если в качестве значения нужно число - используйте конструктор `Value`, например `b.Color("col", "Color", Value(my_color));`, где `my_color` это `uint32_t`.
@@ -832,14 +856,33 @@ void notice(Text text);
 // пустой апдейт (например для вызова Confirm)
 void update(size_t id);
 
-// апдейт с текстом
-void update(size_t id, Text value);
-
 // апдейт с float
 void update(size_t id, float value, uint8_t dec = 2);
 
 // апдейт с числом
 void update(size_t id, <любой численный тип> value);
+
+// апдейт с текстом
+void update(size_t id, <любой текстовый тип> value);
+
+// апдейт логгера
+void update(size_t id, Logger& logger);
+
+// апдейт для двойного слайдера
+void update2(size_t id_min, <любой численный тип> value_min, <любой численный тип> value_max);
+void update2(size_t id_min, float value_min, float value_max, uint8_t dec = 2);
+
+// кастом апдейт для кастом виджета, params - ключи и значения
+void update(size_t id, BSON& params);
+```
+
+### Logger
+```cpp
+Logger(size_t size);
+
+// наследует Print
+void print(любые_данные);
+void println(любые_данные);
 ```
 
 <a id="versions"></a>
@@ -887,6 +930,12 @@ void update(size_t id, <любой численный тип> value);
 
 - v1.1.12
   - Добавлена поддержка цвета виджетам Slider и Switch
+
+- v1.2.0
+  - Добавлен двойной слайдер
+  - Добавлен логгер (Web Serial)
+  - Добавлена поддержка кастомных виджетов на JS
+  - Добавлены обработчики скачивания и загрузки файлов
 
 <a id="install"></a>
 ## Установка

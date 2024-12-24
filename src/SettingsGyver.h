@@ -35,9 +35,11 @@ class SettingsGyver : public sets::SettingsBase {
 
                 case SH("/fetch"):
                     if (authenticate(req.param("auth"))) {
-                        File f = sets::FS.openRead(req.param("path").decodeUrl());
+                        String path = req.param("path").decodeUrl();
+                        File f = sets::FS.openRead(path);
                         if (f) server.sendFile(f);
                         else server.send(500);
+                        if (fetch_cb) fetch_cb(path);
                     } else {
                         server.send(401);
                     }
@@ -45,10 +47,12 @@ class SettingsGyver : public sets::SettingsBase {
 
                 case SH("/upload"):
                     if (authenticate(req.param("auth"))) {
-                        File f = sets::FS.openWrite(req.param("path").decodeUrl());
+                        String path = req.param("path").decodeUrl();
+                        File f = sets::FS.openWrite(path);
                         if (f) {
                             req.body().writeTo(f);
                             server.send(200);
+                            if (upload_cb) upload_cb(path);
                         } else server.send(500);
                     } else {
                         server.send(401);
@@ -76,6 +80,18 @@ class SettingsGyver : public sets::SettingsBase {
 
                 case SH("/favicon.svg"):
                     server.sendFile_P(settings_favicon_gz, sizeof(settings_favicon_gz), "image/svg+xml", true, true);
+                    break;
+
+                case SH("/custom.js"):
+                    if (!custom.p) server.send(500);
+                    else {
+                        if (!custom.isFile) server.sendFile_P((const uint8_t*)custom.p, custom.len, "text/javascript", false, custom.gz);
+                        else {
+                            File f = sets::FS.openRead(custom.p);
+                            if (f) server.sendFile(f, "text/javascript", false, custom.gz);
+                            else server.send(500);
+                        }
+                    }
                     break;
 
                 default:

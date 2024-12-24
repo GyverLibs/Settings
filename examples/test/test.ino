@@ -43,6 +43,8 @@ enum kk : size_t {
     btn2,
 };
 
+sets::Logger logger(150);
+
 // билдер! Тут строится наше окно настроек
 void build(sets::Builder& b) {
     // можно узнать, было ли действие по виджету
@@ -51,6 +53,9 @@ void build(sets::Builder& b) {
         Serial.print(b.build.id, HEX);
         Serial.print(" = ");
         Serial.println(b.build.value);
+        
+        logger.print("Set: 0x");
+        logger.println(b.build.id, HEX);
     }
 
     // группа. beginGroup всегда вернёт true для удобства организации кода
@@ -78,6 +83,9 @@ void build(sets::Builder& b) {
         b.Switch(kk::toggle, "Switch");
         b.Select(kk::selectw, "Select", "var1;var2;hello");
         b.Slider(kk::slider, "Slider", -10, 10, 0.5, "deg");
+
+        // логгер, в него печатаем выше
+        b.Log(logger);
     }
 
     // и ещё

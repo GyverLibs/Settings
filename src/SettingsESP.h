@@ -51,6 +51,7 @@ class SettingsESP : public sets::SettingsBase {
             File f = sets::FS.openRead(path);
             if (f) server.streamFile(f, "text/plain");
             else server.send(500);
+            if (fetch_cb) fetch_cb(path);
         });
 
         server.on("/upload", HTTP_POST, [this]() {
@@ -67,6 +68,10 @@ class SettingsESP : public sets::SettingsBase {
                 if (_file) _file.write(upload.buf, upload.currentSize);
             } else if (upload.status == UPLOAD_FILE_END) {
                 if (_file) _file.close();
+                if (upload_cb) {
+                    String path = server.arg(F("path"));
+                    upload_cb(path);
+                }
             } });
 
         server.on("/ota", HTTP_POST, [this]() { 
@@ -104,6 +109,18 @@ class SettingsESP : public sets::SettingsBase {
             gzip_h();
             cache_h();
             server.send_P(200, "image/svg+xml", (PGM_P)settings_favicon_gz, sizeof(settings_favicon_gz));
+        });
+        server.on("/custom.js", HTTP_GET, [this]() {
+            if (!custom.p) server.send(500);
+            else {
+                if (custom.gz) gzip_h();
+                if (!custom.isFile) server.send_P(200, "text/javascript", custom.p, custom.len);
+                else {
+                    File f = sets::FS.openRead(custom.p);
+                    if (f) server.streamFile(f, "text/javascript");
+                    else server.send(500);
+                }
+            }
         });
     }
 

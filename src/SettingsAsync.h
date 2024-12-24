@@ -30,7 +30,7 @@ class SettingsAsync : public sets::SettingsBase {
         server.begin();
 
         server.on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            setPacketSize(0);   // TODO некорректно работает, видимо есть ограниченный внутренний буфер
+            setPacketSize(0);  // TODO некорректно работает, видимо есть ограниченный внутренний буфер
             String auth, action, id, value;
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (request->hasParam("action")) action = request->getParam("action")->value();
@@ -53,6 +53,7 @@ class SettingsAsync : public sets::SettingsBase {
                 AsyncWebServerResponse *response = request->beginResponse(ST_FS, path, emptyString);
                 cors_h(response);
                 request->send(response);
+                if (fetch_cb) fetch_cb(path);
             } else {
                 sendCode(401, request);
             }
@@ -65,7 +66,10 @@ class SettingsAsync : public sets::SettingsBase {
             if (!authenticate(auth)) return;
             if (!index) _file = sets::FS.openWrite(path);
             if (len && _file) _file.write(data, len);
-            if (final && _file) _file.close(); });
+            if (final && _file) {
+                _file.close();
+                if (upload_cb) upload_cb(path);
+            } });
 
         server.on("/ota", HTTP_POST, [this](AsyncWebServerRequest *request) {
             sendCode(Update.hasError() ? 500 : 200, request);
@@ -100,6 +104,19 @@ class SettingsAsync : public sets::SettingsBase {
             gzip_h(response);
             cache_h(response);
             request->send(response);
+        });
+        server.on("/custom.js", HTTP_GET, [this](AsyncWebServerRequest *request) {
+            if (!custom.p) sendCode(500, request);
+            else {
+                AsyncWebServerResponse *response;
+                if (!custom.isFile) response = request->beginResponse_P(200, "text/javascript", (const uint8_t *)custom.p, custom.len);
+                else response = request->beginResponse(ST_FS, custom.p, "text/javascript");
+                if (!response) return;
+
+                if (custom.gz) gzip_h(response);
+                cors_h(response);
+                request->send(response);
+            }
         });
     }
 
