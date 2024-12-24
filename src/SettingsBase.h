@@ -238,7 +238,7 @@ class SettingsBase {
                                 size_t id = _db->updateNext();
                                 p('{');
                                 p[Code::id] = id;
-                                p[Code::value];
+                                p[Code::data];
                                 p.addFromDB(_db, id);
                                 p('}');
                             }
@@ -267,6 +267,13 @@ class SettingsBase {
             case SH("remove"):
                 if (granted) {
                     FS.remove(value);
+                    _sendFs(true);
+                }
+                break;
+
+            case SH("create"):
+                if (granted) {
+                    FS.openWrite(value);
                     _sendFs(true);
                 }
                 break;
