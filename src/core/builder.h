@@ -331,7 +331,7 @@ class Builder {
     bool Slider2(size_t id_min, size_t id_max, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value_min = nullptr, AnyPtr value_max = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
         if (_enabled && build.isBuild()) {
             (*p)('{');
-            (*p)[Code::id2] = Code::slider2;
+            (*p)[Code::type] = Code::slider2;
             if (label.length()) (*p)[Code::label] = label;
             if (color != SETS_DEFAULT_COLOR) (*p)[Code::color] = color;
             (*p)[Code::min] = min;
@@ -352,7 +352,9 @@ class Builder {
 
             (*p)('}');
             p->checkLen();
-            return _isSet(id_min, value_min) || _isSet(id_max, value_max);
+            bool set = _isSet(id_min, value_min);
+            set |= _isSet(id_max, value_max);
+            return set;
         }
         return false;
     }

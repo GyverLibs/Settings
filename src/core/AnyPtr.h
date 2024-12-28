@@ -15,6 +15,7 @@ class AnyPtr {
         Int8,
         Int16,
         Int32,
+        Int64,
         Float,
         Double,
     };
@@ -37,6 +38,7 @@ class AnyPtr {
             case 1: type = Type::Int8; break;
             case 2: type = Type::Int16; break;
             case 4: type = Type::Int32; break;
+            case 8: type = Type::Int64; break;
         }
     }
 
@@ -57,6 +59,7 @@ class AnyPtr {
             case Type::Int8: *pkt += *((int8_t*)p); break;
             case Type::Int16: *pkt += *((int16_t*)p); break;
             case Type::Int32: *pkt += *((int32_t*)p); break;
+            case Type::Int64: *pkt += *((int64_t*)p); break;
 
             case Type::Float: *pkt += *((float*)p); break;
             case Type::Double: *pkt += *((double*)p); break;
@@ -74,6 +77,7 @@ class AnyPtr {
             case Type::Int8: *((int8_t*)p) = value.toInt(); break;
             case Type::Int16: *((int16_t*)p) = value.toInt(); break;
             case Type::Int32: *((int32_t*)p) = value.toInt(); break;
+            case Type::Int64: *((int64_t*)p) = value.toInt64(); break;
 
             case Type::Float: *((float*)p) = value.toFloat(); break;
             case Type::Double: *((double*)p) = value.toFloat(); break;

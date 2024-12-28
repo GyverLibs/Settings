@@ -31,6 +31,8 @@ enum kk : size_t {
     toggle,
     slider,
     selectw,
+    sldmin,
+    sldmax,
 
     lbl1,
     lbl2,
@@ -83,6 +85,7 @@ void build(sets::Builder& b) {
         b.Switch(kk::toggle, "Switch");
         b.Select(kk::selectw, "Select", "var1;var2;hello");
         b.Slider(kk::slider, "Slider", -10, 10, 0.5, "deg");
+        b.Slider2(kk::sldmin, kk::sldmax, "Slider", -10, 10, 0.5, "deg");
 
         // логгер, в него печатаем выше
         b.Log(logger);
@@ -197,6 +200,8 @@ void setup() {
     db.init(kk::date, 1719941932);
     db.init(kk::timew, 60);
     db.init(kk::datime, 1719941932);
+    db.init(kk::sldmin, -5);
+    db.init(kk::sldmax, 5);
 
     db.dump(Serial);
 
