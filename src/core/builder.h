@@ -352,11 +352,10 @@ class Builder {
 
             (*p)('}');
             p->checkLen();
-            bool set = _isSet(id_min, value_min);
-            set |= _isSet(id_max, value_max);
-            return set;
         }
-        return false;
+        bool set = _isSet(id_min, value_min);
+        set |= _isSet(id_max, value_max);
+        return set;
     }
     bool Slider2(size_t id_min, size_t id_max, Text label, float min, float max, float step, Text unit, AnyPtr value_min, AnyPtr value_max, Colors color) {
         return Slider2(id_min, id_max, label, min, max, step, unit, value_min, value_max, (uint32_t)color);
