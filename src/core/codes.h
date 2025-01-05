@@ -58,6 +58,8 @@ enum class Code : uint8_t {
     alert,
     notice,
     log,
+    proj_name,
+    proj_link,
 };
 
 }

@@ -629,6 +629,9 @@ void setCustom(const char* js, size_t len, bool gz = false);
 // установить кастом js код из файла
 void setCustomFile(const char* path, bool gz = false);
 
+// установить инфо о проекте (отображается на вкладке настроек и файлов)
+void setProjectInfo(const char* name, const char* link = nullptr);
+
 // настройки вебморды
 Config config;
 {
@@ -886,6 +889,9 @@ Logger(size_t size);
 // наследует Print
 void print(любые_данные);
 void println(любые_данные);
+
+// вывод в String
+String toString();
 ```
 
 <a id="versions"></a>

@@ -150,6 +150,12 @@ class SettingsBase {
         }
     }
 
+    // установить инфо о проекте (отображается на вкладке настроек и файлов)
+    void setProjectInfo(const char* name, const char* link = nullptr) {
+        _pname = name;
+        _plink = link;
+    }
+
     // настройки вебморды
     Config config;
 
@@ -292,6 +298,7 @@ class SettingsBase {
     bool _db_update = true;
     bool _rst = false;
     bool _reload = false;
+    const char *_pname = nullptr, *_plink = nullptr;
 
     void _answerEmpty() {
         uint8_t p;
@@ -325,6 +332,8 @@ class SettingsBase {
             if (custom.p) p[Code::custom_hash] = custom.hash;
             if (_title.length()) p[Code::title] = _title;
             if (_passh) p[Code::granted] = granted;
+            if (_pname) p[Code::proj_name] = _pname;
+            if (_plink) p[Code::proj_link] = _plink;
 #ifdef ATOMIC_FS_UPDATE
             p[Code::gzip] = true;
 #endif
