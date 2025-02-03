@@ -52,6 +52,7 @@ enum class Code : uint8_t {
     date,
     datetime,
     button,
+    button_hold,
     paragraph,
     confirm,
     led,
@@ -60,6 +61,17 @@ enum class Code : uint8_t {
     log,
     proj_name,
     proj_link,
+    divtype,
+    line,
+    block,
+    html,
+    regex,
+    format,
+    maxlen,
+    zone,
+    image,
+    stream,
+    tabs,
 };
 
 }

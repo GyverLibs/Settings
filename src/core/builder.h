@@ -12,6 +12,12 @@
 
 namespace sets {
 
+enum class DivType : uint8_t {
+    Default,
+    Line,
+    Block,
+};
+
 class Builder {
     friend class BasicContainer;
 
@@ -78,9 +84,9 @@ class Builder {
 
     // ================= ROW =================
 
-    // горизонтальная группа виджетов
-    bool beginRow(Text title = Text()) {
-        return _beginContainer(Code::row, title);
+    // горизонтальная группа виджетов [DivType::Line | DivType::Block]
+    bool beginRow(Text title = Text(), DivType divtype = DivType::Default) {
+        return _beginContainer(Code::row, title, divtype);
     }
     void endRow() {
         _endContainer();
@@ -207,6 +213,25 @@ class Builder {
         LED(_NO_ID, label);
     }
 
+    // ================= IMAGE =================
+    // изображение, url или path на флешке
+    void Image(size_t id, Text label, Text path) {
+        _widget(Code::image, id, label, &path);
+    }
+    void Image(Text label, Text path) {
+        Image(_NO_ID, label, path);
+    }
+
+    // ================= STREAM =================
+    // видео с камеры ESP32-CAM
+    void Stream() {
+        if (_enabled && build.isBuild()) {
+            (*p)('{');
+            (*p)[Code::type] = Code::stream;
+            _endWidget();
+        }
+    }
+
     // ================= TEXT =================
     // текстовый абзац
     void Paragraph(size_t id, Text label = "", Text text = Text()) {
@@ -216,16 +241,29 @@ class Builder {
         Paragraph(_NO_ID, label, text);
     }
 
+    // ================= HTML =================
+    // HTML
+    void HTML(size_t id, Text label = "", Text html = Text()) {
+        _widget(Code::html, id, label, &html);
+    }
+    void HTML(Text label = "", Text html = Text()) {
+        HTML(_NO_ID, label, html);
+    }
+
     // active
 
     // ================= INPUT =================
-    // ввод текста и цифр [результат - строка], подключаемая переменная - любой тип
-    bool Input(size_t id, Text label = "", AnyPtr value = nullptr) {
-        _widget(Code::input, id, label, value);
+    // ввод текста и цифр [результат - строка], подключаемая переменная - любой тип, format - описание regex
+    bool Input(size_t id, Text label = "", AnyPtr value = nullptr, Text regex = Text(), Text format = Text()) {
+        if (_beginWidget(Code::input, id, label, value)) {
+            if (regex) (*p)[Code::regex] = regex;
+            if (format) (*p)[Code::format] = format;
+            _endWidget();
+        }
         return _isSet(id, value);
     }
-    bool Input(Text label = "", AnyPtr value = nullptr) {
-        return Input(_next(), label, value);
+    bool Input(Text label = "", AnyPtr value = nullptr, Text regex = Text(), Text format = Text()) {
+        return Input(_next(), label, value, regex, format);
     }
 
     // ================= NUMBER =================
@@ -276,12 +314,15 @@ class Builder {
 
     // ================= DATE =================
     // дата [результат - unix секунды], подключаемая переменная - uint32_t
-    bool Date(size_t id, Text label = "", uint32_t* value = nullptr) {
-        _widget(Code::date, id, label, value);
+    bool Date(size_t id, Text label = "", uint32_t* value = nullptr, float zone_hours = NAN) {
+        if (_beginWidget(Code::date, id, label, value)) {
+            if (!isnan(zone_hours)) (*p)[Code::zone] = round(zone_hours * 60);
+            _endWidget();
+        }
         return _isSet(id, value);
     }
-    bool Date(Text label = "", uint32_t* value = nullptr) {
-        return Date(_next(), label, value);
+    bool Date(Text label = "", uint32_t* value = nullptr, float zone_hours = NAN) {
+        return Date(_next(), label, value, zone_hours);
     }
 
     // ================= TIME =================
@@ -296,12 +337,15 @@ class Builder {
 
     // ================= DATETIME =================
     // дата и время [результат - unix секунды], подключаемая переменная - uint32_t
-    bool DateTime(size_t id, Text label = "", uint32_t* value = nullptr) {
-        _widget(Code::datetime, id, label, value);
+    bool DateTime(size_t id, Text label = "", uint32_t* value = nullptr, float zone_hours = NAN) {
+        if (_beginWidget(Code::datetime, id, label, value)) {
+            if (!isnan(zone_hours)) (*p)[Code::zone] = round(zone_hours * 60);
+            _endWidget();
+        }
         return _isSet(id, value);
     }
-    bool DateTime(Text label = "", uint32_t* value = nullptr) {
-        return DateTime(_next(), label, value);
+    bool DateTime(Text label = "", uint32_t* value = nullptr, float zone_hours = NAN) {
+        return DateTime(_next(), label, value, zone_hours);
     }
 
     // ================= SLIDER =================
@@ -374,6 +418,19 @@ class Builder {
         return Select(_next(), label, options, value);
     }
 
+    // ================= TABS =================
+    // опции разделяются ; [результат - индекс (число)], подключаемая переменная - uint8_t
+    bool Tabs(size_t id, Text tabs, uint8_t* value = nullptr) {
+        if (_beginWidget(Code::tabs, id, Text(), value)) {
+            (*p)[Code::text] = tabs;
+            _endWidget();
+        }
+        return _isSet(id, value);
+    }
+    bool Tabs(Text tabs, uint8_t* value = nullptr) {
+        return Tabs(_next(), tabs, value);
+    }
+
     // ================= BUTTON =================
     // кнопку можно добавлять как внутри контейнера кнопок, так и как одиночный виджет
     bool Button(size_t id, Text label = "", uint32_t color = SETS_DEFAULT_COLOR) {
@@ -389,6 +446,25 @@ class Builder {
     }
     bool Button(Text label, Colors color) {
         return Button(_next(), label, (uint32_t)color);
+    }
+
+    // кнопка сигналит при нажатии и отпускании, используй b.build.pressed()
+    bool ButtonHold(size_t id, Text label = "", uint32_t color = SETS_DEFAULT_COLOR) {
+        if (_beginWidget(Code::button, id, label, nullptr, color)) {
+            (*p)[Code::button_hold] = true;
+            _endWidget();
+        }
+        return _isSet(id, nullptr);
+    }
+    bool ButtonHold(Text label = "", uint32_t color = SETS_DEFAULT_COLOR) {
+        return ButtonHold(_next(), label, color);
+    }
+
+    bool ButtonHold(size_t id, Text label, Colors color) {
+        return ButtonHold(id, label, (uint32_t)color);
+    }
+    bool ButtonHold(Text label, Colors color) {
+        return ButtonHold(_next(), label, (uint32_t)color);
     }
 
     // misc
@@ -410,6 +486,9 @@ class Builder {
             if (value) {
                 (*p)[Code::value];
                 value.write(p);
+                if (value.type() == AnyPtr::Type::Char && value.len()) {
+                    (*p)[Code::maxlen] = value.len() - 1;
+                }
             } else if (_db) {
                 (*p)[Code::value];
                 p->addFromDB(_db, id);
@@ -444,7 +523,7 @@ class Builder {
         return false;
     }
 
-    bool _beginWidget(Code type, size_t id, Text& label, AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+    bool _beginWidget(Code type, size_t id, const Text& label, AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
         if (_enabled && build.isBuild()) {
             (*p)('{');
             (*p)[Code::type] = type;
@@ -455,6 +534,9 @@ class Builder {
             if (value) {
                 (*p)[Code::value];
                 value.write(p);
+                if (value.type() == AnyPtr::Type::Char && value.len()) {
+                    (*p)[Code::maxlen] = value.len() - 1;
+                }
             } else if (_db && id != _NO_ID) {
                 (*p)[Code::value];
                 p->addFromDB(_db, id);
@@ -469,11 +551,16 @@ class Builder {
         p->checkLen();
     }
 
-    bool _beginContainer(Code type, Text title = Text()) {
+    bool _beginContainer(Code type, Text title = Text(), DivType divtype = DivType::Default) {
         if (build.isBuild()) {
             (*p)('{');
             (*p)[Code::type] = type;
             if (title.length()) (*p)[Code::title] = title;
+            switch (divtype) {
+                case DivType::Default: break;
+                case DivType::Line: (*p)[Code::divtype] = Code::line; break;
+                case DivType::Block: (*p)[Code::divtype] = Code::block; break;
+            }
             (*p)[Code::content]('[');
         }
         return true;

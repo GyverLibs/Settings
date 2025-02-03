@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 
+#include "colors.h"
 #include "logger.h"
 #include "packet.h"
 
@@ -26,22 +27,36 @@ class Updater {
         p('}');
     }
 
+    // вызов виджета Confirm
+    void confirm(size_t id) {
+        update(id, true);
+    }
+
     // апдейт логгера
     void update(size_t id, Logger& logger) {
-        if (!logger.changed()) return;
+        if (!logger._changed()) return;
         p('{');
         p[Code::id] = id;
         p[Code::data];
         p.addLogger(logger);
         p('}');
-        logger.reset();
+        logger._reset();
     }
 
-    // пустой апдейт (например для вызова Confirm)
+    // пустой апдейт
     void update(size_t id) {
+        update(id, true);
+    }
+
+    // апдейт с цветом
+    void updateColor(size_t id, uint32_t color) {
         p('{');
         p[Code::id] = id;
+        p[Code::color] = color;
         p('}');
+    }
+    void updateColor(size_t id, sets::Colors color) {
+        updateColor(id, (uint32_t)color);
     }
 
     // апдейт с числом

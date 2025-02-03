@@ -9,8 +9,7 @@ class Build {
     enum class Type {
         None,
         Build,
-        Set,
-        Click
+        Set
     };
 
     Build(Type type, bool granted, size_t id = 0, Text value = Text()) : type(type), granted(granted), id(id), value(value) {}
@@ -27,6 +26,11 @@ class Build {
     // значение виджета (действие)
     const Text value;
 
+    // состояние ButtonHold
+    bool pressed() {
+        return value.toBool();
+    }
+
     // тип - сборка виджетов
     bool isBuild() {
         return type == Type::Build;
@@ -34,7 +38,7 @@ class Build {
 
     // тип - действие (обработка клика или значения)
     bool isAction() {
-        return (type == Type::Set || type == Type::Click);
+        return type == Type::Set;
     }
 };
 

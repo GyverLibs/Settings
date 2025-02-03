@@ -4,6 +4,7 @@
 #include "packet.h"
 
 class AnyPtr {
+   public:
     enum class Type {
         None,
         Text,
@@ -20,74 +21,81 @@ class AnyPtr {
         Double,
     };
 
-   public:
     AnyPtr() {}
-    AnyPtr(std::nullptr_t p) {}
-    AnyPtr(const char* p) : p((void*)p), type(Type::ConstChar) {}
-    AnyPtr(const __FlashStringHelper* p) : p((void*)p), type(Type::ConstFstr) {}
-    AnyPtr(char* p, size_t len) : p(p), len(len), type(Type::Char) {}
-    AnyPtr(String* p) : p(p), type(Type::String) {}
-    AnyPtr(Text* p) : p(p), type(p->valid() ? Type::Text : Type::None) {}
-    AnyPtr(float* p) : p(p), type(Type::Float) {}
-    AnyPtr(double* p) : p(p), type(Type::Double) {}
-    AnyPtr(bool* p) : p(p), type(Type::Bool) {}
+    AnyPtr(std::nullptr_t _p) {}
+    AnyPtr(const char* _p) : _p((void*)_p), _type(Type::ConstChar) {}
+    AnyPtr(const __FlashStringHelper* _p) : _p((void*)_p), _type(Type::ConstFstr) {}
+    AnyPtr(char* _p, size_t _len) : _p(_p), _len(_len), _type(Type::Char) {}
+    AnyPtr(String* _p) : _p(_p), _type(Type::String) {}
+    AnyPtr(Text* _p) : _p(_p), _type(_p->valid() ? Type::Text : Type::None) {}
+    AnyPtr(float* _p) : _p(_p), _type(Type::Float) {}
+    AnyPtr(double* _p) : _p(_p), _type(Type::Double) {}
+    AnyPtr(bool* _p) : _p(_p), _type(Type::Bool) {}
 
     template <typename T>
-    AnyPtr(T* p) : p(p) {
+    AnyPtr(T* _p) : _p(_p) {
         switch (sizeof(T)) {
-            case 1: type = Type::Int8; break;
-            case 2: type = Type::Int16; break;
-            case 4: type = Type::Int32; break;
-            case 8: type = Type::Int64; break;
+            case 1: _type = Type::Int8; break;
+            case 2: _type = Type::Int16; break;
+            case 4: _type = Type::Int32; break;
+            case 8: _type = Type::Int64; break;
         }
     }
 
     operator bool() {
-        return p && type != Type::None;
+        return _p && _type != Type::None;
     }
 
     void write(sets::Packet* pkt) {
-        switch (type) {
-            case Type::ConstChar: *pkt += (const char*)p; break;
-            case Type::ConstFstr: *pkt += (const __FlashStringHelper*)p; break;
+        switch (_type) {
+            case Type::ConstChar: *pkt += (const char*)_p; break;
+            case Type::ConstFstr: *pkt += (const __FlashStringHelper*)_p; break;
 
-            case Type::Text: *pkt += *((Text*)p); break;
-            case Type::String: *pkt += *((String*)p); break;
-            case Type::Char: *pkt += (char*)p; break;
+            case Type::Text: *pkt += *((Text*)_p); break;
+            case Type::String: *pkt += *((String*)_p); break;
+            case Type::Char: *pkt += (char*)_p; break;
 
-            case Type::Bool: *pkt += *((bool*)p); break;
-            case Type::Int8: *pkt += *((int8_t*)p); break;
-            case Type::Int16: *pkt += *((int16_t*)p); break;
-            case Type::Int32: *pkt += *((int32_t*)p); break;
-            case Type::Int64: *pkt += *((int64_t*)p); break;
+            case Type::Bool: *pkt += *((bool*)_p); break;
+            case Type::Int8: *pkt += *((int8_t*)_p); break;
+            case Type::Int16: *pkt += *((int16_t*)_p); break;
+            case Type::Int32: *pkt += *((int32_t*)_p); break;
+            case Type::Int64: *pkt += *((int64_t*)_p); break;
 
-            case Type::Float: *pkt += *((float*)p); break;
-            case Type::Double: *pkt += *((double*)p); break;
+            case Type::Float: *pkt += *((float*)_p); break;
+            case Type::Double: *pkt += *((double*)_p); break;
 
             default: break;
         }
     }
 
     void read(const Text& value) {
-        switch (type) {
-            case Type::String: value.toString(*((String*)p)); break;
-            case Type::Char: value.toStr((char*)p, len); break;
+        switch (_type) {
+            case Type::String: value.toString(*((String*)_p)); break;
+            case Type::Char: value.toStr((char*)_p, _len); break;
 
-            case Type::Bool: *((bool*)p) = value.toBool(); break;
-            case Type::Int8: *((int8_t*)p) = value.toInt(); break;
-            case Type::Int16: *((int16_t*)p) = value.toInt(); break;
-            case Type::Int32: *((int32_t*)p) = value.toInt(); break;
-            case Type::Int64: *((int64_t*)p) = value.toInt64(); break;
+            case Type::Bool: *((bool*)_p) = value.toBool(); break;
+            case Type::Int8: *((int8_t*)_p) = value.toInt(); break;
+            case Type::Int16: *((int16_t*)_p) = value.toInt(); break;
+            case Type::Int32: *((int32_t*)_p) = value.toInt(); break;
+            case Type::Int64: *((int64_t*)_p) = value.toInt64(); break;
 
-            case Type::Float: *((float*)p) = value.toFloat(); break;
-            case Type::Double: *((double*)p) = value.toFloat(); break;
+            case Type::Float: *((float*)_p) = value.toFloat(); break;
+            case Type::Double: *((double*)_p) = value.toFloat(); break;
 
             default: break;
         }
     }
 
+    size_t len() {
+        return _len;
+    }
+
+    Type type() {
+        return _type;
+    }
+
    private:
-    void* p = nullptr;
-    size_t len = 0;
-    Type type = Type::None;
+    void* _p = nullptr;
+    size_t _len = 0;
+    Type _type = Type::None;
 };

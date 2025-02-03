@@ -22,8 +22,8 @@ class GuestAccess {
 
 class BasicContainer {
    public:
-    BasicContainer(Code type, Builder& b, Text title = Text()) : b(b) {
-        b._beginContainer(type, title);
+    BasicContainer(Code type, Builder& b, Text title = Text(), DivType divtype = DivType::Default) : b(b) {
+        b._beginContainer(type, title, divtype);
     }
     ~BasicContainer() {
         b._endContainer();
@@ -51,10 +51,10 @@ class Buttons : public BasicContainer {
     Buttons(Builder& b) : BasicContainer(Code::buttons, b) {}
 };
 
-// горизонтальный контейнер
+// горизонтальный контейнер [DivType::Line | DivType::Block]
 class Row : public BasicContainer {
    public:
-    Row(Builder& b, Text title = Text()) : BasicContainer(Code::row, b, title) {}
+    Row(Builder& b, Text title = Text(), DivType divtype = DivType::Default) : BasicContainer(Code::row, b, title, divtype) {}
 };
 
 }  // namespace sets

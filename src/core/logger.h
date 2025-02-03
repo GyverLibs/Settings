@@ -26,22 +26,27 @@ class Logger : public gtl::lbuf_ext<char>, public Print {
     }
 
     size_t write(uint8_t v) {
-        if (!_changed) _changed = true;
+        if (!_change_f) _change_f = true;
         if (_p) gtl::lbuf_ext<char>::write(v);
         return 1;
     }
 
-    void reset() {
-        _changed = false;
+    void clear() {
+        gtl::lbuf_ext<char>::clear();
+        memset(_p.get(), 0, gtl::lbuf_ext<char>::size());
     }
 
-    bool changed() {
-        return _changed;
+    void _reset() {
+        _change_f = false;
+    }
+
+    bool _changed() {
+        return _change_f;
     }
 
    private:
     gtl::ptr_uniq<char> _p;
-    bool _changed = false;
+    bool _change_f = false;
 };
 
 }  // namespace sets

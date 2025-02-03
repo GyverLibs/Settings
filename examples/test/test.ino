@@ -55,7 +55,7 @@ void build(sets::Builder& b) {
         Serial.print(b.build.id, HEX);
         Serial.print(" = ");
         Serial.println(b.build.value);
-        
+
         logger.print("Set: 0x");
         logger.println(b.build.id, HEX);
     }
@@ -67,13 +67,27 @@ void build(sets::Builder& b) {
         b.Input(kk::uintw, "uint");
         b.Input(kk::intw, "int");
         b.Input(kk::int64w, "int 64");
+        b.HTML("Link", R"(<a href="https://alexgyver.ru/">alexgyver.ru</a>)");
 
         b.endGroup();  // НЕ ЗАБЫВАЕМ ЗАВЕРШИТЬ ГРУППУ
+    }
+
+    if (b.beginGroup("Regex")) {
+        char str[10] = "123";
+        b.Input("", AnyPtr(str, 10));
+        b.Input("", AnyPtr(str, 10), R"(^\d+$)");
+        b.Input("", AnyPtr(str, 10), R"(^\d+$)", "Только цифры");
+
+        b.endGroup();
     }
 
     // пара лейблов вне группы. Так тоже можно
     b.Label(kk::lbl1, "Random");
     b.Label(kk::lbl2, "millis()", "", sets::Colors::Red);
+
+    // image
+    // b.Image(H(img), "", "/image.png");
+    // b.Image("", "https://alexgyver.ru/wp-content/uploads/2021/03/ardu.jpg");
 
     // ещё группа
     // можно использовать такой синтаксис: sets::Group(Builder&, title) заключается в блок кода в самом начале,
@@ -89,9 +103,38 @@ void build(sets::Builder& b) {
 
         // логгер, в него печатаем выше
         b.Log(logger);
+
+        if (b.beginRow()) {
+            if (b.Button("click")) {
+                Serial.print("click: ");
+                Serial.println(b.build.pressed());
+            }
+            if (b.ButtonHold("hold")) {
+                Serial.print("hold: ");
+                Serial.println(b.build.pressed());
+            }
+            b.endRow();
+        }
     }
 
-    // и ещё
+    // разные стили Row ВНЕ ГРУППЫ
+    if (b.beginRow("", sets::DivType::Default)) {
+        b.Switch("Switch");
+        b.Switch("Switch");
+        b.endRow();
+    }
+    if (b.beginRow("", sets::DivType::Block)) {
+        b.Switch("Switch");
+        b.Switch("Switch");
+        b.endRow();
+    }
+    if (b.beginRow("", sets::DivType::Line)) {
+        b.Switch("Switch");
+        b.Switch("Switch");
+        b.endRow();
+    }
+
+    // и ещё группа
     if (b.beginGroup("Group3")) {
         b.Date(kk::date, "Date");
         b.Time(kk::timew, "Time");
@@ -142,7 +185,7 @@ void update(sets::Updater& upd) {
     upd.update(kk::lbl2, millis());
 
     // примечание: при ручных изменениях в базе данных отправлять новые значения не нужно!
-    // библиотека сделает это сама =)
+    // библиотека сделает это сама
 }
 
 void setup() {
@@ -176,10 +219,16 @@ void setup() {
     sett.onBuild(build);
     sett.onUpdate(update);
 
+    sett.onFocusChange([]() {
+        Serial.print("Focus: ");
+        Serial.println(sett.focused());
+    });
+
     // настройки вебморды
     // sett.config.requestTout = 3000;
     // sett.config.sliderTout = 500;
     // sett.config.updateTout = 1000;
+    // sett.config.theme = sets::Colors::Green;
 
     // ======== DATABASE ========
 #ifdef ESP32
@@ -187,7 +236,10 @@ void setup() {
 #else
     LittleFS.begin();
 #endif
+
     db.begin();
+
+    // инициализация базы данных начальными значениями
     db.init(kk::txt, "text");
     db.init(kk::pass, "some pass");
     db.init(kk::uintw, 64u);
@@ -203,12 +255,18 @@ void setup() {
     db.init(kk::sldmin, -5);
     db.init(kk::sldmax, 5);
 
-    db.dump(Serial);
+    // db.dump(Serial);
 
-    // инициализация базы данных начальными значениями
+    // часовой пояс для rtc
+    setStampZone(3);
 }
 
 void loop() {
     // тикер, вызывать в лупе
     sett.tick();
+
+    // время получено с браузера
+    if (sett.rtc.newSecond()) {
+        Serial.println(sett.rtc.toString());
+    }
 }

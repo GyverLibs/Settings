@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #include <FS.h>
+#include <StampKeeper.h>
 #include <StringUtils.h>
 
 #ifndef SETT_NO_DB
@@ -19,15 +20,17 @@
 #include "core/fs.h"
 #include "core/logger.h"
 #include "core/packet.h"
-#include "core/timer.h"
 #include "core/updater.h"
 
 namespace sets {
 
 class SettingsBase {
+   public:
+   private:
     typedef std::function<void(Builder& b)> BuildCallback;
     typedef std::function<void(Updater& upd)> UpdateCallback;
     typedef std::function<void(Text path)> FileCallback;
+    typedef std::function<void()> FocusCallback;
 
     struct Config {
         // таймаут отправки слайдера, мс. 0 чтобы отключить
@@ -38,6 +41,9 @@ class SettingsBase {
 
         // период обновлений, мс. 0 чтобы отключить
         uint16_t updateTout = 2500;
+
+        // основная цветовая схема
+        Colors theme = Colors::Green;
     };
 
     struct CustomJS {
@@ -46,6 +52,28 @@ class SettingsBase {
         uint8_t hash = 0;
         bool isFile;
         bool gz;
+    };
+
+    static const uint16_t FOCUS_TOUT = 6000;
+
+    class Timer {
+       public:
+        bool elapsed(uint32_t prd) {
+            return (_tmr && millis() - _tmr >= prd);
+        }
+        void restart() {
+            _tmr = millis();
+            if (!_tmr) --_tmr;
+        }
+        void stop() {
+            _tmr = 0;
+        }
+        bool running() {
+            return _tmr;
+        }
+
+       private:
+        uint32_t _tmr = 0;
     };
 
    public:
@@ -107,6 +135,11 @@ class SettingsBase {
         upload_cb = cb;
     }
 
+    // обработчик подключения браузера f(bool focus)
+    void onFocusChange(FocusCallback cb) {
+        _focus_cb = cb;
+    }
+
     // тикер, вызывать в родительском классе
     void tick() {
 #ifndef SETT_NO_DB
@@ -116,6 +149,11 @@ class SettingsBase {
             delay(3000);
             ESP.restart();
         }
+        if (_focus_tmr.elapsed(FOCUS_TOUT)) {
+            _focus_tmr.stop();
+            if (_focus_cb) _focus_cb();
+        }
+        rtc.tick();
     }
 
     // перезагрузить страницу. Можно вызывать где угодно + в обработчике update
@@ -156,8 +194,16 @@ class SettingsBase {
         _plink = link;
     }
 
+    // вебморда открыта в браузере
+    bool focused() {
+        return _focus_tmr.running();
+    }
+
     // настройки вебморды
     Config config;
+
+    // время с браузера
+    StampKeeper rtc;
 
    protected:
     CustomJS custom;
@@ -177,6 +223,12 @@ class SettingsBase {
 
     // парсить запрос клиента
     void parse(Text passh, Text action, Text idtxt, Text value) {
+        if (!_focus_tmr.running()) {
+            _focus_tmr.restart();
+            if (_focus_cb) _focus_cb();
+        }
+        _focus_tmr.restart();
+
         size_t id = idtxt.toInt32HEX();
         bool granted = authenticate(passh);
 
@@ -189,15 +241,23 @@ class SettingsBase {
                 str += WiFi.macAddress();
                 str += "\"}";
                 send((uint8_t*)str.c_str(), str.length());
+                return;
             } break;
 
             case SH("load"):
+                rtc.sync(value.toInt32HEX());
                 _sendBuild(granted);
+                return;
+
+            case SH("unfocus"):
+                _focus_tmr.stop();
+                if (_focus_cb) _focus_cb();
                 break;
 
             case SH("set"):
+            case SH("click"):
 #ifndef SETT_NO_DB
-                if (_db) {
+                if (_db && action.hash() == SH("set")) {
                     if (_db_update) _db->useUpdates(false);
                     _db->update(id, value);
                     if (_db_update) _db->useUpdates(true);
@@ -207,22 +267,10 @@ class SettingsBase {
                     Build action(Build::Type::Set, granted, id, value);
                     Builder b(this, action);
                     _build_cb(b);
-                    if (b.isReload()) _sendBuild(granted);
-                    else _answerEmpty();
-                } else {
-                    _answerEmpty();
-                }
-                break;
-
-            case SH("click"):
-                if (_build_cb) {
-                    Build action(Build::Type::Click, granted, id);
-                    Builder b(this, action);
-                    _build_cb(b);
-                    if (b.isReload()) _sendBuild(granted);
-                    else _answerEmpty();
-                } else {
-                    _answerEmpty();
+                    if (b.isReload()) {
+                        _sendBuild(granted);
+                        return;
+                    }
                 }
                 break;
 
@@ -258,22 +306,23 @@ class SettingsBase {
                     if (_reload) {
                         _reload = false;
                         _sendBuild(granted);
+                        return;
                     } else {
                         send(p.buf(), p.length());
+                        return;
                     }
-                } else {
-                    _answerEmpty();
                 }
                 break;
 
             case SH("fs"):
                 _sendFs(granted);
-                break;
+                return;
 
             case SH("remove"):
                 if (granted) {
                     FS.remove(value);
                     _sendFs(true);
+                    return;
                 }
                 break;
 
@@ -281,15 +330,19 @@ class SettingsBase {
                 if (granted) {
                     FS.openWrite(value);
                     _sendFs(true);
+                    return;
                 }
                 break;
-        }
+        }  // switch
+        _answerEmpty();
     }
 
    private:
     BuildCallback _build_cb = nullptr;
     UpdateCallback _upd_cb = nullptr;
+    FocusCallback _focus_cb = nullptr;
     String _title;
+    Timer _focus_tmr;
     size_t _passh = 0;
     size_t _packet_size = 1024;
 #ifndef SETT_NO_DB
@@ -328,6 +381,7 @@ class SettingsBase {
             p[Code::update_tout] = config.updateTout;
             p[Code::request_tout] = config.requestTout;
             p[Code::slider_tout] = config.sliderTout;
+            p[Code::color] = (uint32_t)config.theme;
             p[Code::rssi] = constrain(2 * (WiFi.RSSI() + 100), 0, 100);
             if (custom.p) p[Code::custom_hash] = custom.hash;
             if (_title.length()) p[Code::title] = _title;
