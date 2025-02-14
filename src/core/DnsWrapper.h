@@ -19,6 +19,12 @@ class DnsWrapper {
 #endif
     }
 
+    void stop() {
+#ifndef SETT_NO_DNS
+        dns.stop();
+#endif
+    }
+
     void tick() {
 #ifndef SETT_NO_DNS
         if (dns_f) dns.processNextRequest();

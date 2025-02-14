@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 #include "packet.h"
+#include "pos.h"
 
 class AnyPtr {
    public:
@@ -14,31 +15,37 @@ class AnyPtr {
         String,
         Bool,
         Int8,
+        Uint8,
         Int16,
+        Uint16,
         Int32,
+        Uint32,
         Int64,
+        Uint64,
         Float,
         Double,
+        Pos,
     };
 
     AnyPtr() {}
-    AnyPtr(std::nullptr_t _p) {}
-    AnyPtr(const char* _p) : _p((void*)_p), _type(Type::ConstChar) {}
-    AnyPtr(const __FlashStringHelper* _p) : _p((void*)_p), _type(Type::ConstFstr) {}
-    AnyPtr(char* _p, size_t _len) : _p(_p), _len(_len), _type(Type::Char) {}
-    AnyPtr(String* _p) : _p(_p), _type(Type::String) {}
-    AnyPtr(Text* _p) : _p(_p), _type(_p->valid() ? Type::Text : Type::None) {}
-    AnyPtr(float* _p) : _p(_p), _type(Type::Float) {}
-    AnyPtr(double* _p) : _p(_p), _type(Type::Double) {}
-    AnyPtr(bool* _p) : _p(_p), _type(Type::Bool) {}
+    AnyPtr(std::nullptr_t p) {}
+    AnyPtr(const char* p) : _p((void*)p), _type(Type::ConstChar) {}
+    AnyPtr(const __FlashStringHelper* p) : _p((void*)p), _type(Type::ConstFstr) {}
+    AnyPtr(char* p, size_t _len) : _p(p), _len(_len), _type(Type::Char) {}
+    AnyPtr(String* p) : _p(p), _type(Type::String) {}
+    AnyPtr(Text* p) : _p(p), _type(p->valid() ? Type::Text : Type::None) {}
+    AnyPtr(float* p) : _p(p), _type(Type::Float) {}
+    AnyPtr(double* p) : _p(p), _type(Type::Double) {}
+    AnyPtr(bool* p) : _p(p), _type(Type::Bool) {}
+    AnyPtr(sets::Pos* p) : _p(p), _type(Type::Pos) {}
 
     template <typename T>
-    AnyPtr(T* _p) : _p(_p) {
+    AnyPtr(T* p) : _p(p) {
         switch (sizeof(T)) {
-            case 1: _type = Type::Int8; break;
-            case 2: _type = Type::Int16; break;
-            case 4: _type = Type::Int32; break;
-            case 8: _type = Type::Int64; break;
+            case 1: _type = *p < 0 ? Type::Int8 : Type::Uint8; break;
+            case 2: _type = *p < 0 ? Type::Int16 : Type::Uint16; break;
+            case 4: _type = *p < 0 ? Type::Int32 : Type::Uint32; break;
+            case 8: _type = *p < 0 ? Type::Int64 : Type::Uint64; break;
         }
     }
 
@@ -61,6 +68,11 @@ class AnyPtr {
             case Type::Int32: *pkt += *((int32_t*)_p); break;
             case Type::Int64: *pkt += *((int64_t*)_p); break;
 
+            case Type::Uint8: *pkt += *((uint8_t*)_p); break;
+            case Type::Uint16: *pkt += *((uint16_t*)_p); break;
+            case Type::Uint32: *pkt += *((uint32_t*)_p); break;
+            case Type::Uint64: *pkt += *((uint64_t*)_p); break;
+
             case Type::Float: *pkt += *((float*)_p); break;
             case Type::Double: *pkt += *((double*)_p); break;
 
@@ -81,6 +93,11 @@ class AnyPtr {
 
             case Type::Float: *((float*)_p) = value.toFloat(); break;
             case Type::Double: *((double*)_p) = value.toFloat(); break;
+
+            case Type::Pos: {
+                uint32_t v = value;
+                (*(sets::Pos*)_p) = sets::Pos{int16_t(v >> 16), int16_t(v & 0xffff), true};
+            } break;
 
             default: break;
         }

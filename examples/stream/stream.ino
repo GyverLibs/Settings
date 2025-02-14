@@ -3,8 +3,6 @@
 #define WIFI_SSID ""
 #define WIFI_PASS ""
 
-#include <WiFi.h>
-
 #include <GyverDBFile.h>
 #include <LittleFS.h>
 GyverDBFile db(&LittleFS, "/data.db");

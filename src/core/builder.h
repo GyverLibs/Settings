@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include <Table.h>
 
 #include "AnyPtr.h"
 #include "build.h"
@@ -7,6 +8,8 @@
 #include "containers_class.h"
 #include "logger.h"
 #include "packet.h"
+#include "tmode.h"
+#include "pos.h"
 
 #define _NO_ID ((size_t)(-1))
 
@@ -250,7 +253,83 @@ class Builder {
         HTML(_NO_ID, label, html);
     }
 
+    // ================= PLOT =================
+    // бегущий график. Принимает обновления вида float[]. Подписи разделяются ;
+    void PlotRunning(size_t id, Text labels = Text(), uint16_t period = 200) {
+        if (_beginWidget(Code::plot_run, id, labels)) {
+            (*p)[Code::period] = period;
+            _endWidget();
+        }
+    }
+    void PlotRunning(Text labels = Text(), uint16_t period = 200) {
+        PlotRunning(_NO_ID, labels, period);
+    }
+
+    // собирающийся график. Принимает обновления вида float[]. Подписи разделяются ;
+    void PlotStack(size_t id, Text labels = Text()) {
+        _widget(Code::plot_stack, id, labels);
+    }
+    void PlotStack(Text labels = Text()) {
+        PlotStack(_NO_ID, labels);
+    }
+
+    // график с временем точек. Требует таблицу формата [unix, y1, y2...]. Путь к таблице в FS (.tbl, .csv). Подписи разделяются ;
+    void Plot(size_t id, Text path, Text labels = Text()) {
+        _widget(Code::plot, id, labels, &path);
+    }
+    void Plot(Text path, Text labels = Text()) {
+        Plot(_NO_ID, path, labels);
+    }
+
+    // график с временем точек. Требует таблицу формата [unix, y1, y2...]. Подписи разделяются ;
+    void Plot(size_t id, Table& table, Text labels = Text()) {
+        if (_beginWidget(Code::plot, id, labels)) {
+            (*p)[Code::value];
+            p->beginBin(table.writeSize());
+            table.writeTo(*p);
+            _endWidget();
+        }
+    }
+    void Plot(Table& table, Text labels = Text()) {
+        Plot(_NO_ID, table, labels);
+    }
+
+    // таймлайн. Требует таблицу формата [unix, mask] - Mask, [unix, y1, y2...] - All, [unix, n, y] Single. Путь к таблице в FS (.tbl, .csv). Подписи разделяются ;
+    void PlotTimeline(size_t id, Text path, TMode mode, Text labels) {
+        if (_beginWidget(Code::plot_time, id, labels, &path)) {
+            (*p)[Code::tmode] = (uint8_t)mode;
+            _endWidget();
+        }
+    }
+    void PlotTimeline(Text path, TMode mode, Text labels) {
+        PlotTimeline(_NO_ID, path, mode, labels);
+    }
+    // таймлайн. Требует таблицу формата [unix, mask] - Mask, [unix, y1, y2...] - All, [unix, n, y] Single. Подписи разделяются ;
+    void PlotTimeline(size_t id, Table& table, TMode mode, Text labels) {
+        if (_beginWidget(Code::plot, id, labels)) {
+            (*p)[Code::tmode] = (uint8_t)mode;
+            (*p)[Code::value];
+            p->beginBin(table.writeSize());
+            table.writeTo(*p);
+            _endWidget();
+        }
+    }
+    void PlotTimeline(Table& table, TMode mode, Text labels) {
+        PlotTimeline(_NO_ID, table, mode, labels);
+    }
+
     // active
+
+    // ================= JOYSTICK =================
+    // флаг center - возвращать в центр при отпускании
+    bool Joystick(Pos& pos, bool center = false) {
+        size_t id = _next();
+        if (_beginWidget(Code::joystick, id, Text())) {
+            (*p)[Code::center] = center;
+            _endWidget();
+        }
+        return _isSet(id, &pos);
+    }
 
     // ================= INPUT =================
     // ввод текста и цифр [результат - строка], подключаемая переменная - любой тип, format - описание regex
@@ -489,7 +568,7 @@ class Builder {
                 if (value.type() == AnyPtr::Type::Char && value.len()) {
                     (*p)[Code::maxlen] = value.len() - 1;
                 }
-            } else if (_db) {
+            } else if (_db && p->inDB(_db, id)) {
                 (*p)[Code::value];
                 p->addFromDB(_db, id);
             }
@@ -537,7 +616,7 @@ class Builder {
                 if (value.type() == AnyPtr::Type::Char && value.len()) {
                     (*p)[Code::maxlen] = value.len() - 1;
                 }
-            } else if (_db && id != _NO_ID) {
+            } else if (_db && id != _NO_ID && p->inDB(_db, id)) {
                 (*p)[Code::value];
                 p->addFromDB(_db, id);
             }

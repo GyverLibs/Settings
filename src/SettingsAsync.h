@@ -11,11 +11,11 @@
 #endif
 #include <ESPAsyncWebServer.h>
 
-#include "SettingsBase.h"
-#include "core/DnsWrapper.h"
-#include "core/fs.h"
-#include "core/ota.h"
-#include "web/settings.h"
+#include "./core/DnsWrapper.h"
+#include "./core/SettingsBase.h"
+#include "./core/fs.h"
+#include "./core/ota.h"
+#include "./web/settings.h"
 
 class SettingsAsync : public sets::SettingsBase {
    public:
@@ -39,7 +39,10 @@ class SettingsAsync : public sets::SettingsBase {
 
             _response = request->beginResponseStream("text/plain");
             cors_h(_response);
-            parse(auth, action, id, value);
+            parse(Text(auth).toInt32HEX(),
+                  Text(action).hash(),
+                  Text(id).toInt32HEX(),
+                  value);
             request->send(_response);
             _response = nullptr;
         });
@@ -49,7 +52,7 @@ class SettingsAsync : public sets::SettingsBase {
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (request->hasParam("path")) path = request->getParam("path")->value();
 
-            if (authenticate(auth)) {
+            if (authenticate(Text(auth).toInt32HEX())) {
                 AsyncWebServerResponse *response = request->beginResponse(ST_FS, path, emptyString);
                 cors_h(response);
                 request->send(response);
@@ -63,7 +66,8 @@ class SettingsAsync : public sets::SettingsBase {
             String auth, path;
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (request->hasParam("path")) path = request->getParam("path")->value();
-            if (!authenticate(auth)) return;
+            if (!authenticate(Text(auth).toInt32HEX())) return;
+            
             if (!index) _file = sets::FS.openWrite(path);
             if (len && _file) _file.write(data, len);
             if (final && _file) {
@@ -76,7 +80,8 @@ class SettingsAsync : public sets::SettingsBase {
             if (!Update.hasError()) restart(); }, [this](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
             String auth;
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
-            if (!authenticate(auth)) return;
+            if (!authenticate(Text(auth).toInt32HEX())) return;
+
             if (!index) sets::beginOta(true, true);
             if (len) Update.write(data, len);
             if (final) Update.end(true); });
@@ -120,20 +125,27 @@ class SettingsAsync : public sets::SettingsBase {
         });
     }
 
+    void stop() {
+        server.end();
+    }
+
     void tick() {
         _dns.tick();
         sets::SettingsBase::tick();
     }
 
-   private:
+   protected:
     AsyncWebServer server;
+
+   private:
     AsyncResponseStream *_response = nullptr;
     sets::DnsWrapper _dns;
     File _file;
 
-    void send(uint8_t *data, size_t len) {
+    void answer(uint8_t *data, size_t len) override {
         if (_response) _response->write(data, len);
     }
+
     void sendCode(int code, AsyncWebServerRequest *request) {
         AsyncWebServerResponse *response = request->beginResponse(code);
         cors_h(response);

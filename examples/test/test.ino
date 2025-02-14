@@ -3,12 +3,6 @@
 #define WIFI_SSID ""
 #define WIFI_PASS ""
 
-#ifdef ESP8266
-#include <ESP8266WiFi.h>
-#else
-#include <WiFi.h>
-#endif
-
 #include <GyverDBFile.h>
 #include <LittleFS.h>
 // база данных для хранения настроек

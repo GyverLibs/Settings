@@ -11,6 +11,16 @@ class Logger : public gtl::lbuf_ext<char>, public Print {
         setBuffer(_p.get(), size);
     }
 
+    static String error() {
+        return "err: ";
+    }
+    static String warn() {
+        return "warn: ";
+    }
+    static String info() {
+        return "info: ";
+    }
+
     // вывод в String
     String toString() {
         String s;

@@ -8,26 +8,44 @@
 
 # Settings
 Библиотека для создания простого веб-интерфейса настроек на esp8266/esp32
-- Веб-приложение весит около 15кб и вшивается в программу в бинарном gzip виде без возни с файлами
+- Веб-приложение весит около 20кб и вшивается в программу в бинарном gzip виде без возни с файлами
 - Удобный билдер панели управления из скетча
-- Два десятка типовых виджетов с возможностью объединения в группы и вложенные меню
+- Два десятка типовых виджетов с возможностью объединения в группы и вложенные меню, в том числе вывод графиков + кастомные виджеты
 - Система авторизации с разными правами для авторизованных юзеров и гостей
 - Файловый менеджер и OTA (обновление по воздуху)
 - Интеграция с библиотекой [GyverDB](https://github.com/GyverLibs/GyverDB) для полностью автоматического хранения данных
 - Компактный бинарный протокол связи
 - Легко адаптируется под любую библиотеку HTTP сервера, из коробки реализовано три версии: GyverHTTP, стандартный esp-WebServer, ESPAsyncWebserver
-- Это [GyverHub](https://github.com/GyverLibs/GyverHub) на минималках
+- Из коробки поддерживает вебсокет со сторонними библиотеками
 - Исходник веб-приложения [здесь](https://github.com/GyverLibs/Settings-web)
 
 > Есть [Android-приложение](https://github.com/GyverLibs/Settings-discover) для поиска устройств с библиотекой в локальной сети
 
 ![promo](/img/promo.png)
 
-### Совместимость
-ESP8266, ESP32
-
 ## Документация
 Находится в [папке docs](https://github.com/GyverLibs/Settings/tree/main/docs/1.main.md)
+
+## Совместимость
+ESP8266, ESP32
+
+### Зависимости
+- [GTL](https://github.com/GyverLibs/GTL) v1.2.1+
+- [GyverDB](https://github.com/GyverLibs/GyverDB) v1.2.3+
+- [StringUtils](https://github.com/GyverLibs/StringUtils) v1.4.30+
+- [GyverHTTP](https://github.com/GyverLibs/GyverHTTP) v1.0.23+
+- [BSON](https://github.com/GyverLibs/BSON) v2.0.5+
+- [Stamp](https://github.com/GyverLibs/Stamp) v1.4.0+
+- [Table](https://github.com/GyverLibs/Table) v1.1.0+
+- [StreamIO](https://github.com/GyverLibs/StreamIO) v1.0.5+
+
+> [!TIP]
+> При установке из реестра PIO или Arduino IDE все зависимости установятся автоматически!
+
+Дополнительно (ставится вручную):
+- [arduinoWebSockets](https://github.com/Links2004/arduinoWebSockets) для версии SettingsGyverWS/SettingsESPWS
+- [ESPAsyncTCP](https://github.com/esphome/ESPAsyncTCP) для версии SettingsAsync/SettingsAsyncWS
+- [ESPAsyncWebServer](https://github.com/esphome/ESPAsyncWebServer) для версии SettingsAsync/SettingsAsyncWS
 
 ## Версии
 - v1.0

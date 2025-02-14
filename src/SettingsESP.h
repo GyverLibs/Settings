@@ -10,11 +10,11 @@
 #include <WebServer.h>
 #endif
 
-#include "SettingsBase.h"
-#include "core/DnsWrapper.h"
-#include "core/fs.h"
-#include "core/ota.h"
-#include "web/settings.h"
+#include "./core/SettingsBase.h"
+#include "./core/DnsWrapper.h"
+#include "./core/fs.h"
+#include "./core/ota.h"
+#include "./web/settings.h"
 
 class SettingsESP : public sets::SettingsBase {
    public:
@@ -36,13 +36,16 @@ class SettingsESP : public sets::SettingsBase {
             String value = server.arg(F("value"));
 
             cors_h();
-            parse(auth, action, id, value);
+            parse(Text(auth).toInt32HEX(),
+                  Text(action).hash(),
+                  Text(id).toInt32HEX(),
+                  value);
         });
 
         server.on("/fetch", HTTP_GET, [this]() {
             String auth = server.arg(F("auth"));
             cors_h();
-            if (!authenticate(auth)) {
+            if (!authenticate(Text(auth).toInt32HEX())) {
                 server.send(401);
                 return;
             }
@@ -58,7 +61,7 @@ class SettingsESP : public sets::SettingsBase {
             cors_h();
             server.send(200); }, [this]() {
             String auth = server.arg(F("auth"));
-            if (!authenticate(auth)) return;
+            if (!authenticate(Text(auth).toInt32HEX())) return;
 
             HTTPUpload& upload = server.upload();
             if (upload.status == UPLOAD_FILE_START) {
@@ -79,7 +82,7 @@ class SettingsESP : public sets::SettingsBase {
             server.send(Update.hasError() ? 500 : 200);
             if (!Update.hasError()) restart(); }, [this]() {
             String auth = server.arg(F("auth"));
-            if (!authenticate(auth)) return;
+            if (!authenticate(Text(auth).toInt32HEX())) return;
 
             HTTPUpload& upload = server.upload();
             if (upload.status == UPLOAD_FILE_START) {
@@ -91,9 +94,10 @@ class SettingsESP : public sets::SettingsBase {
             } });
 
         server.onNotFound([this]() {
-            gzip_h();
-            no_cache_h();
-            server.send_P(200, "text/html", (PGM_P)settings_index_gz, sizeof(settings_index_gz));
+            index_h();
+        });
+        server.on("/", HTTP_GET, [this]() {
+            index_h();
         });
         server.on("/script.js", HTTP_GET, [this]() {
             gzip_h();
@@ -124,6 +128,11 @@ class SettingsESP : public sets::SettingsBase {
         });
     }
 
+    void stop() {
+        server.stop();
+        _dns.stop();
+    }
+
     void tick() {
         _dns.tick();
         server.handleClient();
@@ -141,7 +150,7 @@ class SettingsESP : public sets::SettingsBase {
     File _file;
     bool _first = true;
 
-    void send(uint8_t* data, size_t len) {
+    void answer(uint8_t* data, size_t len) override {
         if (_first) {
             _first = false;
             server.setContentLength(CONTENT_LENGTH_UNKNOWN);
@@ -150,6 +159,11 @@ class SettingsESP : public sets::SettingsBase {
         server.sendContent((const char*)data, len);
     }
 
+    void index_h() {
+        gzip_h();
+        no_cache_h();
+        server.send_P(200, "text/html", (PGM_P)settings_index_gz, sizeof(settings_index_gz));
+    }
     void gzip_h() {
         server.sendHeader(F("Content-Encoding"), F("gzip"));
     }

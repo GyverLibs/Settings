@@ -26,18 +26,24 @@ class Packet : public BSON {
     void addLogger(Logger& log) {
         if (log.buffer[log.size() - 1]) {  // filled
             beginStr(log.size());
-            concat((uint8_t*)log.buffer + log.getHead(), log.size() - log.getHead());
-            concat((uint8_t*)log.buffer, log.getHead());
+            write(log.buffer + log.getHead(), log.size() - log.getHead());
+            write(log.buffer, log.getHead());
         } else {
             beginStr(log.getHead());
-            concat((uint8_t*)log.buffer, log.getHead());
+            write(log.buffer, log.getHead());
         }
     }
 
-    void addFromDB(void* dbp, size_t hash) {
+    bool inDB(void* db, size_t hash) {
 #ifndef SETT_NO_DB
-        GyverDB* db = (GyverDB*)dbp;
-        gdb::Entry en = db->get(hash);
+        return static_cast<GyverDB*>(db)->has(hash);
+#endif
+        return false;
+    }
+
+    void addFromDB(void* db, size_t hash) {
+#ifndef SETT_NO_DB
+        gdb::Entry en = static_cast<GyverDB*>(db)->get(hash);
         switch (en.type()) {
             case gdb::Type::Int:
                 add(en.toInt());
@@ -72,6 +78,10 @@ class Packet : public BSON {
             _hook(_settptr, *this);
             clear();
         }
+    }
+
+    void concatString(Text str) {
+        write(str.str(), str.length(), str.pgm());
     }
 
    private:
