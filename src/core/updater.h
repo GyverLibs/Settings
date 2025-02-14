@@ -152,21 +152,21 @@ class Updater {
     }
 
     // апдейт для plot графиков
-    Updater& updatePlot(size_t id, Table& table, bool remove = true) {
+    Updater& updatePlot(size_t id, Table& table, bool clear = true) {
         if (table.rows()) {
             p('{');
             p[Code::id] = id;
             p[Code::data];
             p.beginBin(table.writeSize());
             table.writeTo(p);
-            if (remove) table.removeAll();
+            if (clear) table.removeAll();
             p('}');
         }
         return *this;
     }
 
     // апдейт для timeline графиков
-    Updater& updatePlot(size_t id, Table& table, TMode mode, bool remove = true) {
+    Updater& updatePlot(size_t id, Table& table, TMode mode, bool clear = true) {
         if (table.rows()) {
             p('{');
             p[Code::id] = id;
@@ -174,7 +174,7 @@ class Updater {
             p[Code::data];
             p.beginBin(table.writeSize());
             table.writeTo(p);
-            if (remove) table.removeAll();
+            if (clear) table.removeAll();
             p('}');
         }
         return *this;

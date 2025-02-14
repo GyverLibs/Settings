@@ -86,10 +86,14 @@ class AnyPtr {
             case Type::Char: value.toStr((char*)_p, _len); break;
 
             case Type::Bool: *((bool*)_p) = value.toBool(); break;
-            case Type::Int8: *((int8_t*)_p) = value.toInt(); break;
-            case Type::Int16: *((int16_t*)_p) = value.toInt(); break;
-            case Type::Int32: *((int32_t*)_p) = value.toInt(); break;
-            case Type::Int64: *((int64_t*)_p) = value.toInt64(); break;
+            case Type::Int8:
+            case Type::Uint8: *((uint8_t*)_p) = value.toInt(); break;
+            case Type::Int16:
+            case Type::Uint16: *((uint16_t*)_p) = value.toInt(); break;
+            case Type::Int32:
+            case Type::Uint32: *((uint32_t*)_p) = value.toInt(); break;
+            case Type::Int64:
+            case Type::Uint64: *((uint64_t*)_p) = value.toInt64(); break;
 
             case Type::Float: *((float*)_p) = value.toFloat(); break;
             case Type::Double: *((double*)_p) = value.toFloat(); break;
