@@ -4,7 +4,6 @@
 namespace sets {
 
 struct Pos {
-    Pos() {}
     int16_t x, y;
 
     operator bool() {
