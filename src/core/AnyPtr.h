@@ -99,8 +99,11 @@ class AnyPtr {
             case Type::Double: *((double*)_p) = value.toFloat(); break;
 
             case Type::Pos: {
+                sets::Pos* p = (sets::Pos*)_p;
                 uint32_t v = value;
-                (*(sets::Pos*)_p) = sets::Pos{int16_t(v >> 16), int16_t(v & 0xffff), true};
+                p->x = int16_t(v >> 16);
+                p->y = int16_t(v & 0xffff);
+                p->_changed = true;
             } break;
 
             default: break;
