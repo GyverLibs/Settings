@@ -1,6 +1,9 @@
 #pragma once
 #include <Arduino.h>
+
+#ifndef SETT_NO_TABLE
 #include <Table.h>
+#endif
 
 #include "colors.h"
 #include "logger.h"
@@ -151,6 +154,7 @@ class Updater {
         return *this;
     }
 
+#ifndef SETT_NO_TABLE
     // апдейт для plot графиков
     Updater& updatePlot(size_t id, Table& table, bool clear = true) {
         if (table.rows()) {
@@ -179,6 +183,7 @@ class Updater {
         }
         return *this;
     }
+#endif
 
    private:
     Packet& p;

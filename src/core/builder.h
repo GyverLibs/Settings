@@ -1,6 +1,9 @@
 #pragma once
 #include <Arduino.h>
+
+#ifndef SETT_NO_TABLE
 #include <Table.h>
+#endif
 
 #include "AnyPtr.h"
 #include "build.h"
@@ -8,8 +11,8 @@
 #include "containers_class.h"
 #include "logger.h"
 #include "packet.h"
-#include "tmode.h"
 #include "pos.h"
+#include "tmode.h"
 
 #define _NO_ID ((size_t)(-1))
 
@@ -274,13 +277,14 @@ class Builder {
     }
 
     // график с временем точек. Требует таблицу формата [unix, y1, y2...]. Путь к таблице в FS (.tbl, .csv). Подписи разделяются ;
-    void Plot(size_t id, Text path, Text labels = Text()) {
+    void Plot(size_t id, Text path = Text(), Text labels = Text()) {
         _widget(Code::plot, id, labels, &path);
     }
-    void Plot(Text path, Text labels = Text()) {
+    void Plot(Text path = Text(), Text labels = Text()) {
         Plot(_NO_ID, path, labels);
     }
 
+#ifndef SETT_NO_TABLE
     // график с временем точек. Требует таблицу формата [unix, y1, y2...]. Подписи разделяются ;
     void Plot(size_t id, Table& table, Text labels = Text()) {
         if (_beginWidget(Code::plot, id, labels)) {
@@ -293,6 +297,7 @@ class Builder {
     void Plot(Table& table, Text labels = Text()) {
         Plot(_NO_ID, table, labels);
     }
+#endif
 
     // таймлайн. Требует таблицу формата [unix, mask] - Mask, [unix, y1, y2...] - All, [unix, n, y] Single. Путь к таблице в FS (.tbl, .csv). Подписи разделяются ;
     void PlotTimeline(size_t id, Text path, TMode mode, Text labels) {
@@ -304,6 +309,8 @@ class Builder {
     void PlotTimeline(Text path, TMode mode, Text labels) {
         PlotTimeline(_NO_ID, path, mode, labels);
     }
+
+#ifndef SETT_NO_TABLE
     // таймлайн. Требует таблицу формата [unix, mask] - Mask, [unix, y1, y2...] - All, [unix, n, y] Single. Подписи разделяются ;
     void PlotTimeline(size_t id, Table& table, TMode mode, Text labels) {
         if (_beginWidget(Code::plot, id, labels)) {
@@ -317,6 +324,7 @@ class Builder {
     void PlotTimeline(Table& table, TMode mode, Text labels) {
         PlotTimeline(_NO_ID, table, mode, labels);
     }
+#endif
 
     // active
 

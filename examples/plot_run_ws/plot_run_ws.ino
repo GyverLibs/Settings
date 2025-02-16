@@ -1,21 +1,16 @@
 #include <Arduino.h>
 
-// Пример обновления running и stack графиков через запрос обновления
+// Пример обновления running и stack графиков через вебсокет
 
 #define WIFI_SSID ""
 #define WIFI_PASS ""
 
-#include <SettingsGyver.h>
-SettingsGyver sett("My Settings");
+#include <SettingsGyverWS.h>
+SettingsGyverWS sett("My Settings");
 
 void build(sets::Builder& b) {
     b.PlotRunning(H(run), "kek1;kek2");
     b.PlotStack(H(stack), "kek3;kek4");
-}
-void update(sets::Updater u) {
-    float v[] = {random(100) - 50, (random(100) - 50) / 2.0};
-    u.updatePlot(H(run), v);
-    u.updatePlot(H(stack), v);
 }
 
 void setup() {
@@ -34,9 +29,18 @@ void setup() {
 
     sett.begin();
     sett.onBuild(build);
-    sett.onUpdate(update);
 }
 
 void loop() {
     sett.tick();
+
+    static uint32_t tmrs;
+    if (millis() - tmrs >= 500) {
+        tmrs = millis();
+
+        float v[] = {random(100) - 50, (random(100) - 50) / 2.0};
+        sett.updater()
+            .updatePlot(H(run), v)
+            .updatePlot(H(stack), v);
+    }
 }

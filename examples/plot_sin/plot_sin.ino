@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+// Пример с running графиком - настройка параметров синусоиды 
+
 #define WIFI_SSID ""
 #define WIFI_PASS ""
 

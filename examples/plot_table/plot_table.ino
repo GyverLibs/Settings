@@ -1,5 +1,11 @@
 #include <Arduino.h>
 
+/*
+    Пример с таблицей-буфером, в котором таблица графика заполняется точками с привязкой
+    ко времени в миллисекундах и отправляется раз в несколько секунд, чтобы уменьшить
+    количество отправок с сохранением миллисекундной точности точек. При отправке апдейта таблица очищается
+*/
+
 #define WIFI_SSID ""
 #define WIFI_PASS ""
 
@@ -9,7 +15,7 @@ SettingsGyverWS sett("My Settings");
 Table t(0, 3, cell_t::Uint64, cell_t::Float, cell_t::Float);
 
 void build(sets::Builder& b) {
-    b.Plot(H(plot), t);
+    b.Plot(H(plot));
 }
 
 void setup() {
