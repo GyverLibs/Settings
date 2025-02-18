@@ -82,6 +82,7 @@ enum class Code : uint8_t {
     uptime,
     joystick,
     center,
+    force,
 };
 
 }

@@ -46,12 +46,12 @@ class Builder {
     }
 
     // перезагрузить страницу
-    void reload() {
-        if (build.isAction()) _reload = 1;
+    void reload(bool force = false) {
+        if (build.isAction()) _reload = force ? -1 : 1;
     }
 
     // страница будет перезагружена
-    bool isReload() {
+    int8_t isReload() {
         return _reload;
     }
 
@@ -593,7 +593,7 @@ class Builder {
     sets::Packet* p = nullptr;
     void* _db = nullptr;
     size_t _auto_id = UINT32_MAX;
-    bool _reload = false;
+    int8_t _reload = 0;
     bool _enabled = true;
     bool _was_set = false;
     bool _set_f = false;

@@ -196,15 +196,16 @@ class SettingsBase {
     }
 
     // перезагрузить страницу. Можно вызывать где угодно + в обработчике update
-    void reload() {
+    void reload(bool force = false) {
         if (_upd_tmr.running()) {
             Packet p;
             p('{');
             p[Code::type] = Code::reload;
+            if (force) p[Code::force] = true;
             p('}');
             _send(p, true, false);
         } else {
-            _reload = true;
+            _reload = force ? -1 : 1;
         }
     }
 
@@ -345,7 +346,8 @@ class SettingsBase {
                     Build action(Build::Type::Set, granted, idh, value);
                     Builder b(this, action);
                     _build_cb(b);
-                    if (b.isReload() || _reload) {
+                    if (b.isReload()) _reload = b.isReload();
+                    if (_reload) {
                         _sendReload();
                         return;
                     }
@@ -443,7 +445,7 @@ class SettingsBase {
     uint16_t _ws_port = 0;
     bool _db_update = true;
     bool _rst = false;
-    bool _reload = false;
+    int8_t _reload = 0;
 
     void _answerEmpty() {
         BSON b;
@@ -529,12 +531,13 @@ class SettingsBase {
     }
 
     void _sendReload() {
-        _reload = false;
         Packet p;
         p('{');
         p[Code::type] = Code::reload;
+        if (_reload < 0) p[Code::force] = true;
         p('}');
         _answer(p);
+        _reload = 0;
     }
 
     void _answer(BSON& bson) {
