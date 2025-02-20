@@ -19,7 +19,10 @@
 - Из коробки поддерживает вебсокет со сторонними библиотеками
 - Исходник веб-приложения [здесь](https://github.com/GyverLibs/Settings-web)
 
-> Есть [Android-приложение](https://github.com/GyverLibs/Settings-discover) для поиска устройств с библиотекой в локальной сети
+> [!TIP]
+> Есть приложение для поиска устройств с библиотекой в локальной сети:
+> - [Android](https://github.com/GyverLibs/Settings-discover)
+> - [Windows](https://github.com/TonTon-Macout/APP-for-AlexGyver-Settings)
 
 ![promo](/img/promo.png)
 
