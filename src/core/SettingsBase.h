@@ -45,6 +45,9 @@ class SettingsBase {
         // период обновлений, мс. 0 чтобы отключить
         uint16_t updateTout = 2500;
 
+        // период пинга, мс. 0 чтобы отключить
+        uint16_t pingTout = 2500;
+
         // основная цветовая схема
         Colors theme = Colors::Green;
     };
@@ -474,8 +477,9 @@ class SettingsBase {
             p[Code::type] = Code::build;
             p[Code::ws_port] = _ws_port;
             p[Code::update_tout] = config.updateTout;
+            p[Code::update_tout] = config.pingTout;
             p[Code::request_tout] = config.requestTout;
-            p[Code::slider_tout] = config.sliderTout;
+            p[Code::send_tout] = config.sliderTout;
             p[Code::color] = (uint32_t)config.theme;
             p[Code::rssi] = _rssi();
             p[Code::uptime] = millis() / 1000;
