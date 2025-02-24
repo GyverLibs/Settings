@@ -119,6 +119,11 @@ class Builder {
     }
 
     // passive
+    // ================= LINK =================
+    void Link(Text label, Text url) {
+        _widget(Code::link, _NO_ID, label, &url);
+    }
+
     // ================= LOG =================
     void Log(size_t id, Logger& log, Text label = "") {
         if (_enabled && build.isBuild()) {

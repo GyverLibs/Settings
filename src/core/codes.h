@@ -84,6 +84,7 @@ enum class Code : uint8_t {
     joystick,
     center,
     force,
+    link,
 };
 
 }
