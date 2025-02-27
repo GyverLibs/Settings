@@ -477,7 +477,7 @@ class SettingsBase {
             p[Code::type] = Code::build;
             p[Code::ws_port] = _ws_port;
             p[Code::update_tout] = config.updateTout;
-            p[Code::update_tout] = config.pingTout;
+            p[Code::ping_tout] = config.pingTout;
             p[Code::request_tout] = config.requestTout;
             p[Code::send_tout] = config.sliderTout;
             p[Code::color] = (uint32_t)config.theme;

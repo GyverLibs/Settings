@@ -498,28 +498,28 @@ class Builder {
     }
 
     // ================= SELECT =================
-    // опции разделяются ; [результат - индекс (число)], подключаемая переменная - uint8_t
-    bool Select(size_t id, Text label, Text options, uint8_t* value = nullptr) {
+    // опции разделяются ; [результат - индекс (число)]
+    bool Select(size_t id, Text label, Text options, AnyPtr value = nullptr) {
         if (_beginWidget(Code::select, id, label, value)) {
             (*p)[Code::text] = options;
             _endWidget();
         }
         return _isSet(id, value);
     }
-    bool Select(Text label, Text options, uint8_t* value = nullptr) {
+    bool Select(Text label, Text options, AnyPtr value = nullptr) {
         return Select(_next(), label, options, value);
     }
 
     // ================= TABS =================
-    // опции разделяются ; [результат - индекс (число)], подключаемая переменная - uint8_t
-    bool Tabs(size_t id, Text tabs, uint8_t* value = nullptr) {
+    // опции разделяются ; [результат - индекс (число)]
+    bool Tabs(size_t id, Text tabs, AnyPtr value = nullptr) {
         if (_beginWidget(Code::tabs, id, Text(), value)) {
             (*p)[Code::text] = tabs;
             _endWidget();
         }
         return _isSet(id, value);
     }
-    bool Tabs(Text tabs, uint8_t* value = nullptr) {
+    bool Tabs(Text tabs, AnyPtr value = nullptr) {
         return Tabs(_next(), tabs, value);
     }
 
