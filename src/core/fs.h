@@ -14,11 +14,23 @@ class FSClass {
         _fs = &LittleFS;
 
         _totalBytes = []() -> size_t {
+#ifdef ESP8266
+            FSInfo64 fs_info{};
+            LittleFS.info64(fs_info);
+            return fs_info.totalBytes;
+#else
             return LittleFS.totalBytes();
+#endif
         };
 
         _usedBytes = []() -> size_t {
+#ifdef ESP8266
+            FSInfo64 fs_info{};
+            LittleFS.info64(fs_info);
+            return fs_info.usedBytes;
+#else
             return LittleFS.usedBytes();
+#endif
         };
     }
 
@@ -127,33 +139,15 @@ class FSClass {
     }
 
     uint64_t freeSpace() {
-#ifdef ESP8266
-        FSInfo64 fs_info;
-        _fs->info64(fs_info);
-        return fs_info.totalBytes - fs_info.usedBytes;
-#else
         return _totalBytes() - _usedBytes();
-#endif
     }
 
     uint64_t totalSpace() {
-#ifdef ESP8266
-        FSInfo64 fs_info;
-        _fs->info64(fs_info);
-        return fs_info.totalBytes;
-#else
         return _totalBytes();
-#endif
     }
 
     uint64_t usedSpace() {
-#ifdef ESP8266
-        FSInfo64 fs_info;
-        _fs->info64(fs_info);
-        return fs_info.usedBytes;
-#else
         return _usedBytes();
-#endif
     }
 
    private:
