@@ -360,12 +360,16 @@ class Builder {
 
     // ================= NUMBER =================
     // ввод цифр [результат - строка], подключаемая переменная - любой тип
-    bool Number(size_t id, Text label = "", AnyPtr value = nullptr) {
-        _widget(Code::number, id, label, value);
+    bool Number(size_t id, Text label = "", AnyPtr value = nullptr, float min = NAN, float max = NAN) {
+        if (_beginWidget(Code::number, id, label, value)) {
+            if (!isnan(min)) (*p)[Code::min] = min;
+            if (!isnan(max)) (*p)[Code::max] = max;
+            _endWidget();
+        }
         return _isSet(id, value);
     }
-    bool Number(Text label = "", AnyPtr value = nullptr) {
-        return Number(_next(), label, value);
+    bool Number(Text label = "", AnyPtr value = nullptr, float min = NAN, float max = NAN) {
+        return Number(_next(), label, value, min, max);
     }
 
     // ================= PASS =================

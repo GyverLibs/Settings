@@ -1,34 +1,29 @@
+// минимальный пример с хранением данных в переменных
+// для хранения в энергонезависимой памяти используй структуры+FileData или пример с базой данных
+
 #include <Arduino.h>
 
 #define WIFI_SSID ""
 #define WIFI_PASS ""
 
-#include <GyverDBFile.h>
-#include <LittleFS.h>
 #include <SettingsGyver.h>
-// база данных для хранения настроек
-// будет автоматически записываться в файл при изменениях
-GyverDBFile db(&LittleFS, "/data.db");
+SettingsGyver sett("My Settings");
 
-// указывается заголовок меню, подключается база данных
-SettingsGyver sett("My Settings", &db);
+int slider;
+String input;
+bool swit;
 
-// имена ячеек базы данных
-DB_KEYS(
-    kk,
-    input
-);
-
-// билдер! Тут строится наше окно настроек
 void build(sets::Builder& b) {
-    b.Input(kk::input, "My input");
+    b.Slider("My slider", 0, 50, 1, "", &slider);
+    b.Input("My input", &input);
+    b.Switch("My switch", &swit);
 }
 
 void setup() {
     Serial.begin(115200);
     Serial.println();
 
-    WiFi.mode(WIFI_AP_STA);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -38,21 +33,10 @@ void setup() {
     Serial.print("Connected: ");
     Serial.println(WiFi.localIP());
 
-#ifdef ESP32
-    LittleFS.begin(true);
-#else
-    LittleFS.begin();
-#endif
-
     sett.begin();
     sett.onBuild(build);
-
-    // запуск и инициализация полей БД
-    db.begin();
-    db.init(kk::input, 0);
 }
 
 void loop() {
-    // тикер, вызывать в лупе
     sett.tick();
 }

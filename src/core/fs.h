@@ -117,7 +117,7 @@ class FSClass {
 #ifdef ESP8266
         FSInfo64 fs_info;
         ST_FS.info64(fs_info);
-        return fs_info.totalBytes;
+        return fs_info.totalBytes < 512000000000 ? fs_info.totalBytes : 0;
 #else
         return ST_FS.totalBytes();
 #endif
@@ -127,7 +127,7 @@ class FSClass {
 #ifdef ESP8266
         FSInfo64 fs_info;
         ST_FS.info64(fs_info);
-        return fs_info.usedBytes;
+        return fs_info.usedBytes < 512000000000 ? fs_info.usedBytes : 0;
 #else
         return ST_FS.usedBytes();
 #endif
