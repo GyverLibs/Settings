@@ -57,7 +57,8 @@ void setup() {
     SDFS.setConfig(cfg);
 
     SDFS.begin();
-    sett.fs.setFS(LittleFS, SDFS);  // подключение обеих FS
+    // sett.fs.setFS(LittleFS, SDFS);  // подключение обеих FS
+    sett.fs.sd.setFS(SDFS); // подключение SD
 #else
     LittleFS.begin(true);
 
@@ -70,7 +71,8 @@ void setup() {
     // карта подключена к VSPI (по умолч. SPI=VSPI)
     SD.begin(5);
 
-    sett.fs.setFS(LittleFS, SD);  // подключение обеих FS
+    // sett.fs.setFS(LittleFS, SD);  // подключение обеих FS
+    sett.fs.sd.setFS(SD); // подключение SD
 #endif
 
     // список файлов
