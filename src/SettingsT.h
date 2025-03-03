@@ -7,7 +7,6 @@
 
 #include "./core/DnsWrapper.h"
 #include "./core/SettingsBase.h"
-#include "./core/fs.h"
 #include "./core/ota.h"
 #include "./web/settings.h"
 
@@ -40,7 +39,7 @@ class SettingsT : public sets::SettingsBase {
                 case SH("/fetch"):
                     if (authenticate(req.param("auth").toInt32HEX())) {
                         String path = req.param("path").decodeUrl();
-                        File f = sets::FS.openRead(path);
+                        File f = fs.openRead(path.c_str());
                         if (f) server.sendFile(f);
                         else server.send(500);
                         if (fetch_cb) fetch_cb(path);
@@ -52,7 +51,7 @@ class SettingsT : public sets::SettingsBase {
                 case SH("/upload"):
                     if (authenticate(req.param("auth").toInt32HEX())) {
                         String path = req.param("path").decodeUrl();
-                        File f = sets::FS.openWrite(path);
+                        File f = fs.openWrite(path.c_str());
                         if (f) {
                             req.body().writeTo(f);
                             server.send(200);
@@ -91,7 +90,7 @@ class SettingsT : public sets::SettingsBase {
                     else {
                         if (!custom.isFile) server.sendFile_P((const uint8_t*)custom.p, custom.len, "text/javascript", false, custom.gz);
                         else {
-                            File f = sets::FS.openRead(custom.p);
+                            File f = fs.openRead(custom.p);
                             if (f) server.sendFile(f, "text/javascript", false, custom.gz);
                             else server.send(500);
                         }

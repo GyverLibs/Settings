@@ -502,7 +502,7 @@ class Builder {
     }
 
     // ================= SELECT =================
-    // опции разделяются ; [результат - индекс (число)]
+    // опции разделяются ; или \n [результат - индекс (число)]
     bool Select(size_t id, Text label, Text options, AnyPtr value = nullptr) {
         if (_beginWidget(Code::select, id, label, value)) {
             (*p)[Code::text] = options;
@@ -515,7 +515,7 @@ class Builder {
     }
 
     // ================= TABS =================
-    // опции разделяются ; [результат - индекс (число)]
+    // опции разделяются ; или \n [результат - индекс (число)]
     bool Tabs(size_t id, Text tabs, AnyPtr value = nullptr) {
         if (_beginWidget(Code::tabs, id, Text(), value)) {
             (*p)[Code::text] = tabs;

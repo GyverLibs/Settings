@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include <FS.h>
+#include <LittleFS.h>
 #include <StampKeeper.h>
 #include <StringUtils.h>
 
@@ -14,10 +14,10 @@
 #include <WiFi.h>
 #endif
 
+#include "./core/HybridFS.h"
 #include "./core/builder.h"
 #include "./core/colors.h"
 #include "./core/containers.h"
-#include "./core/fs.h"
 #include "./core/logger.h"
 #include "./core/packet.h"
 #include "./core/updater.h"
@@ -113,7 +113,11 @@ class SettingsBase {
     SettingsBase(const String& title = "") : _title(title) {
 #endif
         useAutoUpdates(true);
+        fs.setFS(LittleFS);
     }
+
+    // файловая система
+    HybridFS fs;
 
     // установить пароль на вебморду. Пустая строка "" чтобы отключить
     void setPass(Text pass) {
@@ -233,7 +237,7 @@ class SettingsBase {
         custom.p = path;
         custom.gz = gz;
         custom.hash = 0;
-        File f = sets::FS.openRead(custom.p);
+        File f = fs.openRead(custom.p);
         if (f) {
             while (f.available()) custom.hash += f.read();
         }
@@ -404,7 +408,7 @@ class SettingsBase {
 
             case SH("remove"):
                 if (granted) {
-                    FS.remove(value);
+                    fs.remove(value.c_str());
                     _sendFs(true);
                     return;
                 }
@@ -412,7 +416,7 @@ class SettingsBase {
 
             case SH("create"):
                 if (granted) {
-                    FS.openWrite(value);
+                    fs.openWrite(value.c_str());
                     _sendFs(true);
                     return;
                 }
@@ -456,15 +460,15 @@ class SettingsBase {
     }
 
     void _sendFs(bool granted) {
-        String str;
-        if (granted) FS.listDir(str, "/", true);
+        String res;
+        if (granted) fs.listDir(res, "/", true);
 
         Packet p;
         p('{');
         p[Code::type] = Code::fs;
-        p[Code::content] = str;
-        p[Code::used] = FS.usedSpace();
-        p[Code::total] = FS.totalSpace();
+        p[Code::content] = res;
+        p[Code::used] = fs.flash.usedSpace();
+        p[Code::total] = fs.flash.totalSpace();
         if (!granted) p[Code::error] = F("Access denied");
         p('}');
         _answer(p);

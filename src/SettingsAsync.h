@@ -13,7 +13,6 @@
 
 #include "./core/DnsWrapper.h"
 #include "./core/SettingsBase.h"
-#include "./core/fs.h"
 #include "./core/ota.h"
 #include "./web/settings.h"
 
@@ -52,8 +51,8 @@ class SettingsAsync : public sets::SettingsBase {
             if (request->hasParam("auth")) auth = request->getParam("auth")->value();
             if (request->hasParam("path")) path = request->getParam("path")->value();
 
-            if (authenticate(Text(auth).toInt32HEX())) {
-                AsyncWebServerResponse *response = request->beginResponse(ST_FS, path, emptyString);
+            if (authenticate(Text(auth).toInt32HEX()) && fs.fs(path.c_str())) {
+                AsyncWebServerResponse *response = request->beginResponse(*(fs.fs(path.c_str())), path, emptyString);
                 cors_h(response);
                 request->send(response);
                 if (fetch_cb) fetch_cb(path);
@@ -68,7 +67,7 @@ class SettingsAsync : public sets::SettingsBase {
             if (request->hasParam("path")) path = request->getParam("path")->value();
             if (!authenticate(Text(auth).toInt32HEX())) return;
             
-            if (!index) _file = sets::FS.openWrite(path);
+            if (!index) _file = fs.openWrite(path.c_str());
             if (len && _file) _file.write(data, len);
             if (final && _file) {
                 _file.close();
@@ -111,11 +110,12 @@ class SettingsAsync : public sets::SettingsBase {
             request->send(response);
         });
         server.on("/custom.js", HTTP_GET, [this](AsyncWebServerRequest *request) {
-            if (!custom.p) sendCode(500, request);
-            else {
+            if (!custom.p || !fs.fs(custom.p)) {
+                sendCode(500, request);
+            } else {
                 AsyncWebServerResponse *response;
                 if (!custom.isFile) response = request->beginResponse_P(200, "text/javascript", (const uint8_t *)custom.p, custom.len);
-                else response = request->beginResponse(ST_FS, custom.p, "text/javascript");
+                else response = request->beginResponse(*(fs.fs(custom.p)), custom.p, "text/javascript");
                 if (!response) return;
 
                 if (custom.gz) gzip_h(response);

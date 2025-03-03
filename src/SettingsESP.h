@@ -12,7 +12,6 @@
 
 #include "./core/SettingsBase.h"
 #include "./core/DnsWrapper.h"
-#include "./core/fs.h"
 #include "./core/ota.h"
 #include "./web/settings.h"
 
@@ -51,7 +50,7 @@ class SettingsESP : public sets::SettingsBase {
             }
 
             String path = server.arg(F("path"));
-            File f = sets::FS.openRead(path);
+            File f = fs.openRead(path.c_str());
             if (f) server.streamFile(f, "text/plain");
             else server.send(500);
             if (fetch_cb) fetch_cb(path);
@@ -66,7 +65,7 @@ class SettingsESP : public sets::SettingsBase {
             HTTPUpload& upload = server.upload();
             if (upload.status == UPLOAD_FILE_START) {
                 String path = server.arg(F("path"));
-                _file = sets::FS.openWrite(path);
+                _file = fs.openWrite(path.c_str());
             } else if (upload.status == UPLOAD_FILE_WRITE) {
                 if (_file) _file.write(upload.buf, upload.currentSize);
             } else if (upload.status == UPLOAD_FILE_END) {
@@ -120,7 +119,7 @@ class SettingsESP : public sets::SettingsBase {
                 if (custom.gz) gzip_h();
                 if (!custom.isFile) server.send_P(200, "text/javascript", custom.p, custom.len);
                 else {
-                    File f = sets::FS.openRead(custom.p);
+                    File f = fs.openRead(custom.p);
                     if (f) server.streamFile(f, "text/javascript");
                     else server.send(500);
                 }
