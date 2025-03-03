@@ -32,6 +32,9 @@
 ## Совместимость
 ESP8266, ESP32
 
+> [!CAUTION]
+> Подключение в проект библиотеки FastLED версии старше 3.7.8 ломает вебсервер! Ждём фиксов со стороны ESP или FastLED
+
 ### Зависимости
 - [GTL](https://github.com/GyverLibs/GTL) v1.2.1+
 - [GyverDB](https://github.com/GyverLibs/GyverDB) v1.2.3+
