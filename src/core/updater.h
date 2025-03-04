@@ -156,21 +156,21 @@ class Updater {
 
 #ifndef SETT_NO_TABLE
     // апдейт для plot графиков
-    Updater& updatePlot(size_t id, Table& table, bool clear = true) {
+    Updater& updatePlot(size_t id, Table& table, bool clearTable = true) {
         if (table.rows()) {
             p('{');
             p[Code::id] = id;
             p[Code::data];
             p.beginBin(table.writeSize());
             table.writeTo(p);
-            if (clear) table.removeAll();
+            if (clearTable) table.removeAll();
             p('}');
         }
         return *this;
     }
 
     // апдейт для timeline графиков
-    Updater& updatePlot(size_t id, Table& table, TMode mode, bool clear = true) {
+    Updater& updatePlot(size_t id, Table& table, TMode mode, bool clearTable = true) {
         if (table.rows()) {
             p('{');
             p[Code::id] = id;
@@ -178,7 +178,7 @@ class Updater {
             p[Code::data];
             p.beginBin(table.writeSize());
             table.writeTo(p);
-            if (clear) table.removeAll();
+            if (clearTable) table.removeAll();
             p('}');
         }
         return *this;
