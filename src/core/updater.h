@@ -153,6 +153,11 @@ class Updater {
         p('}');
         return *this;
     }
+    
+    // апдейт для графиков из файла
+    Updater& updatePlot(size_t id, Text path) {
+        return update(id, path);
+    }
 
 #ifndef SETT_NO_TABLE
     // апдейт для plot графиков
