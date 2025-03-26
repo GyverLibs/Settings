@@ -270,6 +270,26 @@ class Builder {
         TableCSV(_NO_ID, csv, labels);
     }
 
+    // ================= GAUGE =================
+    // линейная шкала с заполнением, обновляется через апдейт
+    void LinearGauge(size_t id, Text label = "", float min = 0, float max = 100, Text unit = Text(), float value = NAN, uint32_t color = SETS_DEFAULT_COLOR) {
+        if (_beginWidget(Code::gauge, id, label, isnan(value) ? nullptr : &value, color)) {
+            (*p)[Code::min] = min;
+            (*p)[Code::max] = max;
+            (*p)[Code::unit] = unit;
+            _endWidget();
+        }
+    }
+    void LinearGauge(size_t id, Text label, float min, float max, Text unit, float value, Colors color) {
+        LinearGauge(id, label, min, max, unit, value, uint32_t(color));
+    }
+    void LinearGauge(Text label = "", float min = 0, float max = 100, Text unit = Text(), float value = NAN, uint32_t color = SETS_DEFAULT_COLOR) {
+        LinearGauge(_NO_ID, label, min, max, unit, value, color);
+    }
+    void LinearGauge(Text label, float min, float max, Text unit, float value, Colors color) {
+        LinearGauge(_NO_ID, label, min, max, unit, value, uint32_t(color));
+    }
+
     // ================= PLOT =================
     // бегущий график. Принимает обновления вида float[]. Подписи разделяются ;
     void PlotRunning(size_t id, Text labels = Text(), uint16_t period = 200) {
