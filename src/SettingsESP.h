@@ -10,8 +10,8 @@
 #include <WebServer.h>
 #endif
 
-#include "./core/SettingsBase.h"
 #include "./core/DnsWrapper.h"
+#include "./core/SettingsBase.h"
 #include "./core/ota.h"
 #include "./web/settings.h"
 
@@ -148,6 +148,16 @@ class SettingsESP : public sets::SettingsBase {
     sets::DnsWrapper _dns;
     File _file;
     bool _first = true;
+
+    String getMac() override {
+        return WiFi.macAddress();
+    }
+    int getRSSI() override {
+        return constrain(2 * (WiFi.RSSI() + 100), 0, 100);
+    }
+    IPAddress getIP() override {
+        return WiFi.localIP();
+    }
 
     void answer(uint8_t* data, size_t len) override {
         if (_first) {

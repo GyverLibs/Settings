@@ -142,6 +142,16 @@ class SettingsAsync : public sets::SettingsBase {
     sets::DnsWrapper _dns;
     File _file;
 
+    String getMac() override {
+        return WiFi.macAddress();
+    }
+    int getRSSI() override {
+        return constrain(2 * (WiFi.RSSI() + 100), 0, 100);
+    }
+    IPAddress getIP() override {
+        return WiFi.localIP();
+    }
+
     void answer(uint8_t *data, size_t len) override {
         if (_response) _response->write(data, len);
     }

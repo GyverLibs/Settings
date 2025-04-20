@@ -87,6 +87,10 @@ enum class Code : uint8_t {
     link,
     table,
     gauge,
+    as_txt,
+    mac,
+    local_ip,
+    spinner,
 };
 
 }

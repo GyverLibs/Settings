@@ -24,9 +24,7 @@ bool beginOta(bool ota_flash, bool async) {
 #ifdef ESP8266
         ota_type = U_FS;
         close_all_fs();
-#ifndef GH_NO_FS
         ota_size = (size_t)&_FS_end - (size_t)&_FS_start;
-#endif
 #else
         ota_type = U_SPIFFS;
         ota_size = UPDATE_SIZE_UNKNOWN;

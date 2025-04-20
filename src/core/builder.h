@@ -108,6 +108,11 @@ class Builder {
         _endContainer();
     }
 
+    // true если в вебморде открыто текущее меню
+    bool enterMenu() {
+        return build.type == Build::Type::Menu && build.id == _menuID;
+    }
+
     // ================= BUTTONS =================
 
     // ряд кнопок
@@ -475,6 +480,21 @@ class Builder {
         return DateTime(_next(), label, value, zone_hours);
     }
 
+    // ================= SPINNER =================
+    // сипннер [результат - число], подключаемая переменная - любой тип
+    bool Spinner(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, AnyPtr value = nullptr) {
+        if (_beginWidget(Code::spinner, id, label, value)) {
+            (*p)[Code::min] = min;
+            (*p)[Code::max] = max;
+            (*p)[Code::step] = step;
+            _endWidget();
+        }
+        return _isSet(id, value);
+    }
+    bool Spinner(Text label = "", float min = 0, float max = 100, float step = 1, AnyPtr value = nullptr) {
+        return Spinner(_next(), label, min, max, step, value);
+    }
+
     // ================= SLIDER =================
     // слайдер [результат - число], подключаемая переменная - любой тип
     bool Slider(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
@@ -531,18 +551,34 @@ class Builder {
     bool Slider2(size_t id_min, size_t id_max, Text label, float min, float max, float step, Text unit, AnyPtr value_min, AnyPtr value_max, Colors color) {
         return Slider2(id_min, id_max, label, min, max, step, unit, value_min, value_max, (uint32_t)color);
     }
+    bool Slider2(Text label = "", float min = 0, float max = 100, float step = 1, Text unit = Text(), AnyPtr value_min = nullptr, AnyPtr value_max = nullptr, uint32_t color = SETS_DEFAULT_COLOR) {
+        return Slider2(_next(), _next(), label, min, max, step, unit, value_min, value_max, color);
+    }
+    bool Slider2(Text label, float min, float max, float step, Text unit, AnyPtr value_min, AnyPtr value_max, Colors color) {
+        return Slider2(_next(), _next(), label, min, max, step, unit, value_min, value_max, (uint32_t)color);
+    }
 
     // ================= SELECT =================
     // опции разделяются ; или \n [результат - индекс (число)]
     bool Select(size_t id, Text label, Text options, AnyPtr value = nullptr) {
+        return _Select(id, label, options, value, false);
+    }
+    bool Select(Text label, Text options, AnyPtr value = nullptr) {
+        return _Select(_next(), label, options, value, false);
+    }
+
+    // опции разделяются ; или \n [результат - строка]
+    bool SelectText(Text label, Text options) {
+        return _Select(_next(), label, options, nullptr, true);
+    }
+
+    bool _Select(size_t id, Text label, Text options, AnyPtr value, bool asText) {
         if (_beginWidget(Code::select, id, label, value)) {
             (*p)[Code::text] = options;
+            (*p)[Code::as_txt] = asText;
             _endWidget();
         }
         return _isSet(id, value);
-    }
-    bool Select(Text label, Text options, AnyPtr value = nullptr) {
-        return Select(_next(), label, options, value);
     }
 
     // ================= TABS =================
@@ -634,6 +670,7 @@ class Builder {
     void* _db = nullptr;
     size_t _auto_id = UINT32_MAX;
     int8_t _reload = 0;
+    uint8_t _menuID = 0;
     bool _enabled = true;
     bool _was_set = false;
     bool _set_f = false;
@@ -679,9 +716,11 @@ class Builder {
     }
 
     bool _beginContainer(Code type, Text title = Text(), DivType divtype = DivType::Default) {
+        if (type == Code::menu) ++_menuID;
         if (build.isBuild()) {
             (*p)('{');
             (*p)[Code::type] = type;
+            if (type == Code::menu) (*p)[Code::id] = _menuID;
             if (title.length()) (*p)[Code::title] = title;
             switch (divtype) {
                 case DivType::Default: break;

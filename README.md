@@ -36,13 +36,13 @@ ESP8266, ESP32
 > Подключение в проект библиотеки FastLED версии старше [3.7.8](https://github.com/GyverLibs/Settings/issues/35#issuecomment-2691839527) ломает вебсервер! Ждём фиксов со стороны ESP или FastLED
 
 ### Зависимости
-- [GTL](https://github.com/GyverLibs/GTL) v1.2.1+
-- [GyverDB](https://github.com/GyverLibs/GyverDB) v1.2.3+
+- [GTL](https://github.com/GyverLibs/GTL) v1.3.0+
+- [GyverDB](https://github.com/GyverLibs/GyverDB) v1.3.0+
 - [StringUtils](https://github.com/GyverLibs/StringUtils) v1.4.30+
-- [GyverHTTP](https://github.com/GyverLibs/GyverHTTP) v1.0.23+
-- [BSON](https://github.com/GyverLibs/BSON) v2.0.5+
+- [GyverHTTP](https://github.com/GyverLibs/GyverHTTP) v1.0.26+
+- [BSON](https://github.com/GyverLibs/BSON) v2.1.0+
 - [Stamp](https://github.com/GyverLibs/Stamp) v1.4.0+
-- [Table](https://github.com/GyverLibs/Table) v1.1.0+
+- [Table](https://github.com/GyverLibs/Table) v1.2.0+
 - [StreamIO](https://github.com/GyverLibs/StreamIO) v1.0.5+
 
 > [!TIP]
@@ -134,10 +134,6 @@ ESP8266, ESP32
   - Добавлен виджет Ссылка
   - Добавлен минимум и максимум в Number
   - Мелкие исправления и улучшения
-
-## Благодарочки
-- Александр Инфинити - материальная поддержка проекта, идеи
-- TontonMacout - идеи, десктопное приложение
 
 ## Баги и обратная связь
 При нахождении багов создавайте **Issue**, а лучше сразу пишите на почту [alex@alexgyver.ru](mailto:alex@alexgyver.ru)  

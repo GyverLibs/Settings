@@ -87,7 +87,11 @@ class SettingsBase {
             p[Code::type] = Code::update;
             p[Code::content]('[');
         }
-        InlineUpdater(InlineUpdater&& u) : Updater(p), sets(u.sets), p(u.p) {}
+
+        InlineUpdater(InlineUpdater& u) = default;
+        InlineUpdater(InlineUpdater&& u) = default;
+        InlineUpdater& operator=(InlineUpdater&&) = default;
+        InlineUpdater& operator=(InlineUpdater&) = default;
 
         ~InlineUpdater() {
             p(']');
@@ -265,6 +269,10 @@ class SettingsBase {
     FileCallback fetch_cb = nullptr;
     FileCallback upload_cb = nullptr;
 
+    virtual String getMac() { return String(); }
+    virtual int getRSSI() { return 100; }
+    virtual IPAddress getIP() { return IPAddress(); }
+
     // ответ HTTP
     virtual void answer(uint8_t* data, size_t len) = 0;
 
@@ -321,7 +329,7 @@ class SettingsBase {
                 if (_title.length()) p.concatString(_title);
                 else p.concatString(F("Unnamed"));
                 p.concatString(F(R"raw(","mac":")raw"));
-                p.concatString(WiFi.macAddress());
+                p.concatString(getMac());
                 p.concatString("\"}");
                 _answer(p);
                 return;
@@ -338,6 +346,14 @@ class SettingsBase {
             case SH("unfocus"):
                 _focus_tmr.stop();
                 if (_focus_cb) _focus_cb();
+                break;
+
+            case SH("menu"):
+                if (_build_cb) {
+                    Build action(Build::Type::Menu, granted, idh);
+                    Builder b(this, action);
+                    _build_cb(b);
+                }
                 break;
 
             case SH("set"):
@@ -388,7 +404,7 @@ class SettingsBase {
                     Packet p;
                     p('{');
                     p[Code::type] = Code::update;
-                    p[Code::rssi] = _rssi();
+                    p[Code::rssi] = getRSSI();
                     p[Code::content]('[');
                     _fillUpdates(p);
                     if (_upd_cb) {
@@ -425,7 +441,7 @@ class SettingsBase {
             case SH("ping"): {
                 BSON b;
                 b('{');
-                b[Code::rssi] = _rssi();
+                b[Code::rssi] = getRSSI();
                 b('}');
                 _answer(b);
                 return;
@@ -485,8 +501,10 @@ class SettingsBase {
             p[Code::request_tout] = config.requestTout;
             p[Code::send_tout] = config.sliderTout;
             p[Code::color] = (uint32_t)config.theme;
-            p[Code::rssi] = _rssi();
+            p[Code::rssi] = getRSSI();
             p[Code::uptime] = millis() / 1000;
+            p[Code::mac] = getMac();
+            p[Code::local_ip] = getIP().toString();
             if (custom.p) p[Code::custom_hash] = custom.hash;
             if (_title.length()) p[Code::title] = _title;
             if (_passh) p[Code::granted] = granted;
@@ -510,10 +528,6 @@ class SettingsBase {
         } else {
             _answerEmpty();
         }
-    }
-
-    int16_t _rssi() {
-        return constrain(2 * (WiFi.RSSI() + 100), 0, 100);
     }
 
     bool _dbHasUpdates() {

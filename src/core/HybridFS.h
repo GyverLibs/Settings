@@ -10,18 +10,20 @@
 // FSWrapper
 class FSWrapper {
    public:
+    // указатель на fs
     FS* fs() {
         return _fs;
     }
 
+    // fs подключена
     bool valid() {
         return _fs;
     }
-
     operator bool() {
         return _fs;
     }
 
+    // подлючить fs
     template <typename fs_t>
     void setFS(fs_t& fs) {
         _fs = &fs;
@@ -47,25 +49,36 @@ class FSWrapper {
 #endif
     }
 
+    // отключить fs
+    void reset() {
+        _fs = nullptr;
+        _totalSpace = nullptr;
+        _usedSpace = nullptr;
+    }
+
+    // удалить файл
     bool remove(const char* path) {
         return _fs ? _fs->remove(path) : false;
     }
 
+    // открыть файл
     File open(const char* path, const char* mode) {
         if (!_fs) return File();
         mkdir(path);
         return _fs->open(path, mode);
     }
 
+    // открыть для чтения
     File openRead(const char* path) {
         return open(path, "r");
     }
 
+    // открыть для записи
     File openWrite(const char* path) {
         return open(path, "w");
     }
 
-    // вывести список файлов. Разделитель файлов - \n, через : указан размер в байтах
+    // вывести список файлов. Разделитель файлов - ';', через ':' указан размер в байтах
     void listDir(String& str, const char* path = "/", bool withSize = false, const char* prefix = "") {
         if (!_fs) return;
 #ifdef ESP8266
@@ -86,7 +99,7 @@ class FSWrapper {
                     str += ':';
                     str += dir.fileSize();
                 }
-                str += '\n';
+                str += ';';
             }
         }
 
@@ -105,12 +118,13 @@ class FSWrapper {
                     str += ':';
                     str += file.size();
                 }
-                str += '\n';
+                str += ';';
             }
         }
 #endif
     }
 
+    // создать директорию
     void mkdir(const char* path) {
         if (!_fs) return;
 #ifdef ESP32
@@ -133,6 +147,7 @@ class FSWrapper {
 #endif
     }
 
+    // удалить директорию
     void rmdir(const char* path) {
         if (!_fs) return;
 #ifdef ESP32
@@ -150,16 +165,21 @@ class FSWrapper {
 #endif
     }
 
+    // всего памяти, байт
     uint64_t totalSpace() {
         if (!_totalSpace) return 0;
         uint64_t v = _totalSpace();
         return v < FSW_MAX_SPACE ? v : 0;
     }
+
+    // свободно, байт
     uint64_t usedSpace() {
         if (!_usedSpace) return 0;
         uint64_t v = _usedSpace();
         return v < FSW_MAX_SPACE ? v : 0;
     }
+
+    // занято, байт
     uint64_t freeSpace() {
         return totalSpace() - usedSpace();
     }
@@ -179,50 +199,70 @@ class HybridFS {
    public:
     FSWrapper flash, sd;
 
+    // подлючить fs (flash)
     template <typename flash_t>
     void setFS(flash_t& flash_fs) {
         flash.setFS(flash_fs);
+        sd.reset();
     }
 
+    // подлючить fs (flash + sd)
     template <typename flash_t, typename sd_t>
     void setFS(flash_t& flash_fs, sd_t& sd_fs) {
         flash.setFS(flash_fs);
         sd.setFS(sd_fs);
     }
 
+    // вывести список файлов. Разделитель файлов - ';', через ':' указан размер в байтах
     void listDir(String& str, const char* path = "/", bool withSize = false) {
         flash.listDir(str, path, withSize);
 
-        char* pref = strdup(HFS_SD_PREFIX);
-        pref[HFS_SD_PREFIX_LEN - 1] = 0;
-        sd.listDir(str, path, withSize, pref);
-        free(pref);
+        if (sd) {
+            char* pref = strdup(HFS_SD_PREFIX);
+            pref[HFS_SD_PREFIX_LEN - 1] = 0;
+            sd.listDir(str, path, withSize, pref);
+            free(pref);
+        }
     }
 
+    // вывести список файлов. Разделитель файлов - ';'
+    String listDir(const char* path = "/") {
+        String str;
+        listDir(str, path, false);
+        return str;
+    }
+
+    // удалить файл
     bool remove(const char* path) {
         return _isSD(path) ? sd.remove(path + HFS_SD_SHIFT) : flash.remove(path);
     }
 
+    // открыть файл
     File open(const char* path, const char* mode) {
         return _isSD(path) ? sd.open(path + HFS_SD_SHIFT, mode) : flash.open(path, mode);
     }
 
+    // открыть для чтения
     File openRead(const char* path) {
         return open(path, "r");
     }
 
+    // открыть для записи
     File openWrite(const char* path) {
         return open(path, "w");
     }
 
+    // создать директорию
     void mkdir(const char* path) {
         _isSD(path) ? sd.mkdir(path + HFS_SD_SHIFT) : flash.mkdir(path);
     }
 
+    // удалить директорию
     void rmdir(const char* path) {
         _isSD(path) ? sd.rmdir(path + HFS_SD_SHIFT) : flash.rmdir(path);
     }
 
+    // указатель на fs
     FS* fs(const char* path) {
         return _isSD(path) ? sd.fs() : flash.fs();
     }

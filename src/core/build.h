@@ -9,7 +9,8 @@ class Build {
     enum class Type {
         None,
         Build,
-        Set
+        Set,
+        Menu,
     };
 
     Build(Type type, bool granted, size_t id = 0, Text value = Text()) : type(type), granted(granted), id(id), value(value) {}
