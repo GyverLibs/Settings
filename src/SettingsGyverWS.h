@@ -7,9 +7,9 @@ class SettingsGyverWS : public SettingsGyver, private sets::SyncWS {
    public:
     using SettingsGyver::SettingsGyver;
 
-    void begin() {
+    void begin(bool useDns = true) {
         setWSPort(81);
-        SettingsGyver::begin();
+        SettingsGyver::begin(useDns);
         SyncWS::begin();
     }
 

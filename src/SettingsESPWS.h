@@ -7,9 +7,9 @@ class SettingsESPWS : public SettingsESP, private sets::SyncWS {
    public:
     using SettingsESP::SettingsESP;
 
-    void begin() {
+    void begin(bool useDns = true) {
         setWSPort(81);
-        SettingsESP::begin();
+        SettingsESP::begin(useDns);
         SyncWS::begin();
     }
 

@@ -6,9 +6,9 @@ class SettingsAsyncWS : public SettingsAsync {
    public:
     using SettingsAsync::SettingsAsync;
 
-    void begin() {
+    void begin(bool useDns = true) {
         setWSPort(80);
-        SettingsAsync::begin();
+        SettingsAsync::begin(useDns);
         ws.onEvent([this](AsyncWebSocket* server, AsyncWebSocketClient* client, AwsEventType type, void* arg, uint8_t* data, size_t len) {
             switch (type) {
                 case WS_EVT_DATA:
