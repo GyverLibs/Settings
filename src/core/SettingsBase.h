@@ -14,13 +14,15 @@
 #include <WiFi.h>
 #endif
 
-#include "./core/HybridFS.h"
-#include "./core/builder.h"
-#include "./core/colors.h"
-#include "./core/containers.h"
-#include "./core/logger.h"
-#include "./core/packet.h"
-#include "./core/updater.h"
+#include "../web/settings.h"
+#include "./HybridFS.h"
+#include "./builder.h"
+#include "./colors.h"
+#include "./containers.h"
+#include "./logger.h"
+#include "./macro.h"
+#include "./packet.h"
+#include "./updater.h"
 
 namespace sets {
 
@@ -122,6 +124,11 @@ class SettingsBase {
 
     // файловая система
     HybridFS fs;
+
+    // установить версию прошивки для отображения в меню
+    void setVersion(const char* ver) {
+        _f_ver = ver;
+    }
 
     // установить пароль на вебморду. Пустая строка "" чтобы отключить
     void setPass(Text pass) {
@@ -455,6 +462,7 @@ class SettingsBase {
     BuildCallback _build_cb = nullptr;
     UpdateCallback _upd_cb = nullptr;
     FocusCallback _focus_cb = nullptr;
+    const char* _f_ver = nullptr;
     String _title;
     Timer _focus_tmr;
     Timer _upd_tmr;
@@ -505,6 +513,8 @@ class SettingsBase {
             p[Code::uptime] = millis() / 1000;
             p[Code::mac] = getMac();
             p[Code::local_ip] = getIP().toString();
+            p[Code::s_ver] = SETTINGS_VER;
+            if (_f_ver) p[Code::f_ver] = _f_ver;
             if (custom.p) p[Code::custom_hash] = custom.hash;
             if (_title.length()) p[Code::title] = _title;
             if (_passh) p[Code::granted] = granted;

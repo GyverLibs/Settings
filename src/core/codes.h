@@ -91,6 +91,8 @@ enum class Code : uint8_t {
     mac,
     local_ip,
     spinner,
+    s_ver,
+    f_ver,
 };
 
 }
