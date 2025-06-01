@@ -53,7 +53,7 @@ void loop() {
             tmr = millis();
 
             // ===== бинарная таблица =====
-            TableFileStatic t(&LittleFS, "/file_plot1.tbl");
+            TableFileStatic t(&LittleFS, "/file_plot1.tbl", 100);   // макс. 100 строк, будет смещаться при append()
 
             // инициализация, должна быть вызвана хотя бы один раз после непосредственного создания файла
             t.init(3, cell_t::Uint32, cell_t::Float, cell_t::Int8);
