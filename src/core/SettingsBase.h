@@ -98,7 +98,7 @@ class SettingsBase {
         ~InlineUpdater() {
             p(']');
             p('}');
-            if (sets.focused()) sets._send(p, true, false);
+            if (sets.focused()) sets._sendWS(p);
         }
 
        private:
@@ -198,7 +198,7 @@ class SettingsBase {
             _fillUpdates(p);
             p(']');
             p('}');
-            _send(p, true, false);
+            _sendWS(p);
         }
 #endif
         if (_rst) {
@@ -221,7 +221,7 @@ class SettingsBase {
             p[Code::type] = Code::reload;
             if (force) p[Code::force] = true;
             p('}');
-            _send(p, true, false);
+            _sendWS(p);
         } else {
             _reload = force ? -1 : 1;
         }
@@ -585,6 +585,11 @@ class SettingsBase {
             bson.write(&pid, 2);
         }
         sendWS(bson.buf(), bson.length(), broadcast);
+    }
+    void _sendWS(BSON& bson) {
+        uint32_t p = 0;
+        bson.write(&p, 3);  // skip 0, pid 0
+        sendWS(bson.buf(), bson.length(), true);
     }
 
     static void _hook(void* settptr, Packet& p) {
