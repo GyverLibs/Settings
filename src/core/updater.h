@@ -153,9 +153,21 @@ class Updater {
         p('}');
         return *this;
     }
-    
+
     // апдейт для графиков из файла
-    Updater& updatePlot(size_t id, Text path) {
+    Updater& updatePlot(size_t id, char* path) {
+        return update(id, path);
+    }
+    Updater& updatePlot(size_t id, const char* path) {
+        return update(id, path);
+    }
+    Updater& updatePlot(size_t id, const __FlashStringHelper* path) {
+        return update(id, path);
+    }
+    Updater& updatePlot(size_t id, const String& path) {
+        return update(id, path);
+    }
+    Updater& updatePlot(size_t id, const Text& path) {
         return update(id, path);
     }
 

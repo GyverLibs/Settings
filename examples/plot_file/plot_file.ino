@@ -52,7 +52,7 @@ void loop() {
         if (millis() - tmr >= 2000) {
             tmr = millis();
 
-            // ===== бинарная таблица =====
+            // ==================== бинарная таблица ====================
             TableFileStatic t(&LittleFS, "/file_plot1.tbl", 100);   // макс. 100 строк, будет смещаться при append()
 
             // инициализация, должна быть вызвана хотя бы один раз после непосредственного создания файла
@@ -61,7 +61,10 @@ void loop() {
             // добавление в файл
             t.append(sett.rtc.getUnix(), (random(100) - 50) / 2.0, random(-100, 100));
 
-            // ===== CSV таблица =====
+            // отправить апдейт
+            // sett.updater().update(H(plot1), "/file_plot1.tbl");
+
+            // ======================= CSV таблица ======================
             File f = LittleFS.open("/file_plot2.csv", "a");
             if (f) {
                 f.print(sett.rtc.getUnix());

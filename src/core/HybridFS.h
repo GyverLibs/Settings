@@ -64,8 +64,11 @@ class FSWrapper {
     // открыть файл
     File open(const char* path, const char* mode) {
         if (!_fs) return File();
-        mkdir(path);
+#ifdef ESP8266
         return _fs->open(path, mode);
+#else
+        return _fs->open(path, mode, mode[0] != 'r');
+#endif
     }
 
     // открыть для чтения
@@ -76,6 +79,12 @@ class FSWrapper {
     // открыть для записи
     File openWrite(const char* path) {
         return open(path, "w");
+    }
+
+    String listDir(const char* path = "/") {
+        String str;
+        listDir(str, path);
+        return str;
     }
 
     // вывести список файлов. Разделитель файлов - ';', через ':' указан размер в байтах
@@ -112,6 +121,7 @@ class FSWrapper {
                 listDir(str, file.path(), withSize);
             } else {
                 str += prefix;
+                if (strlen(path) > 1) str += path;
                 str += '/';
                 str += file.name();
                 if (withSize) {
@@ -127,7 +137,9 @@ class FSWrapper {
     // создать директорию
     void mkdir(const char* path) {
         if (!_fs) return;
-#ifdef ESP32
+#ifdef ESP8266
+        _fs->mkdir(path);
+#else
         if (!_fs->exists(path)) {
             if (strchr(path, '/')) {
                 char* pathD = strdup(path);
@@ -143,14 +155,15 @@ class FSWrapper {
                 free(pathD);
             }
         }
-#else
 #endif
     }
 
     // удалить директорию
     void rmdir(const char* path) {
         if (!_fs) return;
-#ifdef ESP32
+#ifdef ESP8266
+        _fs->rmdir(path);
+#else
         char* pathD = strdup(path);
         if (pathD) {
             char* ptr = strrchr(pathD, '/');
@@ -161,7 +174,6 @@ class FSWrapper {
             }
             free(pathD);
         }
-#else
 #endif
     }
 
@@ -228,7 +240,7 @@ class HybridFS {
     // вывести список файлов. Разделитель файлов - ';'
     String listDir(const char* path = "/") {
         String str;
-        listDir(str, path, false);
+        listDir(str, path);
         return str;
     }
 
