@@ -52,6 +52,9 @@ class SettingsBase {
 
         // основная цветовая схема
         Colors theme = Colors::Green;
+
+        // использовать файловый менеджер
+        bool useFS = true;
     };
 
     struct CustomJS {
@@ -508,6 +511,7 @@ class SettingsBase {
             p[Code::ping_tout] = config.pingTout;
             p[Code::request_tout] = config.requestTout;
             p[Code::send_tout] = config.sliderTout;
+            p[Code::use_fs] = config.useFS;
             p[Code::color] = (uint32_t)config.theme;
             p[Code::rssi] = getRSSI();
             p[Code::uptime] = millis() / 1000;

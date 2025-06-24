@@ -10,6 +10,11 @@
 // FSWrapper
 class FSWrapper {
    public:
+    FSWrapper() {}
+
+    template <typename fs_t>
+    FSWrapper(fs_t& fs) { setFS(fs); }
+
     // указатель на fs
     FS* fs() {
         return _fs;
@@ -210,6 +215,16 @@ class FSWrapper {
 class HybridFS {
    public:
     FSWrapper flash, sd;
+
+    HybridFS() {}
+
+    // подлючить fs (flash)
+    template <typename flash_t>
+    HybridFS(flash_t& flash_fs) { setFS(flash_fs); }
+
+    // подлючить fs (flash + sd)
+    template <typename flash_t, typename sd_t>
+    HybridFS(flash_t& flash_fs, sd_t& sd_fs) { setFS(flash_fs, sd_fs); }
 
     // подлючить fs (flash)
     template <typename flash_t>

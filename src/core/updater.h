@@ -92,6 +92,13 @@ class Updater {
     }
 
     // апдейт с текстом
+    Updater& updateText(size_t id, const Text& value) {
+        p('{');
+        p[Code::id] = id;
+        p[Code::data] = value;
+        p('}');
+        return *this;
+    }
     Updater& update(size_t id, const Text& value) {
         return updateText(id, value);
     }
@@ -99,6 +106,9 @@ class Updater {
         return updateText(id, value);
     }
     Updater& update(size_t id, const char* value) {
+        return updateText(id, value);
+    }
+    Updater& update(size_t id, char* value) {
         return updateText(id, value);
     }
     Updater& update(size_t id, const __FlashStringHelper* value) {
@@ -142,6 +152,21 @@ class Updater {
         p('}');
         return *this;
     }
+
+#ifndef SETT_NO_TABLE
+    // апдейт для Table
+    Updater& updateTable(size_t id, Table& table) {
+        if (table.rows()) {
+            p('{');
+            p[Code::id] = id;
+            p[Code::data];
+            p.beginBin(table.writeSize());
+            table.writeTo(p);
+            p('}');
+        }
+        return *this;
+    }
+#endif
 
     // апдейт для running и stack графиков
     template <typename T>
@@ -204,14 +229,6 @@ class Updater {
 
    private:
     Packet& p;
-
-    Updater& updateText(size_t id, const Text& value) {
-        p('{');
-        p[Code::id] = id;
-        p[Code::data] = value;
-        p('}');
-        return *this;
-    }
 };
 
 }  // namespace sets

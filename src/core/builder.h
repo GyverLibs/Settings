@@ -275,6 +275,7 @@ class Builder {
         Table(_NO_ID, table, labels);
     }
 
+#ifndef SETT_NO_TABLE
     // таблица из бинарной таблицы в RAM. Подписи - список с разделением ';'
     void Table(size_t id, ::Table& table, Text labels = Text()) {
         if (_beginWidget(Code::table, id, labels)) {
@@ -287,6 +288,7 @@ class Builder {
     void Table(::Table& table, Text labels = Text()) {
         Table(_NO_ID, table, labels);
     }
+#endif
 
     // ================= GAUGE =================
     // линейная шкала с заполнением, обновляется через апдейт
