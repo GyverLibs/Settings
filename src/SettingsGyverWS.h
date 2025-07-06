@@ -7,9 +7,11 @@ class SettingsGyverWS : public SettingsGyver, private sets::SyncWS {
    public:
     using SettingsGyver::SettingsGyver;
 
-    void begin(bool useDns = true) {
+    // запустить. captive - запустить mdns для автооткрытия окна в режиме AP при подключении к точке
+    // domain - домен, по которому есп будет доступна в локальной сети по адресу домен.local
+    void begin(bool captive = true, const char* domain = nullptr) {
         setWSPort(81);
-        SettingsGyver::begin(useDns);
+        SettingsGyver::begin(captive, domain);
         SyncWS::begin();
     }
 

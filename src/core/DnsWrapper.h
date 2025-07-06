@@ -4,7 +4,9 @@
 
 #ifdef ESP8266
 #include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #else
+#include <ESPmDNS.h>
 #include <WiFi.h>
 #endif
 
@@ -12,29 +14,40 @@ namespace sets {
 
 class DnsWrapper {
    public:
-    void begin() {
+    void begin(bool captive, const char* domain) {
 #ifndef SETT_NO_DNS
-        dns_f = true;
-        dns.start(53, "*", WiFi.softAPIP());
+        if (captive) {
+            captF = true;
+            dns.start(53, "*", WiFi.softAPIP());
+        }
+        if (domain) {
+            if (localF) MDNS.end();
+            localF = true;
+            MDNS.begin(domain);
+            MDNS.addService("http", "tcp", 80);
+        }
 #endif
     }
 
     void stop() {
 #ifndef SETT_NO_DNS
         dns.stop();
+        MDNS.end();
 #endif
     }
 
     void tick() {
 #ifndef SETT_NO_DNS
-        if (dns_f) dns.processNextRequest();
+        if (captF) dns.processNextRequest();
+        if (localF) MDNS.update();
 #endif
     }
 
    private:
 #ifndef SETT_NO_DNS
     DNSServer dns;
-    bool dns_f = false;
+    bool captF = false;
+    bool localF = false;
 #endif
 };
 

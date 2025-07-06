@@ -24,8 +24,10 @@ class SettingsAsync : public sets::SettingsBase {
     SettingsAsync(const String &title = "") : sets::SettingsBase(title), server(80) {}
 #endif
 
-    void begin(bool useDns = true) {
-        if (useDns) _dns.begin();
+    // запустить. captive - запустить mdns для автооткрытия окна в режиме AP при подключении к точке
+    // domain - домен, по которому есп будет доступна в локальной сети по адресу домен.local
+    void begin(bool captive = true, const char *domain = nullptr) {
+        _dns.begin(captive, domain);
         server.begin();
 
         server.on("/settings", HTTP_GET, [this](AsyncWebServerRequest *request) {

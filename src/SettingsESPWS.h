@@ -7,9 +7,11 @@ class SettingsESPWS : public SettingsESP, private sets::SyncWS {
    public:
     using SettingsESP::SettingsESP;
 
-    void begin(bool useDns = true) {
+    // запустить. captive - запустить mdns для автооткрытия окна в режиме AP при подключении к точке
+    // domain - домен, по которому есп будет доступна в локальной сети по адресу домен.local
+    void begin(bool captive = true, const char* domain = nullptr) {
         setWSPort(81);
-        SettingsESP::begin(useDns);
+        SettingsESP::begin(captive, domain);
         SyncWS::begin();
     }
 
@@ -22,7 +24,7 @@ class SettingsESPWS : public SettingsESP, private sets::SyncWS {
         SettingsESP::tick();
         SyncWS::tick();
     }
-    
+
     void onUpdate(UpdateCallback cb) = delete;
     using SettingsESP::updater;
 
