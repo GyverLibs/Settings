@@ -24,7 +24,6 @@ class DnsWrapper {
             if (localF) MDNS.end();
             localF = true;
             MDNS.begin(domain);
-            MDNS.addService("http", "tcp", 80);
         }
 #endif
     }
@@ -33,13 +32,17 @@ class DnsWrapper {
 #ifndef SETT_NO_DNS
         dns.stop();
         MDNS.end();
+        localF = false;
+        captF = false;
 #endif
     }
 
     void tick() {
 #ifndef SETT_NO_DNS
         if (captF) dns.processNextRequest();
+#ifdef ESP8266
         if (localF) MDNS.update();
+#endif
 #endif
     }
 
