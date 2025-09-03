@@ -23,7 +23,7 @@
 > Есть приложение для поиска устройств с библиотекой в локальной сети:
 > - [Android](https://github.com/GyverLibs/Settings-discover)
 > - [Windows](https://github.com/TonTon-Macout/APP-for-AlexGyver-Settings)
-> - [iOS](https://apps.apple.com/us/app/gyver-settings/id6751504764)
+> - iOS: [AppStore](https://apps.apple.com/us/app/gyver-settings/id6751504764) | [Репозиторий](https://github.com/Vl-VSV/Gyver-Settings)
 
 ![promo](/img/promo.png)
 
