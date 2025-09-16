@@ -425,12 +425,16 @@ class Builder {
 
     // ================= PASS =================
     // ввод пароля [результат - строка], подключаемая переменная - любой тип
-    bool Pass(size_t id, Text label = "", AnyPtr value = nullptr) {
-        _widget(Code::pass, id, label, value);
+    bool Pass(size_t id, Text label = "", AnyPtr value = nullptr, Text regex = Text(), Text format = Text()) {
+        if (_beginWidget(Code::pass, id, label, value)) {
+            if (regex) (*p)[Code::regex] = regex;
+            if (format) (*p)[Code::format] = format;
+            _endWidget();
+        }
         return _isSet(id, value);
     }
-    bool Pass(Text label = "", AnyPtr value = nullptr) {
-        return Pass(_next(), label, value);
+    bool Pass(Text label = "", AnyPtr value = nullptr, Text regex = Text(), Text format = Text()) {
+        return Pass(_next(), label, value, regex, format);
     }
 
     // ================= COLOR =================
@@ -499,8 +503,8 @@ class Builder {
     // сипннер [результат - число], подключаемая переменная - любой тип
     bool Spinner(size_t id, Text label = "", float min = 0, float max = 100, float step = 1, AnyPtr value = nullptr) {
         if (_beginWidget(Code::spinner, id, label, value)) {
-            (*p)[Code::min] = min;
-            (*p)[Code::max] = max;
+            if (!isnan(min)) (*p)[Code::min] = min;
+            if (!isnan(max)) (*p)[Code::max] = max;
             (*p)[Code::step] = step;
             _endWidget();
         }
