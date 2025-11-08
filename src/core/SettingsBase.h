@@ -208,6 +208,11 @@ class SettingsBase {
         _focus_cb = cb;
     }
 
+    // обработчик удаления файлов с устройства типа f(Text path)
+    void onFileRemove(FileCallback cb) {
+        _remove_cb = cb;
+    }
+
     // тикер, вызывать в родительском классе
     void tick() {
 #ifndef SETT_NO_DB
@@ -456,6 +461,9 @@ class SettingsBase {
                 if (granted) {
                     fs.remove(value.c_str());
                     _sendFs(true);
+                    if (_remove_cb) {
+                      _remove_cb(value);
+                    }
                     return;
                 }
                 break;
@@ -482,6 +490,7 @@ class SettingsBase {
     }
 
    private:
+    FileCallback _remove_cb = nullptr;
     BuildCallback _build_cb = nullptr;
     UpdateCallback _upd_cb = nullptr;
     FocusCallback _focus_cb = nullptr;
