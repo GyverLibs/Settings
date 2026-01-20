@@ -26,11 +26,19 @@
 
 namespace sets {
 
+  typedef void (*onUpdateFWStart_t)();
+  typedef void (*onUpdateFWProgress_t)(size_t current, size_t final);
+  typedef void (*onUpdateFWDone_t)(bool success);
+
 class SettingsBase {
     static const uint16_t FOCUS_TOUT = 5000;
     static const uint16_t DB_WS_UPDATE_PRD = 300;
 
    protected:
+    sets::onUpdateFWStart_t _onStart = nullptr;
+    sets::onUpdateFWProgress_t _onProgress = nullptr;
+    sets::onUpdateFWDone_t _onDone = nullptr;
+
     typedef std::function<void(Builder& b)> BuildCallback;
     typedef std::function<void(Updater& upd)> UpdateCallback;
     typedef std::function<void(Text path)> FileCallback;
@@ -116,6 +124,18 @@ class SettingsBase {
     }
 
    public:
+     void onUpdateFWStart(sets::onUpdateFWStart_t fn) {
+       _onStart = fn;
+     };
+
+     void onUpdateFWProgress(sets::onUpdateFWProgress_t fn) {
+       _onProgress = fn;
+     };
+
+     void onUpdateFWDone(sets::onUpdateFWDone_t fn) {
+       _onDone = fn;
+     };
+
 #ifndef SETT_NO_DB
     SettingsBase(const String& title = "", GyverDB* db = nullptr) : _title(title), _db(db) {
 #else
@@ -186,6 +206,11 @@ class SettingsBase {
     // обработчик подключения браузера f(bool focus)
     void onFocusChange(FocusCallback cb) {
         _focus_cb = cb;
+    }
+
+    // обработчик удаления файлов с устройства типа f(Text path)
+    void onFileRemove(FileCallback cb) {
+        _remove_cb = cb;
     }
 
     // тикер, вызывать в родительском классе
@@ -436,6 +461,9 @@ class SettingsBase {
                 if (granted) {
                     fs.remove(value.c_str());
                     _sendFs(true);
+                    if (_remove_cb) {
+                      _remove_cb(value);
+                    }
                     return;
                 }
                 break;
@@ -462,6 +490,7 @@ class SettingsBase {
     }
 
    private:
+    FileCallback _remove_cb = nullptr;
     BuildCallback _build_cb = nullptr;
     UpdateCallback _upd_cb = nullptr;
     FocusCallback _focus_cb = nullptr;
