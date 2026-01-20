@@ -64,7 +64,7 @@ class Packet : public BSON {
                 break;
 
             case gdb::Type::String:
-                add((Text)en);
+                add(en.toText());
                 break;
 
             default:

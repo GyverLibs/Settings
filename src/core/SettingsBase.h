@@ -488,7 +488,7 @@ class SettingsBase {
 
     void _sendFs(bool granted) {
         String res;
-        if (granted) fs.listDir(res, "/", true);
+        if (granted) fs.listDir(res, "/", ';', ':');
 
         Packet p;
         p('{');

@@ -86,14 +86,15 @@ class FSWrapper {
         return open(path, "w");
     }
 
-    String listDir(const char* path = "/") {
+    // вывести список файлов. Разделитель файлов - pathDiv, разделитель размера в Байтах - sizeDiv
+    String listDir(const char* path = "/", char pathDiv = ';', char sizeDiv = 0) {
         String str;
-        listDir(str, path);
+        listDir(str, path, pathDiv, sizeDiv);
         return str;
     }
 
-    // вывести список файлов. Разделитель файлов - ';', через ':' указан размер в байтах
-    void listDir(String& str, const char* path = "/", bool withSize = false, const char* prefix = "") {
+    // вывести список файлов. Разделитель файлов - pathDiv, разделитель размера в Байтах - sizeDiv
+    void listDir(String& str, const char* path = "/", char pathDiv = ';', char sizeDiv = 0, const char* prefix = "") {
         if (!_fs) return;
 #ifdef ESP8266
         Dir dir = _fs->openDir(path);
@@ -103,17 +104,17 @@ class FSWrapper {
                 p += dir.fileName();
                 p += '/';
                 Dir sdir = _fs->openDir(p);
-                listDir(str, p.c_str(), withSize);
+                listDir(str, p.c_str(), pathDiv, sizeDiv);
             }
             if (dir.isFile() && dir.fileName().length()) {
                 str += prefix;
                 str += path;
                 str += dir.fileName();
-                if (withSize) {
-                    str += ':';
+                if (sizeDiv) {
+                    str += sizeDiv;
                     str += dir.fileSize();
                 }
-                str += ';';
+                str += pathDiv;
             }
         }
 
@@ -123,17 +124,17 @@ class FSWrapper {
         File file;
         while (file = root.openNextFile()) {
             if (file.isDirectory()) {
-                listDir(str, file.path(), withSize);
+                listDir(str, file.path(), pathDiv, sizeDiv);
             } else {
                 str += prefix;
                 if (strlen(path) > 1) str += path;
                 str += '/';
                 str += file.name();
-                if (withSize) {
-                    str += ':';
+                if (sizeDiv) {
+                    str += sizeDiv;
                     str += file.size();
                 }
-                str += ';';
+                str += pathDiv;
             }
         }
 #endif
@@ -240,22 +241,23 @@ class HybridFS {
         sd.setFS(sd_fs);
     }
 
-    // вывести список файлов. Разделитель файлов - ';', через ':' указан размер в байтах
-    void listDir(String& str, const char* path = "/", bool withSize = false) {
-        flash.listDir(str, path, withSize);
+    // вывести список файлов. Разделитель файлов - pathDiv, разделитель размера в Байтах - sizeDiv
+    void listDir(String& str, const char* path = "/", char pathDiv = ';', char sizeDiv = 0) {
+        flash.listDir(str, path, pathDiv, sizeDiv);
 
         if (sd) {
-            char* pref = strdup(HFS_SD_PREFIX);
-            pref[HFS_SD_PREFIX_LEN - 1] = 0;
-            sd.listDir(str, path, withSize, pref);
-            free(pref);
+            // char* pref = strdup(HFS_SD_PREFIX);
+            // pref[HFS_SD_PREFIX_LEN - 1] = 0;
+            // sd.listDir(str, path, sizeDiv, pref);
+            // free(pref);
+            sd.listDir(str, path, pathDiv, sizeDiv, HFS_SD_PREFIX);
         }
     }
 
-    // вывести список файлов. Разделитель файлов - ';'
-    String listDir(const char* path = "/") {
+    // вывести список файлов. Разделитель файлов - pathDiv, разделитель размера в Байтах - sizeDiv
+    String listDir(const char* path = "/", char pathDiv = ';', char sizeDiv = 0) {
         String str;
-        listDir(str, path);
+        listDir(str, path, pathDiv, sizeDiv);
         return str;
     }
 
