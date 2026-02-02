@@ -31,7 +31,6 @@ class AnyPtr {
     AnyPtr(std::nullptr_t p) {}
     AnyPtr(const char* p) : _p((void*)p), _type(Type::ConstChar) {}
     AnyPtr(const __FlashStringHelper* p) : _p((void*)p), _type(Type::ConstFstr) {}
-    AnyPtr(char* p, size_t _len) : _p(p), _len(_len), _type(Type::Char) {}
     AnyPtr(String* p) : _p(p), _type(Type::String) {}
     AnyPtr(Text* p) : _p(p), _type(p->valid() ? Type::Text : Type::None) {}
     AnyPtr(float* p) : _p(p), _type(Type::Float) {}
@@ -39,15 +38,20 @@ class AnyPtr {
     AnyPtr(bool* p) : _p(p), _type(Type::Bool) {}
     AnyPtr(sets::Pos* p) : _p(p), _type(Type::Pos) {}
 
-    template <typename T>
-    AnyPtr(T* p) : _p(p) {
-        switch (sizeof(T)) {
-            case 1: _type = *p < 0 ? Type::Int8 : Type::Uint8; break;
-            case 2: _type = *p < 0 ? Type::Int16 : Type::Uint16; break;
-            case 4: _type = *p < 0 ? Type::Int32 : Type::Uint32; break;
-            case 8: _type = *p < 0 ? Type::Int64 : Type::Uint64; break;
-        }
-    }
+    template <size_t N>
+    AnyPtr(char (&arr)[N]) : AnyPtr(arr, N) {}
+    AnyPtr(char* p, size_t _len) : _p(p), _len(_len), _type(Type::Char) {}
+
+    AnyPtr(signed char* p) : _p(p), _type(Type::Int8) {}
+    AnyPtr(unsigned char* p) : _p(p), _type(Type::Uint8) {}
+    AnyPtr(short* p) : _p(p), _type(Type::Int16) {}
+    AnyPtr(unsigned short* p) : _p(p), _type(Type::Uint16) {}
+    AnyPtr(int* p) : _p(p), _type(Type::Int32) {}
+    AnyPtr(unsigned int* p) : _p(p), _type(Type::Uint32) {}
+    AnyPtr(long* p) : _p(p), _type(Type::Int32) {}
+    AnyPtr(unsigned long* p) : _p(p), _type(Type::Uint32) {}
+    AnyPtr(long long* p) : _p(p), _type(Type::Int64) {}
+    AnyPtr(unsigned long long* p) : _p(p), _type(Type::Uint64) {}
 
     operator bool() {
         return _p && _type != Type::None;

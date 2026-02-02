@@ -80,7 +80,7 @@ void build(sets::Builder& b) {
         b.LED("", data.sw, sets::Colors::Aqua, sets::Colors::Pink);
         b.Paragraph("", data.paragr);
         b.Input("", &data.input);
-        b.Input("", AnyPtr(data.inputc, 20));
+        b.Input("", data.inputc);
         b.Number("", &data.number);
         b.Pass("", &data.pass);
         b.Color("", &data.color);
