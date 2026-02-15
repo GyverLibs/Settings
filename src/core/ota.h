@@ -7,7 +7,7 @@
 #endif
 
 namespace sets {
-
+size_t OtaGetMaxSize(bool ota_flash = true);
 bool beginOta(bool ota_flash = true, bool async = false);
 
 }  // namespace sets
