@@ -129,6 +129,7 @@ class SettingsAsync : public sets::SettingsBase {
 
     void stop() {
         server.end();
+        _dns.stop();
     }
 
     void tick() {
