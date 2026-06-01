@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <LittleFS.h>
 #include <StampKeeper.h>
-#include <StringUtils.h>
+#include <StringUtilsGyver.h>
 
 #ifndef SETT_NO_DB
 #include <GyverDB.h>
