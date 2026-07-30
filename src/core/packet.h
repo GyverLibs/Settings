@@ -23,6 +23,21 @@ class Packet : public BSON {
         reserve(maxsize + PACKET_OVERLAP);
     }
 
+    using BSON::add;
+    using BSON::operator+=;
+    using BSON::operator=;
+    using BSON::operator[];
+
+    void add(Text t) { addStr(t.str(), t.length()); }
+    Packet& operator[](Text t) { return add(t), *this; }
+    void operator=(Text t) { add(t); }
+    void operator+=(Text t) { add(t); }
+
+    void add(Code code) { addCode(code); }
+    Packet& operator[](Code key) { return add(key), *this; }
+    void operator=(Code code) { add(code); }
+    void operator+=(Code code) { add(code); }
+
     void addLogger(Logger& log) {
         if (log.buffer[log.size() - 1]) {  // filled
             beginStr(log.size());
@@ -46,29 +61,26 @@ class Packet : public BSON {
         gdb::Entry en = static_cast<GyverDB*>(db)->get(hash);
         switch (en.type()) {
             case gdb::Type::Int:
-                add(en.toInt());
-                break;
-            case gdb::Type::Uint:
-                add((uint32_t)en.toInt());
+            case gdb::Type::Int64:
+                addInt(en.buffer(), en.size());
                 break;
 
-            case gdb::Type::Int64:
-                add(en.toInt64());
-                break;
+            case gdb::Type::Uint:
             case gdb::Type::Uint64:
-                add((uint64_t)en.toInt64());
+                addUint(en.buffer(), en.size());
                 break;
 
             case gdb::Type::Float:
-                add(en.toFloat(), 4);
+                addFloat(en.buffer());
                 break;
 
             case gdb::Type::String:
-                add(en.toText());
+                addStr((const char*)en.buffer(), en.size());
                 break;
 
             default:
-                add(0u);
+                addNull();
+                break;
         }
 #endif
     }

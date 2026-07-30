@@ -41,6 +41,10 @@ class Build {
     bool isAction() {
         return type == Type::Set;
     }
+    
+    bool isMenu() {
+        return type == Type::Menu;
+    }
 };
 
 }  // namespace sets

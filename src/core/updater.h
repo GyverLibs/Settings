@@ -80,15 +80,15 @@ class Updater {
     }
 
     // апдейт с float
-    Updater& update(size_t id, float value, int dec = 2) {
+    Updater& update(size_t id, float value) {
         p('{');
         p[Code::id] = id;
-        p[Code::data].add(value, dec);
+        p[Code::data] = value;
         p('}');
         return *this;
     }
-    Updater& update(size_t id, double value, int dec = 2) {
-        return update(id, (float)value, dec);
+    Updater& update(size_t id, double value) {
+        return update(id, (float)value);
     }
 
     // апдейт с текстом
@@ -128,12 +128,12 @@ class Updater {
         p('}');
         return *this;
     }
-    Updater& update2(size_t id_min, float value_min, float value_max, int dec = 2) {
+    Updater& update2(size_t id_min, float value_min, float value_max) {
         p('{');
         p[Code::id] = id_min;
         if (p[Code::data]('[')) {
-            p.add(value_min, dec);
-            p.add(value_max, dec);
+            p += value_min;
+            p += value_max;
             p(']');
         }
         p('}');
@@ -146,7 +146,7 @@ class Updater {
         p[Code::id] = id;
 
         p[Code::data]('{');
-        p.add(params);
+        p += params;
         p('}');
 
         p('}');

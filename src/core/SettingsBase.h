@@ -363,6 +363,10 @@ class SettingsBase {
                     Build action(Build::Type::Menu, granted, idh);
                     Builder b(this, action);
                     _build_cb(b);
+                    if (_reload) {
+                        _sendReload();
+                        return;
+                    }
                 }
                 break;
 
@@ -451,7 +455,7 @@ class SettingsBase {
             case SH("ping"): {
                 BSON b;
                 b('{');
-                b[Code::rssi] = getRSSI();
+                b[BSCode(Code::rssi)] = getRSSI();
                 b('}');
                 _answer(b);
                 return;
@@ -507,7 +511,7 @@ class SettingsBase {
             p('{');
             p[Code::type] = Code::build;
             p[Code::ws_port] = _ws_port;
-            p[Code::update_tout] = config.updateTout;
+            p[Code::update_tout] = _upd_cb ? config.updateTout : 0;
             p[Code::ping_tout] = config.pingTout;
             p[Code::request_tout] = config.requestTout;
             p[Code::send_tout] = config.sliderTout;

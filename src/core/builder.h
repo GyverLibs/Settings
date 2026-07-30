@@ -47,7 +47,7 @@ class Builder {
 
     // перезагрузить страницу
     void reload(bool force = false) {
-        if (build.isAction()) _reload = force ? -1 : 1;
+        if (build.isAction() || build.isMenu()) _reload = force ? -1 : 1;
     }
 
     // страница будет перезагружена
