@@ -15,6 +15,11 @@
 #endif
 
 #include "../web/settings.h"
+
+#ifdef SETT_FS_TREE
+#include "../web/fs_tree.h"
+#endif
+
 #include "./HybridFS.h"
 #include "./builder.h"
 #include "./colors.h"
@@ -244,6 +249,13 @@ class SettingsBase {
         custom.hash = 0;
         while (len--) custom.hash += pgm_read_byte(js++);
     }
+
+#ifdef SETT_FS_TREE
+    // показывать файловый менеджер по папкам (занимает слот кастомного js)
+    void useFsTree() {
+        setCustom(sets_fs_tree_js, sizeof(sets_fs_tree_js) - 1);
+    }
+#endif
 
     // установить кастом js код из файла
     void setCustomFile(const char* path, bool gz = false) {
