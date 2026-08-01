@@ -450,7 +450,12 @@ class SettingsBase {
 
             case SH("remove"):
                 if (granted) {
+#ifdef SETT_FS_TREE
+                    // папка - это то, что не удалилось как файл
+                    if (!fs.remove(value.c_str())) fs.removeDir(value.c_str());
+#else
                     fs.remove(value.c_str());
+#endif
                     _sendFs(true);
                     return;
                 }

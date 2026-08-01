@@ -30,6 +30,7 @@ class SetsFsTree {
 .sft_name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sft_meta{font-size:13px;margin-left:10px;opacity:.7;white-space:nowrap}
 .sft_arrow{height:13px;margin-right:8px;transition:transform .15s;width:13px}
+.sft_del{background:var(--error);height:15px;margin-left:12px;width:15px}
 .sft_head.sft_open .sft_arrow{transform:rotate(90deg)}
 .sft_list{display:none;padding-left:13px}
 .sft_head.sft_open+.sft_list{display:block}
@@ -56,6 +57,22 @@ class SetsFsTree {
       e.className = cls;
       if (text !== undefined) e.textContent = text;
       return e;
+    };
+
+    // имя функции собрано из кусков намеренно: загрузчик кастомного js делает
+    // replaceAll("Component") и испортил бы прямой вызов
+    const enc = window["encodeURICompon" + "ent"];
+
+    // удаление папки: вебморда умеет удалять только файлы, поэтому запрос
+    // отправляется напрямую. Прошивка со сборкой SETT_FS_TREE удаляет папку
+    // рекурсивно (см. HybridFS::removeDir)
+    const removeDir = async (dir) => {
+      const auth = Number(JSON.parse(localStorage.getItem("auth") || "0")) || 0;
+      const base = typeof SETTINGS_DEV_URL === "string" ? SETTINGS_DEV_URL : location.origin;
+      const url = base + "/settings?action=remove&id=0&value=" + enc(dir) +
+        (auth ? "&auth=" + auth.toString(16) : "");
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(res.status);
     };
 
     const rebuild = () => {
@@ -93,10 +110,29 @@ class SetsFsTree {
         left.style.cssText = "align-items:center;display:flex;overflow:hidden";
         left.append(span("icon arrow sft_arrow"), span("sft_name", dir));
 
+        const wrap = document.createElement("div");
+
+        const del = span("icon cross sft_del");
+        del.title = dir;
+        del.onclick = async (ev) => {
+          ev.stopPropagation();
+          if (!(await AsyncConfirm(dir + " (" + files.length + ")?"))) return;
+          try {
+            await removeDir(dir);
+            wrap.remove();
+          } catch (err) {
+            popup(String(err), true);
+          }
+        };
+
+        const right = document.createElement("div");
+        right.style.cssText = "align-items:center;display:flex";
+        right.append(span("sft_meta", files.length + " • " +
+          (kb >= 1024 ? (kb / 1024).toFixed(1) + " MB" : Math.round(kb) + " kB")), del);
+
         const head = document.createElement("div");
         head.className = "sft_head";
-        head.append(left, span("sft_meta", files.length + " • " +
-          (kb >= 1024 ? (kb / 1024).toFixed(1) + " MB" : Math.round(kb) + " kB")));
+        head.append(left, right);
 
         const list = document.createElement("div");
         list.className = "sft_list";
@@ -108,7 +144,6 @@ class SetsFsTree {
           else opened.delete(dir);
         };
 
-        const wrap = document.createElement("div");
         wrap.append(head, list);
         cont.appendChild(wrap);
       }
