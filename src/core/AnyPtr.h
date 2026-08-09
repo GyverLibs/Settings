@@ -60,7 +60,10 @@ class AnyPtr {
 
             case Type::String: pkt->addStr(*(String*)_p); break;
             case Type::ConstFstr: pkt->addStr((const __FlashStringHelper*)_p); break;
-            case Type::Text: pkt->addStr(((Text*)_p)->str(), ((Text*)_p)->length()); break;
+            case Type::Text: {
+                Text* text = (Text*)_p;
+                pkt->addStr(text->str(), text->length(), text->pgm());
+            } break;
             case Type::Bool: pkt->addBool(_p); break;
             case Type::Int: pkt->addInt(_p, _len); break;
             case Type::Uint: pkt->addUint(_p, _len); break;

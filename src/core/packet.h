@@ -28,7 +28,7 @@ class Packet : public BSON {
     using BSON::operator=;
     using BSON::operator[];
 
-    void add(Text t) { addStr(t.str(), t.length()); }
+    void add(Text t) { addStr(t.str(), t.length(), t.pgm()); }
     Packet& operator[](Text t) { return add(t), *this; }
     void operator=(Text t) { add(t); }
     void operator+=(Text t) { add(t); }
