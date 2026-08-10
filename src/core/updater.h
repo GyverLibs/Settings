@@ -174,7 +174,7 @@ class Updater {
         p('{');
         p[Code::id] = id;
         p[Code::data];
-        p.add(&data, sizeof(T));
+        p.addBin(data);
         p('}');
         return *this;
     }
