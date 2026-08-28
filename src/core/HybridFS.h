@@ -66,6 +66,48 @@ class FSWrapper {
         return _fs ? _fs->remove(path) : false;
     }
 
+#ifdef SETT_FS_TREE
+    // удалить папку со всем содержимым
+    bool removeDir(const char* path) {
+        if (!_fs) return false;
+
+        // сначала собираем содержимое, потом удаляем: удалять записи прямо во
+        // время обхода директории небезопасно
+        String list;
+#ifdef ESP8266
+        Dir dir = _fs->openDir(path);
+        while (dir.next()) {
+            if (!dir.fileName().length()) continue;
+            list += path;
+            if (list.length() && list[list.length() - 1] != '/') list += '/';
+            list += dir.fileName();
+            list += '\n';
+        }
+#else
+        File root = _fs->open(path);
+        if (!root || !root.isDirectory()) return false;
+        File file;
+        while (file = root.openNextFile()) {
+            list += file.path();
+            list += '\n';
+            file.close();
+        }
+        root.close();
+#endif
+
+        int start = 0;
+        while (start < (int)list.length()) {
+            int end = list.indexOf('\n', start);
+            if (end < 0) break;
+            String sub = list.substring(start, end);
+            start = end + 1;
+            // папка - это то, что не удалилось как файл
+            if (!_fs->remove(sub)) removeDir(sub.c_str());
+        }
+        return _fs->rmdir(path);
+    }
+#endif
+
     // открыть файл
     File open(const char* path, const char* mode) {
         if (!_fs) return File();
@@ -265,6 +307,13 @@ class HybridFS {
     bool remove(const char* path) {
         return _isSD(path) ? sd.remove(path + HFS_SD_SHIFT) : flash.remove(path);
     }
+
+#ifdef SETT_FS_TREE
+    // удалить папку со всем содержимым
+    bool removeDir(const char* path) {
+        return _isSD(path) ? sd.removeDir(path + HFS_SD_SHIFT) : flash.removeDir(path);
+    }
+#endif
 
     // открыть файл
     File open(const char* path, const char* mode) {

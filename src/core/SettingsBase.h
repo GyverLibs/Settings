@@ -15,6 +15,11 @@
 #endif
 
 #include "../web/settings.h"
+
+#ifdef SETT_FS_TREE
+#include "../web/fs_tree.h"
+#endif
+
 #include "./HybridFS.h"
 #include "./builder.h"
 #include "./colors.h"
@@ -245,6 +250,13 @@ class SettingsBase {
         while (len--) custom.hash += pgm_read_byte(js++);
     }
 
+#ifdef SETT_FS_TREE
+    // показывать файловый менеджер по папкам (занимает слот кастомного js)
+    void useFsTree() {
+        setCustom(sets_fs_tree_js, sizeof(sets_fs_tree_js) - 1);
+    }
+#endif
+
     // установить кастом js код из файла
     void setCustomFile(const char* path, bool gz = false) {
         custom.isFile = true;
@@ -438,7 +450,12 @@ class SettingsBase {
 
             case SH("remove"):
                 if (granted) {
+#ifdef SETT_FS_TREE
+                    // папка - это то, что не удалилось как файл
+                    if (!fs.remove(value.c_str())) fs.removeDir(value.c_str());
+#else
                     fs.remove(value.c_str());
+#endif
                     _sendFs(true);
                     return;
                 }
