@@ -88,10 +88,18 @@ class SettingsESP : public sets::SettingsBase {
             HTTPUpload& upload = server.upload();
             if (upload.status == UPLOAD_FILE_START) {
                 sets::beginOta();
+                if (_onStart)
+                  _onStart();
             } else if (upload.status == UPLOAD_FILE_WRITE) {
                 Update.write(upload.buf, upload.currentSize);
+                if (_onProgress) {
+                  size_t maxSketchSpace = sets::OtaGetMaxSize();
+                  _onProgress(upload.totalSize, maxSketchSpace);
+                }
             } else if (upload.status == UPLOAD_FILE_END) {
-                Update.end(true);
+                bool result = Update.end(true);
+                if (_onDone)
+                  _onDone(result);
             } });
 
         server.onNotFound([this]() {
